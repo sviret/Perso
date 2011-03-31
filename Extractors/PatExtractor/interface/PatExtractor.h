@@ -28,6 +28,8 @@
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+
 #include "DataFormats/MuonReco/interface/Muon.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
@@ -59,6 +61,7 @@ class PatExtractor : public edm::EDAnalyzer {
   
  private:
 
+  bool isMC_;
   edm::InputTag photon_tag_;   // 
   edm::InputTag electron_tag_; // 
   edm::InputTag jet_tag_;      // 
@@ -103,7 +106,7 @@ class PatExtractor : public edm::EDAnalyzer {
   static const int 	m_jets_MAX       = 100;
   static const int 	m_mets_MAX       = 2;
   static const int 	m_vertices_MAX   = 50;
-
+  static const int 	m_MCs_MAX        = 1000;
 
   int   m_evtID;
   int   m_BCID;
@@ -186,11 +189,26 @@ class PatExtractor : public edm::EDAnalyzer {
   float	m_vtx_vy[m_vertices_MAX];
   float	m_vtx_vz[m_vertices_MAX];
 
-  int m_n_MCs;
+  int   m_n_MCs;
 
+  int   m_MC_index[m_MCs_MAX];
+  int   m_MC_status[m_MCs_MAX];
+  int   m_MC_type[m_MCs_MAX];
+  int   m_MC_imot1[m_MCs_MAX];
+  int   m_MC_imot2[m_MCs_MAX];
+  int   m_MC_generation[m_MCs_MAX];
+  float m_MC_E[m_MCs_MAX];
+  float	m_MC_px[m_MCs_MAX];
+  float	m_MC_py[m_MCs_MAX];
+  float	m_MC_pz[m_MCs_MAX];
+  float	m_MC_vx[m_MCs_MAX];
+  float	m_MC_vy[m_MCs_MAX];
+  float	m_MC_vz[m_MCs_MAX];
+  float	m_MC_eta[m_MCs_MAX];
+  float	m_MC_phi[m_MCs_MAX];
 
   void setVarToZero();
-
+  void constructGeneration(int gene, int npart);
 };
 
 
