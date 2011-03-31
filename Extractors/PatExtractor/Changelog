@@ -1,0 +1,5 @@
+2011-03-31  Seb Viret  <viret@in2p3.fr>
+ 
+       	* Adding a first version of the PatExtractor tool, 
+	working with CMSSW 4_1_2_patch1. This is is a first test
+
