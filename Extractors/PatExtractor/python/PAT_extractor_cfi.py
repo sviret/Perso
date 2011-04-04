@@ -2,19 +2,44 @@ import FWCore.ParameterSet.Config as cms
 
 PATextraction = cms.EDAnalyzer("PatExtractor",
 
+##
+## First you define the name of the  output ROOTfile
+##
 
-   # Set this to True for MC (!!! Not for data !!!)
 
-   fillMCtree = cms.untracked.bool(False),
+  extractedRootFile = cms.string('extracted.root'),
 
-   # Here we put the name of the different collections
-   # we want to extract
 
-   photon_tag  = cms.InputTag( "cleanPatPhotons" ),
-   electron_tag= cms.InputTag( "cleanPatElectrons" ),
-   jet_tag     = cms.InputTag( "cleanPatJets" ),
-   muon_tag    = cms.InputTag( "cleanPatMuons" ),
-   met_tag     = cms.InputTag( "patMETsPFlow" ),
-   MC_tag      = cms.InputTag( "" ),
-   vtx_tag     = cms.InputTag( "offlinePrimaryVertices" )                               
+##
+## Then you define the content of the output file
+##
+                               
+   # Add MC information
+   doMC          = cms.untracked.bool(False),
+   MC_tag        = cms.InputTag( "" ),
+                               
+   # Add Photon information
+   doPhoton      = cms.untracked.bool(False),
+   photon_tag    = cms.InputTag( "selectedPatPhotons" ),
+
+   # Add Electron information
+   doElectron    = cms.untracked.bool(True),
+   electron_tag  = cms.InputTag( "selectedPatElectronsPFlow" ),
+
+   # Add Muon information
+   doMuon        = cms.untracked.bool(True),
+   muon_tag      = cms.InputTag( "selectedPatMuonsPFlow" ),
+
+   # Add Jet information
+   doJet         = cms.untracked.bool(True),
+   jet_tag       = cms.InputTag( "selectedPatJetsPFlow" ),
+
+   # Add MET information
+   doMET         = cms.untracked.bool(True),
+   met_tag       = cms.InputTag( "patMETsPFlow" ),
+
+   # Add PV information
+   doVertex      = cms.untracked.bool(True),
+   vtx_tag       = cms.InputTag( "offlinePrimaryVertices" )
+
 )

@@ -1,3 +1,9 @@
+2011-04-04  Seb Viret  <viret@in2p3.fr>
+ 
+       	* New option added to the config file (*_cfi.py), one can now choose
+	which trees we want in, and the output file name.
+
+
 2011-03-31  Seb Viret  <viret@in2p3.fr>
  
        	* New version including MC information (GenParticles)

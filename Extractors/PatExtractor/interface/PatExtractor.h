@@ -25,10 +25,12 @@
 #include "DataFormats/PatCandidates/interface/Photon.h"
 #include "DataFormats/Common/interface/View.h"
 
+
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+
 
 #include "DataFormats/MuonReco/interface/Muon.h"
 #include "DataFormats/TrackReco/interface/Track.h"
@@ -41,6 +43,8 @@
 #include "TMath.h"
 #include "TTree.h"
 #include "TFile.h"
+#include "TLorentzVector.h"
+#include <vector>
 
 class PatExtractor : public edm::EDAnalyzer {
  public:
@@ -56,12 +60,23 @@ class PatExtractor : public edm::EDAnalyzer {
   virtual void endJob();
 
   void beginRun(edm::Run const&, edm::EventSetup const&);
+
   void analyze(const edm::Event&, const edm::EventSetup& );
   void endRun(edm::Run const&, edm::EventSetup const&);
   
  private:
 
-  bool isMC_;
+
+
+  bool do_MC_;
+  bool do_Photon_;
+  bool do_Electron_;
+  bool do_Jet_;
+  bool do_Muon_;
+  bool do_MET_;
+  bool do_Vertex_;
+
+
   edm::InputTag photon_tag_;   // 
   edm::InputTag electron_tag_; // 
   edm::InputTag jet_tag_;      // 
@@ -71,6 +86,7 @@ class PatExtractor : public edm::EDAnalyzer {
   edm::InputTag vtx_tag_;      // 
 
 
+  std::string outFilename_;
 
   // select tracking particles 
   //(i.e. "denominator" of the efficiency ratio)
@@ -117,6 +133,7 @@ class PatExtractor : public edm::EDAnalyzer {
 
 
   int   m_n_photons;
+
   float m_pho_E[m_photons_MAX];
   float	m_pho_px[m_photons_MAX];
   float	m_pho_py[m_photons_MAX];
