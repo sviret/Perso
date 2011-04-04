@@ -1,0 +1,18 @@
+################################################
+#
+# Machine-induced background monitoring
+#
+# Run procedure: S.V. 04/04/2011 (viret@in2p3.fr)
+#
+################################################
+
+
+The monitoring procedure is divided into two parts: data extraction and data processing.
+
+1. Data extraction
+
+Done by runDQ_extraction.sh
+
+2. Data processing
+
+Done by runDQ_monitoring.sh
