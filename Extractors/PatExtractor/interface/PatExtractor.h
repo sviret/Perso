@@ -44,7 +44,7 @@
 #include "TTree.h"
 #include "TFile.h"
 #include "TLorentzVector.h"
-#include <vector>
+#include "TClonesArray.h"
 
 class PatExtractor : public edm::EDAnalyzer {
  public:
@@ -66,8 +66,6 @@ class PatExtractor : public edm::EDAnalyzer {
   
  private:
 
-
-
   bool do_MC_;
   bool do_Photon_;
   bool do_Electron_;
@@ -75,7 +73,6 @@ class PatExtractor : public edm::EDAnalyzer {
   bool do_Muon_;
   bool do_MET_;
   bool do_Vertex_;
-
 
   edm::InputTag photon_tag_;   // 
   edm::InputTag electron_tag_; // 
@@ -143,6 +140,7 @@ class PatExtractor : public edm::EDAnalyzer {
   float	m_pho_vz[m_photons_MAX];
   float	m_pho_eta[m_photons_MAX];
   float	m_pho_phi[m_photons_MAX];
+  TClonesArray *m_pho_lorentzvector;
 
 
   int   m_n_electrons;
@@ -156,6 +154,7 @@ class PatExtractor : public edm::EDAnalyzer {
   float	m_ele_eta[m_electrons_MAX];
   float	m_ele_phi[m_electrons_MAX];
   int	m_ele_charge[m_electrons_MAX];
+  TClonesArray *m_ele_lorentzvector;
 
   int   m_n_jets;
   float m_jet_E[m_jets_MAX];
@@ -167,6 +166,7 @@ class PatExtractor : public edm::EDAnalyzer {
   float	m_jet_vz[m_jets_MAX];
   float	m_jet_eta[m_jets_MAX];
   float	m_jet_phi[m_jets_MAX];
+  TClonesArray *m_jet_lorentzvector;
 
 
   int   m_n_mets;
@@ -176,6 +176,7 @@ class PatExtractor : public edm::EDAnalyzer {
   float	m_met_pz[m_mets_MAX];
   float	m_met_eta[m_mets_MAX];
   float	m_met_phi[m_mets_MAX];
+  TClonesArray *m_met_lorentzvector;
 
 
   int   m_n_muons;
@@ -199,12 +200,17 @@ class PatExtractor : public edm::EDAnalyzer {
   float m_muo_ecalIso[m_muons_MAX];
   float m_muo_hcalIso[m_muons_MAX];
   int	m_muo_charge[m_muons_MAX];
+  double m_muo_d0[m_muons_MAX];
+  double m_muo_d0error[m_muons_MAX];
+  TClonesArray *m_muo_lorentzvector;
 
 
   int   m_n_vertices;
   float	m_vtx_vx[m_vertices_MAX];
   float	m_vtx_vy[m_vertices_MAX];
   float	m_vtx_vz[m_vertices_MAX];
+  bool  m_vtx_isFake[m_vertices_MAX];
+  bool  m_vtx_ndof[m_vertices_MAX];
 
   int   m_n_MCs;
 
@@ -223,6 +229,7 @@ class PatExtractor : public edm::EDAnalyzer {
   float	m_MC_vz[m_MCs_MAX];
   float	m_MC_eta[m_MCs_MAX];
   float	m_MC_phi[m_MCs_MAX];
+  TClonesArray *m_MC_lorentzvector;
 
   void setVarToZero();
   void constructGeneration(int gene, int npart);

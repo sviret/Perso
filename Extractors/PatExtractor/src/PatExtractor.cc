@@ -4,13 +4,15 @@ using namespace std;
 using namespace edm;
 
 PatExtractor::PatExtractor(const edm::ParameterSet& config) :
+
   do_MC_         (config.getUntrackedParameter<bool>("doMC", false)),
   do_Photon_     (config.getUntrackedParameter<bool>("doPhoton", false)),
   do_Electron_   (config.getUntrackedParameter<bool>("doElectron", false)),
   do_Jet_        (config.getUntrackedParameter<bool>("doJet", false)),
-  do_Muon_       (config.getUntrackedParameter<bool>("doMuon", false)),
+  do_Muon_       (config.getUntrackedParameter<bool>("doMuon", true)),
   do_MET_        (config.getUntrackedParameter<bool>("doMET", false)),
   do_Vertex_     (config.getUntrackedParameter<bool>("doVertex", false)),
+
   photon_tag_    (config.getParameter<edm::InputTag>("photon_tag")),
   electron_tag_  (config.getParameter<edm::InputTag>("electron_tag")),
   jet_tag_       (config.getParameter<edm::InputTag>("jet_tag")),
@@ -31,10 +33,8 @@ void PatExtractor::beginJob()
   // ROOTuple definition
   //
   nevent_tot                   = 0;
-
   m_file          = new TFile(outFilename_.c_str(),"RECREATE");
 
- 
 
   // Infos 
 
@@ -44,10 +44,12 @@ void PatExtractor::beginJob()
   m_tree_event->Branch("run",    &m_run,"run/I");
   m_tree_event->Branch("BCID",   &m_BCID,"BCID/I");
   m_tree_event->Branch("time",   &m_time,"time/I");
-  
+
   if (do_MC_)
   {
     m_tree_MC       = new TTree("MC","PAT MC info");  
+    m_MC_lorentzvector = new TClonesArray("TLorentzVector");
+    m_tree_MC->Branch("MC_4vector","TClonesArray",&m_MC_lorentzvector, 1000, 0);
     m_tree_MC->Branch("n_MCs",  &m_n_MCs,"n_MCs/I");  
     m_tree_MC->Branch("MC_index",   &m_MC_index,    "MC_index[n_MCs]/I");  
     m_tree_MC->Branch("MC_type",    &m_MC_type,     "MC_type[n_MCs]/I");  
@@ -68,6 +70,9 @@ void PatExtractor::beginJob()
   if (do_Photon_)
   {
     m_tree_photon   = new TTree("photon","PAT photon info");  
+    m_pho_lorentzvector = new TClonesArray("TLorentzVector");
+    m_tree_photon->Branch("photon_4vector","TClonesArray",&m_pho_lorentzvector, 1000, 0);
+    m_tree_photon   = new TTree("photon","PAT photon info");  
     m_tree_photon->Branch("n_photons",  &m_n_photons,"n_photons/I");  
     m_tree_photon->Branch("photon_e",   &m_pho_E,    "photon_e[n_photons]/F");  
     m_tree_photon->Branch("photon_px",  &m_pho_px,   "photon_px[n_photons]/F");  
@@ -79,9 +84,12 @@ void PatExtractor::beginJob()
     m_tree_photon->Branch("photon_eta", &m_pho_eta,  "photon_eta[n_photons]/F");  
     m_tree_photon->Branch("photon_phi", &m_pho_phi,  "photon_phi[n_photons]/F");  
   }
-    
+
   if (do_Electron_)
   {
+    m_tree_electron = new TTree("electron_PF","PAT PF electron info");  
+    m_ele_lorentzvector = new TClonesArray("TLorentzVector");
+    m_tree_electron->Branch("electron_4vector","TClonesArray",&m_ele_lorentzvector, 1000, 0);
     m_tree_electron = new TTree("electron_PF","PAT PF electron info");  
     m_tree_electron->Branch("n_electrons",  &m_n_electrons,"n_electrons/I");  
     m_tree_electron->Branch("electron_e",   &m_ele_E,      "electron_e[n_electrons]/F");  
@@ -98,6 +106,9 @@ void PatExtractor::beginJob()
 
   if (do_Jet_)
   {
+    m_tree_jet      = new TTree("jet_PF","PAT PF jet info");   
+    m_jet_lorentzvector = new TClonesArray("TLorentzVector");
+    m_tree_jet->Branch("jet_4vector","TClonesArray",&m_jet_lorentzvector, 1000, 0);
     m_tree_jet      = new TTree("jet_PF","PAT PF jet info");  
     m_tree_jet->Branch("n_jets",  &m_n_jets,   "n_jets/I");  
     m_tree_jet->Branch("jet_e",   &m_jet_E,    "jet_e[n_jets]/F");  
@@ -110,9 +121,12 @@ void PatExtractor::beginJob()
     m_tree_jet->Branch("jet_eta", &m_jet_eta,  "jet_eta[n_jets]/F");  
     m_tree_jet->Branch("jet_phi", &m_jet_phi,  "jet_phi[n_jets]/F");  
   }    
- 
+
   if (do_MET_)
   {
+    m_tree_met      = new TTree("MET_PF","PAT PF MET info");  
+    m_met_lorentzvector = new TClonesArray("TLorentzVector");
+    m_tree_met->Branch("met_4vector","TClonesArray",&m_met_lorentzvector, 1000, 0);
     m_tree_met      = new TTree("MET_PF","PAT PF MET info");  
     m_tree_met->Branch("n_mets",  &m_n_mets,   "n_mets/I");  
     m_tree_met->Branch("met_e",   &m_met_E,    "met_e[n_mets]/F");  
@@ -125,6 +139,9 @@ void PatExtractor::beginJob()
 
   if (do_Muon_)
   {
+    m_tree_muon     = new TTree("muon_PF","PAT PF muon info"); 
+    m_muo_lorentzvector = new TClonesArray("TLorentzVector");
+    m_tree_muon->Branch("muon_4vector","TClonesArray",&m_muo_lorentzvector, 1000, 0);
     m_tree_muon     = new TTree("muon_PF","PAT PF muon info"); 
     m_tree_muon->Branch("n_muons",  &m_n_muons,  "n_muons/I");  
     m_tree_muon->Branch("muon_e",   &m_muo_E,    "muon_e[n_muons]/F");  
@@ -147,6 +164,8 @@ void PatExtractor::beginJob()
     m_tree_muon->Branch("muon_trackIso",       &m_muo_trackIso,"muon_trackIso[n_muons]/F");
     m_tree_muon->Branch("muon_ecalIso",        &m_muo_ecalIso,"muon_ecalIso[n_muons]/F");
     m_tree_muon->Branch("muon_hcalIso",        &m_muo_hcalIso,"muon_hcalIso[n_muons]/F");
+    m_tree_muon->Branch("muon_d0",      &m_muo_d0,"muon_d0[n_muons]/F");
+    m_tree_muon->Branch("muon_d0error", &m_muo_d0error,"muon_d0error[n_muons]/F");
   }
 
   if (do_Vertex_)
@@ -156,6 +175,8 @@ void PatExtractor::beginJob()
     m_tree_vtx->Branch("vertex_vx",  &m_vtx_vx,   "vertex_vx[n_vertices]/F");  
     m_tree_vtx->Branch("vertex_vy",  &m_vtx_vy,   "vertex_vy[n_vertices]/F");  
     m_tree_vtx->Branch("vertex_vz",  &m_vtx_vz,   "vertex_vz[n_vertices]/F"); 
+    m_tree_vtx->Branch("vertex_isFake",  &m_vtx_isFake,   "vertex_isFake[n_vertices]/B"); 
+    m_tree_vtx->Branch("vertex_ndof",  &m_vtx_ndof,   "vertex_ndof[n_vertices]/F"); 
   }
 }
 
@@ -168,6 +189,7 @@ void PatExtractor::beginRun(Run const& run, EventSetup const& setup)
   //
 
   nevent                   = 0;
+
 }
 
 
@@ -180,7 +202,7 @@ void PatExtractor::analyze(const edm::Event& event, const edm::EventSetup& setup
   //
   // Reset Tree Variables :
   //
- 
+
   PatExtractor::setVarToZero();
 
 
@@ -200,32 +222,32 @@ void PatExtractor::analyze(const edm::Event& event, const edm::EventSetup& setup
   //
   // Photon info
   //
-
   if (do_Photon_)
   {    
     edm::Handle< View<pat::Photon> >  photonHandle;
     event.getByLabel(photon_tag_, photonHandle);
     edm::View<pat::Photon> p_photons = *photonHandle;
-    
+
     m_n_photons=static_cast<int>(p_photons.size()); 
-    
+
     if (m_n_photons)
     {
       for(int i=0; i<m_n_photons; ++i)
       {
-	if (i>=m_photons_MAX) continue;
-	
-	pat::Photon currentPhoton = p_photons.at(i);
-	
-	m_pho_E[i]    = currentPhoton.energy();
-	m_pho_px[i]   = currentPhoton.px();
-	m_pho_py[i]   = currentPhoton.py();
-	m_pho_pz[i]   = currentPhoton.pz();
-	m_pho_vx[i]   = currentPhoton.vx();
-	m_pho_vy[i]   = currentPhoton.vy();
-	m_pho_vz[i]   = currentPhoton.vz();
-	m_pho_eta[i]  = currentPhoton.eta();
-	m_pho_phi[i]  = currentPhoton.phi();
+        if (i>=m_photons_MAX) continue;
+
+        pat::Photon currentPhoton = p_photons.at(i);
+
+        m_pho_E[i]    = currentPhoton.energy();
+        m_pho_px[i]   = currentPhoton.px();
+        m_pho_py[i]   = currentPhoton.py();
+        m_pho_pz[i]   = currentPhoton.pz();
+        m_pho_vx[i]   = currentPhoton.vx();
+        m_pho_vy[i]   = currentPhoton.vy();
+        m_pho_vz[i]   = currentPhoton.vz();
+        m_pho_eta[i]  = currentPhoton.eta();
+        m_pho_phi[i]  = currentPhoton.phi();
+        new((*m_pho_lorentzvector)[i]) TLorentzVector(currentPhoton.energy(),currentPhoton.px(),currentPhoton.py(),currentPhoton.pz());
       } 
     }
 
@@ -235,34 +257,34 @@ void PatExtractor::analyze(const edm::Event& event, const edm::EventSetup& setup
   //
   // Electron info
   //
-  
 
   if (do_Electron_)
   {
     edm::Handle< View<pat::Electron> >  electronHandle;
     event.getByLabel(electron_tag_, electronHandle);
     edm::View<pat::Electron> p_electrons = *electronHandle;
-    
+
     m_n_electrons=static_cast<int>(p_electrons.size()); 
-    
+
     if (m_n_electrons)
     {
       for(int i=0; i<m_n_electrons; i++)
       {
-	if (i>=m_electrons_MAX) continue;
-	
-	pat::Electron currentElectron = p_electrons.at(i);
-	
-	m_ele_E[i]      = currentElectron.energy();
-	m_ele_px[i]     = currentElectron.px();
-	m_ele_py[i]     = currentElectron.py();
-	m_ele_pz[i]     = currentElectron.pz();
-	m_ele_vx[i]     = currentElectron.vx();
-	m_ele_vy[i]     = currentElectron.vy();
-	m_ele_vz[i]     = currentElectron.vz();
-	m_ele_eta[i]    = currentElectron.eta();
-	m_ele_phi[i]    = currentElectron.phi();
-	m_ele_charge[i] = currentElectron.charge();
+        if (i>=m_electrons_MAX) continue;
+
+        pat::Electron currentElectron = p_electrons.at(i);
+
+        m_ele_E[i]      = currentElectron.energy();
+        m_ele_px[i]     = currentElectron.px();
+        m_ele_py[i]     = currentElectron.py();
+        m_ele_pz[i]     = currentElectron.pz();
+        m_ele_vx[i]     = currentElectron.vx();
+        m_ele_vy[i]     = currentElectron.vy();
+        m_ele_vz[i]     = currentElectron.vz();
+        m_ele_eta[i]    = currentElectron.eta();
+        m_ele_phi[i]    = currentElectron.phi();
+        m_ele_charge[i] = currentElectron.charge();
+        new((*m_ele_lorentzvector)[i]) TLorentzVector(currentElectron.px(),currentElectron.py(),currentElectron.pz(),currentElectron.energy());
       } 
     }
 
@@ -272,57 +294,59 @@ void PatExtractor::analyze(const edm::Event& event, const edm::EventSetup& setup
   //
   // Muon info
   //
-  
 
   if (do_Muon_)
   {
     edm::Handle< View<pat::Muon> >  muonHandle;
     event.getByLabel(muon_tag_, muonHandle);
     edm::View<pat::Muon> p_muons = *muonHandle;
-    
+
     m_n_muons=static_cast<int>(p_muons.size()); 
-    
+
     if (m_n_muons)
     {
       for(int i=0; i<m_n_muons; i++)
       {
-	if (i>=m_muons_MAX) continue;
-	
-	pat::Muon currentMuon = p_muons.at(i);
-	
-	m_muo_E[i]               = currentMuon.energy();
-	m_muo_px[i]              = currentMuon.px();
-	m_muo_py[i]              = currentMuon.py();
-	m_muo_pz[i]              = currentMuon.pz();
-	m_muo_vx[i]              = currentMuon.vx();
-	m_muo_vy[i]              = currentMuon.vy();
-	m_muo_vz[i]              = currentMuon.vz();
-	m_muo_eta[i]             = currentMuon.eta();
-	m_muo_phi[i]             = currentMuon.phi();
-	m_muo_isGlobal[i]        = currentMuon.isGlobalMuon();
-	m_muo_isTracker[i]       = currentMuon.isTrackerMuon();
-	m_muo_charge[i]          = currentMuon.charge();
-	
-	if (currentMuon.outerTrack().isNonnull())
-	{
-	  m_muo_dB[i]              = currentMuon.dB();
-	  m_muo_nMatches[i]        = currentMuon.numberOfMatches();
-	}
-      
-	if (currentMuon.innerTrack().isNonnull())
-	{
-	  m_muo_dB[i]                = currentMuon.dB();
-	  m_muo_nValTrackerHits[i]   = currentMuon.numberOfValidHits();
-	}
-	
-	if (currentMuon.globalTrack().isNonnull())
-	{
-	  m_muo_normChi2[i]          = currentMuon.normChi2();
-	}
+        if (i>=m_muons_MAX) continue;
 
-	m_muo_trackIso[i]        = currentMuon.trackIso();
-	m_muo_ecalIso[i]         = currentMuon.ecalIso();
-	m_muo_hcalIso[i]         = currentMuon.hcalIso();
+        pat::Muon currentMuon = p_muons.at(i);
+
+        m_muo_E[i]               = currentMuon.energy();
+        m_muo_px[i]              = currentMuon.px();
+        m_muo_py[i]              = currentMuon.py();
+        m_muo_pz[i]              = currentMuon.pz();
+        m_muo_vx[i]              = currentMuon.vx();
+        m_muo_vy[i]              = currentMuon.vy();
+        m_muo_vz[i]              = currentMuon.vz();
+        m_muo_eta[i]             = currentMuon.eta();
+        m_muo_phi[i]             = currentMuon.phi();
+        m_muo_isGlobal[i]        = currentMuon.isGlobalMuon();
+        m_muo_isTracker[i]       = currentMuon.isTrackerMuon();
+        m_muo_charge[i]          = currentMuon.charge();
+        new((*m_muo_lorentzvector)[i]) TLorentzVector(currentMuon.px(),currentMuon.py(),currentMuon.pz(),currentMuon.energy());
+
+        if (currentMuon.outerTrack().isNonnull())
+        {
+          m_muo_dB[i]              = currentMuon.dB();
+          m_muo_nMatches[i]        = currentMuon.numberOfMatches();
+        }
+
+        if (currentMuon.innerTrack().isNonnull())
+        {
+          m_muo_dB[i]                = currentMuon.dB();
+          m_muo_nValTrackerHits[i]   = currentMuon.numberOfValidHits();
+          m_muo_d0[i]                = currentMuon.innerTrack()->d0(); 
+          m_muo_d0error[i]           = currentMuon.innerTrack()->d0Error();
+        }
+
+        if (currentMuon.globalTrack().isNonnull())
+        {
+          m_muo_normChi2[i]          = currentMuon.normChi2();
+        }
+
+        m_muo_trackIso[i]        = currentMuon.trackIso();
+        m_muo_ecalIso[i]         = currentMuon.ecalIso();
+        m_muo_hcalIso[i]         = currentMuon.hcalIso();
       } 
     }
 
@@ -333,41 +357,40 @@ void PatExtractor::analyze(const edm::Event& event, const edm::EventSetup& setup
   //
   // Jet info
   //
-  
-
   if (do_Jet_)
   {
     edm::Handle< View<pat::Jet> >  jetHandle;
     event.getByLabel(jet_tag_, jetHandle);
     edm::View<pat::Jet> p_jets = *jetHandle;
-    
+
     m_n_jets=static_cast<int>(p_jets.size()); 
-    
+
     int i_jet=0;
 
     if (m_n_jets)
     {
       for(int i=0; i<m_n_jets; i++)
       {
-	if (i>=m_jets_MAX) continue;
-	
-	pat::Jet currentJet = p_jets.at(i);
-	
-	double pt_jet = sqrt(currentJet.px()*currentJet.px()+currentJet.py()*currentJet.py());
-	
-	if (pt_jet<10.) continue;
-	
-	m_jet_E[i_jet]    = currentJet.energy();
-	m_jet_px[i_jet]   = currentJet.px();
-	m_jet_py[i_jet]   = currentJet.py();
-	m_jet_pz[i_jet]   = currentJet.pz();
-	m_jet_vx[i_jet]   = currentJet.vx();
-	m_jet_vy[i_jet]   = currentJet.vy();
-	m_jet_vz[i_jet]   = currentJet.vz();
-	m_jet_eta[i_jet]  = currentJet.eta();
-	m_jet_phi[i_jet]  = currentJet.phi();
-	
-	i_jet++;
+        if (i>=m_jets_MAX) continue;
+
+        pat::Jet currentJet = p_jets.at(i);
+
+        double pt_jet = sqrt(currentJet.px()*currentJet.px()+currentJet.py()*currentJet.py());
+
+        if (pt_jet<10.) continue;
+
+        m_jet_E[i_jet]    = currentJet.energy();
+        m_jet_px[i_jet]   = currentJet.px();
+        m_jet_py[i_jet]   = currentJet.py();
+        m_jet_pz[i_jet]   = currentJet.pz();
+        m_jet_vx[i_jet]   = currentJet.vx();
+        m_jet_vy[i_jet]   = currentJet.vy();
+        m_jet_vz[i_jet]   = currentJet.vz();
+        m_jet_eta[i_jet]  = currentJet.eta();
+        m_jet_phi[i_jet]  = currentJet.phi();
+        new((*m_jet_lorentzvector)[i_jet]) TLorentzVector(currentJet.px(),currentJet.py(),currentJet.pz(),currentJet.energy());
+
+        i_jet++;
       } 
     }
     m_n_jets=i_jet; 
@@ -375,40 +398,38 @@ void PatExtractor::analyze(const edm::Event& event, const edm::EventSetup& setup
     m_tree_jet->Fill();
   }
 
-
   //
   // MET info
   //
-   
 
   if (do_MET_)
   {
     edm::Handle< View<pat::MET> >  metHandle;
     event.getByLabel(met_tag_, metHandle);
     edm::View<pat::MET> p_mets = *metHandle;
-    
+
     m_n_mets=static_cast<int>(p_mets.size()); 
-    
+
     if (m_n_mets)
     {
       for(int i=0; i<m_n_mets; i++)
       {
-	if (i>=m_mets_MAX) continue;
-	
-	pat::MET currentMet = p_mets.at(i);
-	
-	m_met_E[i]    = currentMet.energy();
-	m_met_px[i]   = currentMet.px();
-	m_met_py[i]   = currentMet.py();
-	m_met_pz[i]   = currentMet.pz();
-	m_met_eta[i]  = currentMet.eta();
-	m_met_phi[i]  = currentMet.phi();
+        if (i>=m_mets_MAX) continue;
+
+        pat::MET currentMet = p_mets.at(i);
+
+        m_met_E[i]    = currentMet.energy();
+        m_met_px[i]   = currentMet.px();
+        m_met_py[i]   = currentMet.py();
+        m_met_pz[i]   = currentMet.pz();
+        m_met_eta[i]  = currentMet.eta();
+        m_met_phi[i]  = currentMet.phi();
+        new((*m_met_lorentzvector)[i]) TLorentzVector(currentMet.px(),currentMet.py(),currentMet.pz(),currentMet.energy());
       } 
     }
 
     m_tree_met->Fill();
   }
-
 
   //
   // Reco vertex collection
@@ -418,22 +439,24 @@ void PatExtractor::analyze(const edm::Event& event, const edm::EventSetup& setup
   {
     edm::Handle<reco::VertexCollection> vertexHandle;
     event.getByLabel(vtx_tag_, vertexHandle);
-    
+
     const VertexCollection vertexCollection = *(vertexHandle.product());
-    
+
     m_n_vertices=static_cast<int>(vertexCollection.size()); 
-    
+
     if (m_n_vertices)
     {
       for(int i=0; i<m_n_vertices; i++)
       {
-	if (i>=m_vertices_MAX) continue;
-	
-	reco::Vertex currentVtx = vertexCollection.at(i);
-	
-	m_vtx_vx[i]   = currentVtx.position().x();
-	m_vtx_vy[i]   = currentVtx.position().y();
-	m_vtx_vz[i]   = currentVtx.position().z();
+        if (i>=m_vertices_MAX) continue;
+
+        reco::Vertex currentVtx = vertexCollection.at(i);
+
+        m_vtx_vx[i]   = currentVtx.position().x();
+        m_vtx_vy[i]   = currentVtx.position().y();
+        m_vtx_vz[i]   = currentVtx.position().z();
+        m_vtx_isFake[i] = currentVtx.isFake();
+        m_vtx_ndof[i]   = currentVtx.ndof();
       } 
     }
 
@@ -462,91 +485,92 @@ void PatExtractor::analyze(const edm::Event& event, const edm::EventSetup& setup
     int st    = 0;
     int n_mot = 0;
     int n_dau = 0;
-    
+
     int ipart = 0;
-    
+
     for(int i=0; i<m_n_MCs; ++i) 
     {
       const Candidate & p = (*genParticles)[i];
-      
+
       id    = p.pdgId();
       st    = p.status(); 
       n_mot = p.numberOfMothers(); 
       n_dau = p.numberOfDaughters();
-      
+
       int iMo1 = -1;
       int iMo2 = -1;
-      
+
       if (st==3)
       {
-	if (n_mot>0)
-	{
-	  id_r = (p.mother(0))->pdgId();
-	  px_r = (p.mother(0))->px();
-	  py_r = (p.mother(0))->py();
-	  pz_r = (p.mother(0))->pz();
-	  
-	  for(int j=0; j<m_n_MCs; ++j) 
-	  {
-	    const Candidate &p2 = (*genParticles)[j];
-	    
-	    if (p2.pdgId() != id_r) continue;
-	    if (fabs(p2.px()-px_r)>0.0001) continue;
-	    if (fabs(p2.py()-py_r)>0.0001) continue;
-	    if (fabs(p2.pz()-pz_r)>0.0001) continue;
-	    
-	    iMo1=j;
-	    
-	    break;
-	  }
-	  
-	  if (n_mot>1)
-	  {
-	    id_r = (p.mother(1))->pdgId();
-	    px_r = (p.mother(1))->px();
-	    py_r = (p.mother(1))->py();
-	    pz_r = (p.mother(1))->pz();
-	    
-	    for(int j=0; j<m_n_MCs; ++j) 
-	    {
-	      const Candidate &p2 = (*genParticles)[j];
-	      
-	      if (p2.pdgId() != id_r) continue;
-	      if (fabs(p2.px()-px_r)>0.0001) continue;
-	      if (fabs(p2.py()-py_r)>0.0001) continue;
-	      if (fabs(p2.pz()-pz_r)>0.0001) continue;
-	      
-	      iMo2=j;
-	      
-	      break;
-	    }
-	  }
-	}
-	
-	m_MC_imot1[ipart]      = iMo1;
-	m_MC_imot2[ipart]      = iMo2;
-	m_MC_index[ipart]      = i;
-	m_MC_status[ipart]     = st;
-	m_MC_type[ipart]       = id;
-	m_MC_E[ipart]          = p.energy();
-	m_MC_px[ipart]         = p.px();
-	m_MC_py[ipart]         = p.py();
-	m_MC_pz[ipart]         = p.pz();
-	m_MC_vx[ipart]         = p.vx();
-	m_MC_vy[ipart]         = p.vy();
-	m_MC_vz[ipart]         = p.vz();
-	m_MC_eta[ipart]        = p.eta();
-	m_MC_phi[ipart]        = p.phi();
-    
-	if (n_mot==0) m_MC_generation[ipart] = 0;
+        if (n_mot>0)
+        {
+          id_r = (p.mother(0))->pdgId();
+          px_r = (p.mother(0))->px();
+          py_r = (p.mother(0))->py();
+          pz_r = (p.mother(0))->pz();
 
-	++ipart;
+          for(int j=0; j<m_n_MCs; ++j) 
+          {
+            const Candidate &p2 = (*genParticles)[j];
+
+            if (p2.pdgId() != id_r) continue;
+            if (fabs(p2.px()-px_r)>0.0001) continue;
+            if (fabs(p2.py()-py_r)>0.0001) continue;
+            if (fabs(p2.pz()-pz_r)>0.0001) continue;
+
+            iMo1=j;
+
+            break;
+          }
+
+          if (n_mot>1)
+          {
+            id_r = (p.mother(1))->pdgId();
+            px_r = (p.mother(1))->px();
+            py_r = (p.mother(1))->py();
+            pz_r = (p.mother(1))->pz();
+
+            for(int j=0; j<m_n_MCs; ++j) 
+            {
+              const Candidate &p2 = (*genParticles)[j];
+
+              if (p2.pdgId() != id_r) continue;
+              if (fabs(p2.px()-px_r)>0.0001) continue;
+              if (fabs(p2.py()-py_r)>0.0001) continue;
+              if (fabs(p2.pz()-pz_r)>0.0001) continue;
+
+              iMo2=j;
+
+              break;
+            }
+          }
+        }
+
+        m_MC_imot1[ipart]      = iMo1;
+        m_MC_imot2[ipart]      = iMo2;
+        m_MC_index[ipart]      = i;
+        m_MC_status[ipart]     = st;
+        m_MC_type[ipart]       = id;
+        m_MC_E[ipart]          = p.energy();
+        m_MC_px[ipart]         = p.px();
+        m_MC_py[ipart]         = p.py();
+        m_MC_pz[ipart]         = p.pz();
+        m_MC_vx[ipart]         = p.vx();
+        m_MC_vy[ipart]         = p.vy();
+        m_MC_vz[ipart]         = p.vz();
+        m_MC_eta[ipart]        = p.eta();
+        m_MC_phi[ipart]        = p.phi();
+        new((*m_MC_lorentzvector)[i]) TLorentzVector(p.px(),p.py(),p.pz(),p.energy());
+
+        if (n_mot==0) m_MC_generation[ipart] = 0;
+
+        ++ipart;
       }
     }  
 
-    
+
     m_n_MCs=ipart;
-  
+
     for(int i=1; i<6; ++i) 
     {    
       PatExtractor::constructGeneration(i,m_n_MCs);
@@ -559,21 +583,21 @@ void PatExtractor::analyze(const edm::Event& event, const edm::EventSetup& setup
   ++nevent;
   ++nevent_tot;
 }
- 
+
 void PatExtractor::endRun(Run const&, EventSetup const&) {
-  
+
   std::cout << "Total # of events      = "<< nevent << " / "<< nevent_tot     << std::endl;
-  
+
 }
 
 void PatExtractor::endJob() {
-  
+
   std::cout << "Total # of events      = "<< nevent     << std::endl;
 
   m_file->Write();
   m_file->Close();
-  
-  
+
+
 }
 
 
@@ -584,11 +608,11 @@ void PatExtractor::constructGeneration(int gene, int npart)
     if (m_MC_generation[i]==gene-1)
     {
       int index = m_MC_index[i];
-      
+
       for(int j=0; j<npart; ++j) 
       {
-	if (m_MC_imot1[j]==index) m_MC_generation[j]=gene;
-	if (m_MC_imot2[j]==index) m_MC_generation[j]=gene;
+        if (m_MC_imot1[j]==index) m_MC_generation[j]=gene;
+        if (m_MC_imot2[j]==index) m_MC_generation[j]=gene;
       }
     }
   }
@@ -613,7 +637,7 @@ void PatExtractor::setVarToZero()
   if (do_MC_)
   {
     m_n_MCs     = 0;
-    
+
     for (int i=0;i<m_MCs_MAX;++i) 
     {
       m_MC_index[i] = 0;
@@ -657,7 +681,7 @@ void PatExtractor::setVarToZero()
   if (do_Electron_)
   { 
     m_n_electrons = 0;
-    
+
     for (int i=0;i<m_electrons_MAX;++i) 
     {
       m_ele_E[i] = 0.;
@@ -677,7 +701,7 @@ void PatExtractor::setVarToZero()
   if (do_Jet_)
   { 
     m_n_jets = 0;
-    
+
     for (int i=0;i<m_jets_MAX;++i) 
     {
       m_jet_E[i] = 0.;
@@ -696,7 +720,7 @@ void PatExtractor::setVarToZero()
   if (do_MET_)
   {
     m_n_mets = 0;
-    
+
     for (int i=0;i<m_mets_MAX;++i) 
     {
       m_met_E[i] = 0.;
@@ -712,7 +736,7 @@ void PatExtractor::setVarToZero()
   if (do_Muon_)
   {
     m_n_muons = 0;
-    
+
     for (int i=0;i<m_muons_MAX;++i) 
     {
       m_muo_E[i] = 0.;
@@ -742,7 +766,7 @@ void PatExtractor::setVarToZero()
   if (do_Vertex_)
   {
     m_n_vertices = 0;
-    
+
     for (int i=0;i<m_vertices_MAX;++i) 
     {
       m_vtx_vx[i] = 0.;
@@ -750,10 +774,5 @@ void PatExtractor::setVarToZero()
       m_vtx_vz[i] = 0.;
     }
   }
-}    
 
-  
-  
-  
-    
-  
+}

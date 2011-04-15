@@ -1,3 +1,9 @@
+2011-04-15  Stephane <stephane.perries@cern.ch>
+
+        * New variables :
+            * a TLorentzVector for each object except the Vertices
+            * d0 and d0 error for the muons (note the track has to be embeded in the PatMuons)
+
 2011-04-04  Seb Viret  <viret@in2p3.fr>
  
        	* New option added to the config file (*_cfi.py), one can now choose
