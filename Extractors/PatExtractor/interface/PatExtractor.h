@@ -2,8 +2,7 @@
 #define PatExtractor_h
 
 /** \class PatExtractor
- *  Class that produces a roottuple to validate Track Regional Reconstruction performances
- *  \author tschudi, modif. by sviret
+ *  Class that produces a roottuple from PATuples
  */
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -82,8 +81,10 @@ class PatExtractor : public edm::EDAnalyzer {
   edm::InputTag MC_tag_;       // 
   edm::InputTag vtx_tag_;      // 
 
-
   std::string outFilename_;
+
+  bool isPFMuon;
+  bool isPFElectron;
 
   // select tracking particles 
   //(i.e. "denominator" of the efficiency ratio)
@@ -130,7 +131,7 @@ class PatExtractor : public edm::EDAnalyzer {
 
 
   int   m_n_photons;
-
+  TClonesArray* m_pho_lorentzvector;
   float m_pho_E[m_photons_MAX];
   float	m_pho_px[m_photons_MAX];
   float	m_pho_py[m_photons_MAX];
@@ -140,10 +141,10 @@ class PatExtractor : public edm::EDAnalyzer {
   float	m_pho_vz[m_photons_MAX];
   float	m_pho_eta[m_photons_MAX];
   float	m_pho_phi[m_photons_MAX];
-  TClonesArray *m_pho_lorentzvector;
 
 
   int   m_n_electrons;
+  TClonesArray* m_ele_lorentzvector;
   float m_ele_E[m_electrons_MAX];
   float	m_ele_px[m_electrons_MAX];
   float	m_ele_py[m_electrons_MAX];
@@ -153,10 +154,33 @@ class PatExtractor : public edm::EDAnalyzer {
   float	m_ele_vz[m_electrons_MAX];
   float	m_ele_eta[m_electrons_MAX];
   float	m_ele_phi[m_electrons_MAX];
-  int	m_ele_charge[m_electrons_MAX];
-  TClonesArray *m_ele_lorentzvector;
+  int	  m_ele_charge[m_electrons_MAX];
+  // electron id's
+  int   m_ele_eidLoose[m_electrons_MAX]; 
+  int   m_ele_eidRobustHighEnergy[m_electrons_MAX]; 
+  int   m_ele_eidRobustLoose[m_electrons_MAX]; 
+  int   m_ele_eidRobustTight[m_electrons_MAX]; 
+  int   m_ele_eidTight[m_electrons_MAX]; 
+  int   m_ele_eidpf_evspi[m_electrons_MAX]; 
+  int   m_ele_eidpf_evsmu[m_electrons_MAX]; 
+  float m_ele_dB[m_electrons_MAX];
+  float m_ele_trackIso[m_electrons_MAX];
+  float m_ele_ecalIso[m_electrons_MAX];
+  float m_ele_hcalIso[m_electrons_MAX];
+  float m_ele_pfParticleIso[m_electrons_MAX]; // isolation calculated with all the PFCandidates
+  float m_ele_pfChargedHadronIso[m_electrons_MAX]; // isolation calculated with only the charged hadron PFCandidates
+  float m_ele_pfNeutralHadronIso[m_electrons_MAX]; // isolation calculated with only the neutral hadron PFCandidates
+  float m_ele_pfPhotonIso[m_electrons_MAX]; // Returns the isolation calculated with only the photon PFCandidates
+  int   m_ele_numberOfMissedInnerLayer[m_electrons_MAX]; // Access the hit pattern counting (in the Tracker) the number of expected crossed layers  before the first trajectory's hit
+
+
+ 
+
+
+
 
   int   m_n_jets;
+  TClonesArray* m_jet_lorentzvector;
   float m_jet_E[m_jets_MAX];
   float	m_jet_px[m_jets_MAX];
   float	m_jet_py[m_jets_MAX];
@@ -166,20 +190,20 @@ class PatExtractor : public edm::EDAnalyzer {
   float	m_jet_vz[m_jets_MAX];
   float	m_jet_eta[m_jets_MAX];
   float	m_jet_phi[m_jets_MAX];
-  TClonesArray *m_jet_lorentzvector;
 
 
   int   m_n_mets;
+  TClonesArray* m_met_lorentzvector;
   float m_met_E[m_mets_MAX];
   float	m_met_px[m_mets_MAX];
   float	m_met_py[m_mets_MAX];
   float	m_met_pz[m_mets_MAX];
   float	m_met_eta[m_mets_MAX];
   float	m_met_phi[m_mets_MAX];
-  TClonesArray *m_met_lorentzvector;
 
 
   int   m_n_muons;
+  TClonesArray* m_muo_lorentzvector;
   float m_muo_E[m_muons_MAX];
   float	m_muo_px[m_muons_MAX];
   float	m_muo_py[m_muons_MAX];
@@ -193,16 +217,19 @@ class PatExtractor : public edm::EDAnalyzer {
   int 	m_muo_isTracker[m_muons_MAX];
   float m_muo_dB[m_muons_MAX];
   float m_muo_normChi2[m_muons_MAX];
-  int 	m_muo_nValTrackerHits[m_muons_MAX];
-  int 	m_muo_nValPixelHits[m_muons_MAX];
-  int 	m_muo_nMatches[m_muons_MAX];
+  int 	m_muo_nValTrackerHits[m_muons_MAX]; // includes double sided layers and overlapped layers
+  int 	m_muo_nValPixelHits[m_muons_MAX]; // without overlap
+  int 	m_muo_nMatches[m_muons_MAX]; 
   float m_muo_trackIso[m_muons_MAX];
   float m_muo_ecalIso[m_muons_MAX];
   float m_muo_hcalIso[m_muons_MAX];
-  int	m_muo_charge[m_muons_MAX];
-  double m_muo_d0[m_muons_MAX];
-  double m_muo_d0error[m_muons_MAX];
-  TClonesArray *m_muo_lorentzvector;
+  int	  m_muo_charge[m_muons_MAX];
+  float m_muo_d0[m_muons_MAX];
+  float m_muo_d0error[m_muons_MAX];
+  float m_muo_pfParticleIso[m_muons_MAX]; // isolation calculated with all the PFCandidates
+  float m_muo_pfChargedHadronIso[m_muons_MAX]; // isolation calculated with only the charged hadron PFCandidates
+  float m_muo_pfNeutralHadronIso[m_muons_MAX]; // isolation calculated with only the neutral hadron PFCandidates
+  float m_muo_pfPhotonIso[m_muons_MAX]; // Returns the isolation calculated with only the photon PFCandidates
 
 
   int   m_n_vertices;
@@ -213,7 +240,7 @@ class PatExtractor : public edm::EDAnalyzer {
   bool  m_vtx_ndof[m_vertices_MAX];
 
   int   m_n_MCs;
-
+  TClonesArray *m_MC_lorentzvector;
   int   m_MC_index[m_MCs_MAX];
   int   m_MC_status[m_MCs_MAX];
   int   m_MC_type[m_MCs_MAX];
@@ -229,7 +256,6 @@ class PatExtractor : public edm::EDAnalyzer {
   float	m_MC_vz[m_MCs_MAX];
   float	m_MC_eta[m_MCs_MAX];
   float	m_MC_phi[m_MCs_MAX];
-  TClonesArray *m_MC_lorentzvector;
 
   void setVarToZero();
   void constructGeneration(int gene, int npart);

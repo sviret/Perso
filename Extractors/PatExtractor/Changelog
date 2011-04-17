@@ -1,3 +1,12 @@
+2011-04-17  Stephane <stephane.perries@cern.ch>
+       * Addition of many variables for the Electrons
+
+2011-04-15  Stephane <stephane.perries@cern.ch>
+        * New variables for muons
+            * pfIsolation
+            * Pixel hits
+            * tracker hits
+
 2011-04-15  Stephane <stephane.perries@cern.ch>
 
         * New variables :

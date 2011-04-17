@@ -21,7 +21,10 @@ PatExtractor::PatExtractor(const edm::ParameterSet& config) :
   MC_tag_        (config.getParameter<edm::InputTag>("MC_tag")),
   vtx_tag_       (config.getParameter<edm::InputTag>("vtx_tag")),
   outFilename_   (config.getParameter<std::string>("extractedRootFile"))
+
 {
+  isPFMuon = false;
+  isPFElectron = false;
   LogDebug("") << "Using the " << photon_tag_ << " photon collection";
 }
 
@@ -101,7 +104,26 @@ void PatExtractor::beginJob()
     m_tree_electron->Branch("electron_vz",  &m_ele_vz,     "electron_vz[n_electrons]/F");  
     m_tree_electron->Branch("electron_eta", &m_ele_eta,    "electron_eta[n_electrons]/F");  
     m_tree_electron->Branch("electron_phi", &m_ele_phi,    "electron_phi[n_electrons]/F");  
-    m_tree_electron->Branch("electron_charge", &m_ele_charge,    "electron_charge[n_electrons]/F");  
+    m_tree_electron->Branch("electron_charge",     &m_ele_charge,    "electron_charge[n_electrons]/F");  
+    // electron id's
+    m_tree_electron->Branch("electron_eidLoose", &m_ele_eidLoose,"electron_eidLoose[n_electrons]/I");  
+    m_tree_electron->Branch("electron_eidRobustHighEnergy", &m_ele_eidRobustHighEnergy,"electron_eidRobustHighEnergy[n_electrons]/I");  
+    m_tree_electron->Branch("electron_eidRobustLoose", &m_ele_eidRobustLoose,"electron_eidRobustLoose[n_electrons]/I");  
+    m_tree_electron->Branch("electron_eidRobustTight", &m_ele_eidRobustTight,"electron_eidRobustTight[n_electrons]/I");  
+    m_tree_electron->Branch("electron_eidTight",       &m_ele_eidTight,"electron_eidTight[n_electrons]/I");  
+    m_tree_electron->Branch("electron_eidpf_evspi",    &m_ele_eidpf_evspi,"electron_eidpf_evspi[n_electrons]/I");  
+    m_tree_electron->Branch("electron_eidpf_evsmu",   &m_ele_eidpf_evsmu,"electron_eidpf_evsmu[n_electrons]/I");  
+    m_tree_electron->Branch("electron_dB",             &m_ele_dB,        "electron_dB[n_electrons]/F");  
+    m_tree_electron->Branch("electron_trackIso",       &m_ele_trackIso,  "electron_trackIso[n_electrons]/F");  
+    m_tree_electron->Branch("electron_ecalIso",        &m_ele_ecalIso,   "electron_ecalIso[n_electrons]/F");  
+    m_tree_electron->Branch("electron_hcalIso",        &m_ele_hcalIso,   "electron_hcalIso[n_electrons]/F");  
+    m_tree_electron->Branch("electron_pfParticleIso",      &m_ele_pfParticleIso,     "electron_pfParticleIso[n_electrons]/F");  
+    m_tree_electron->Branch("electron_pfChargedHadronIso", &m_ele_pfChargedHadronIso,"electron_pfChargedHadronIso[n_electrons]/F");  
+    m_tree_electron->Branch("electron_pfNeutralHadronIso", &m_ele_pfNeutralHadronIso,"electron_pfNeutralHadronIso[n_electrons]/F");  
+    m_tree_electron->Branch("electron_pfPhotonIso",        &m_ele_pfPhotonIso,       "electron_pfPhotonIso[n_electrons]/F");  
+    m_tree_electron->Branch("electron_numberOfMissedInnerLayer", &m_ele_numberOfMissedInnerLayer, "electron_numberOfMissedInnerLayer[n_electrons]/F");  
+
+    if ((electron_tag_.label()).find("PFlow")) isPFElectron=true;
   }
 
   if (do_Jet_)
@@ -164,8 +186,14 @@ void PatExtractor::beginJob()
     m_tree_muon->Branch("muon_trackIso",       &m_muo_trackIso,"muon_trackIso[n_muons]/F");
     m_tree_muon->Branch("muon_ecalIso",        &m_muo_ecalIso,"muon_ecalIso[n_muons]/F");
     m_tree_muon->Branch("muon_hcalIso",        &m_muo_hcalIso,"muon_hcalIso[n_muons]/F");
+    m_tree_muon->Branch("muon_pfParticleIso",      &m_muo_pfParticleIso,"muon_pfParticleIso[n_muons]/F");
+    m_tree_muon->Branch("muon_pfChargedHadronIso", &m_muo_pfChargedHadronIso,"muon_pfChargedHadronIso[n_muons]/F");
+    m_tree_muon->Branch("muon_pfNeutralHadronIso", &m_muo_pfNeutralHadronIso,"muon_pfNeutralHadronIso[n_muons]/F");
+    m_tree_muon->Branch("muon_pfPhotonIso",        &m_muo_pfPhotonIso,"muon_pfPhotonIso[n_muons]/F");
     m_tree_muon->Branch("muon_d0",      &m_muo_d0,"muon_d0[n_muons]/F");
     m_tree_muon->Branch("muon_d0error", &m_muo_d0error,"muon_d0error[n_muons]/F");
+    
+    if ((muon_tag_.label()).find("PFlow")) isPFMuon=true;
   }
 
   if (do_Vertex_)
@@ -274,6 +302,7 @@ void PatExtractor::analyze(const edm::Event& event, const edm::EventSetup& setup
 
         pat::Electron currentElectron = p_electrons.at(i);
 
+        new((*m_ele_lorentzvector)[i]) TLorentzVector(currentElectron.px(),currentElectron.py(),currentElectron.pz(),currentElectron.energy());
         m_ele_E[i]      = currentElectron.energy();
         m_ele_px[i]     = currentElectron.px();
         m_ele_py[i]     = currentElectron.py();
@@ -284,7 +313,31 @@ void PatExtractor::analyze(const edm::Event& event, const edm::EventSetup& setup
         m_ele_eta[i]    = currentElectron.eta();
         m_ele_phi[i]    = currentElectron.phi();
         m_ele_charge[i] = currentElectron.charge();
-        new((*m_ele_lorentzvector)[i]) TLorentzVector(currentElectron.px(),currentElectron.py(),currentElectron.pz(),currentElectron.energy());
+        
+        m_ele_eidLoose[i]            = currentElectron.electronID("eidLoose");
+        m_ele_eidRobustHighEnergy[i] = currentElectron.electronID("eidRobustHighEnergy");
+        m_ele_eidRobustLoose[i]      = currentElectron.electronID("eidRobustLoose");
+        m_ele_eidRobustTight[i]      = currentElectron.electronID("eidRobustTight");
+        m_ele_eidTight[i]            = currentElectron.electronID("eidTight");
+
+        m_ele_dB[i] = currentElectron.dB() ;
+        m_ele_trackIso[i] = currentElectron.trackIso() ;
+        m_ele_ecalIso[i] = currentElectron.ecalIso() ;
+        m_ele_hcalIso[i] = currentElectron.hcalIso() ;
+
+        if (currentElectron.gsfTrack().isNonnull())
+          m_ele_numberOfMissedInnerLayer[i] = currentElectron.gsfTrack()->trackerExpectedHitsInner().numberOfHits();
+
+
+        if (isPFElectron)
+        {
+          m_ele_pfParticleIso[i]      = currentElectron.particleIso();
+          m_ele_pfChargedHadronIso[i] = currentElectron.chargedHadronIso();
+          m_ele_pfNeutralHadronIso[i] = currentElectron.neutralHadronIso();
+          m_ele_pfPhotonIso[i]        = currentElectron.photonIso();
+          m_ele_eidpf_evspi[i]         = currentElectron.electronID("pf_evspi");
+          m_ele_eidpf_evsmu[i]        = currentElectron.electronID("pf_evsmu");
+        }
       } 
     }
 
@@ -311,6 +364,7 @@ void PatExtractor::analyze(const edm::Event& event, const edm::EventSetup& setup
 
         pat::Muon currentMuon = p_muons.at(i);
 
+        new((*m_muo_lorentzvector)[i]) TLorentzVector(currentMuon.px(),currentMuon.py(),currentMuon.pz(),currentMuon.energy());
         m_muo_E[i]               = currentMuon.energy();
         m_muo_px[i]              = currentMuon.px();
         m_muo_py[i]              = currentMuon.py();
@@ -323,7 +377,6 @@ void PatExtractor::analyze(const edm::Event& event, const edm::EventSetup& setup
         m_muo_isGlobal[i]        = currentMuon.isGlobalMuon();
         m_muo_isTracker[i]       = currentMuon.isTrackerMuon();
         m_muo_charge[i]          = currentMuon.charge();
-        new((*m_muo_lorentzvector)[i]) TLorentzVector(currentMuon.px(),currentMuon.py(),currentMuon.pz(),currentMuon.energy());
 
         if (currentMuon.outerTrack().isNonnull())
         {
@@ -334,19 +387,29 @@ void PatExtractor::analyze(const edm::Event& event, const edm::EventSetup& setup
         if (currentMuon.innerTrack().isNonnull())
         {
           m_muo_dB[i]                = currentMuon.dB();
-          m_muo_nValTrackerHits[i]   = currentMuon.numberOfValidHits();
+          m_muo_nValPixelHits[i]     = currentMuon.innerTrack()->hitPattern().pixelLayersWithMeasurement();
+          m_muo_nValTrackerHits[i]   = currentMuon.innerTrack()->hitPattern().numberOfValidTrackerHits();
           m_muo_d0[i]                = currentMuon.innerTrack()->d0(); 
           m_muo_d0error[i]           = currentMuon.innerTrack()->d0Error();
         }
 
         if (currentMuon.globalTrack().isNonnull())
         {
+          m_muo_nValTrackerHits[i]   = currentMuon.numberOfValidHits();
           m_muo_normChi2[i]          = currentMuon.normChi2();
         }
 
         m_muo_trackIso[i]        = currentMuon.trackIso();
         m_muo_ecalIso[i]         = currentMuon.ecalIso();
         m_muo_hcalIso[i]         = currentMuon.hcalIso();
+
+        if (isPFMuon)
+        {
+          m_muo_pfParticleIso[i]      = currentMuon.particleIso();
+          m_muo_pfChargedHadronIso[i] = currentMuon.chargedHadronIso();
+          m_muo_pfNeutralHadronIso[i] = currentMuon.neutralHadronIso();
+          m_muo_pfPhotonIso[i]        = currentMuon.photonIso();
+        }
       } 
     }
 
@@ -694,14 +757,27 @@ void PatExtractor::setVarToZero()
       m_ele_eta[i] = 0.;
       m_ele_phi[i] = 0.;
       m_ele_charge[i] = 0;
+      m_ele_eidLoose[i]=0; 
+      m_ele_eidRobustHighEnergy[i]=0; 
+      m_ele_eidRobustLoose[i]=0; 
+      m_ele_eidRobustTight[i]=0; 
+      m_ele_eidTight[i]=0; 
+      m_ele_eidpf_evspi[i]=0; 
+      m_ele_eidpf_evsmu[i]=0; 
+      m_ele_dB[i]=0;                          
+      m_ele_trackIso[i]=0;                      
+      m_ele_ecalIso[i]=0;
+      m_ele_hcalIso[i]=0;
+      m_ele_pfParticleIso[i]=0;
+      m_ele_pfChargedHadronIso[i]=0;
+      m_ele_pfNeutralHadronIso[i]=0;
+      m_ele_pfPhotonIso[i]=0;
+      m_ele_numberOfMissedInnerLayer[i]=0;
     }
-  }    
-
+  }
 
   if (do_Jet_)
-  { 
-    m_n_jets = 0;
-
+  {
     for (int i=0;i<m_jets_MAX;++i) 
     {
       m_jet_E[i] = 0.;
@@ -759,6 +835,12 @@ void PatExtractor::setVarToZero()
       m_muo_trackIso[i] = 0.;
       m_muo_ecalIso[i] = 0.;
       m_muo_hcalIso[i] = 0.;
+      m_muo_pfParticleIso[i] =0.;
+      m_muo_pfChargedHadronIso[i]=0.;
+      m_muo_pfNeutralHadronIso[i]=0.;
+      m_muo_pfPhotonIso[i]=0.;
+      m_muo_d0[i]=0.;
+      m_muo_d0error[i]=0.;
     }
   }
 
