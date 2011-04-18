@@ -104,7 +104,7 @@ void PatExtractor::beginJob()
     m_tree_electron->Branch("electron_vz",  &m_ele_vz,     "electron_vz[n_electrons]/F");  
     m_tree_electron->Branch("electron_eta", &m_ele_eta,    "electron_eta[n_electrons]/F");  
     m_tree_electron->Branch("electron_phi", &m_ele_phi,    "electron_phi[n_electrons]/F");  
-    m_tree_electron->Branch("electron_charge",     &m_ele_charge,    "electron_charge[n_electrons]/F");  
+    m_tree_electron->Branch("electron_charge",     &m_ele_charge,    "electron_charge[n_electrons]/I");  
     // electron id's
     m_tree_electron->Branch("electron_eidLoose", &m_ele_eidLoose,"electron_eidLoose[n_electrons]/I");  
     m_tree_electron->Branch("electron_eidRobustHighEnergy", &m_ele_eidRobustHighEnergy,"electron_eidRobustHighEnergy[n_electrons]/I");  
@@ -121,7 +121,7 @@ void PatExtractor::beginJob()
     m_tree_electron->Branch("electron_pfChargedHadronIso", &m_ele_pfChargedHadronIso,"electron_pfChargedHadronIso[n_electrons]/F");  
     m_tree_electron->Branch("electron_pfNeutralHadronIso", &m_ele_pfNeutralHadronIso,"electron_pfNeutralHadronIso[n_electrons]/F");  
     m_tree_electron->Branch("electron_pfPhotonIso",        &m_ele_pfPhotonIso,       "electron_pfPhotonIso[n_electrons]/F");  
-    m_tree_electron->Branch("electron_numberOfMissedInnerLayer", &m_ele_numberOfMissedInnerLayer, "electron_numberOfMissedInnerLayer[n_electrons]/F");  
+    m_tree_electron->Branch("electron_numberOfMissedInnerLayer", &m_ele_numberOfMissedInnerLayer, "electron_numberOfMissedInnerLayer[n_electrons]/I");  
 
     if ((electron_tag_.label()).find("PFlow")) isPFElectron=true;
   }
@@ -326,8 +326,9 @@ void PatExtractor::analyze(const edm::Event& event, const edm::EventSetup& setup
         m_ele_hcalIso[i] = currentElectron.hcalIso() ;
 
         if (currentElectron.gsfTrack().isNonnull())
+        {
           m_ele_numberOfMissedInnerLayer[i] = currentElectron.gsfTrack()->trackerExpectedHitsInner().numberOfHits();
-
+        }
 
         if (isPFElectron)
         {

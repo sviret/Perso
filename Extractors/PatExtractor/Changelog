@@ -1,3 +1,6 @@
+2011-04-18  Stephane <stephane.perries@cern.ch>
+       * Fixed some bugs in the electron variables
+
 2011-04-17  Stephane <stephane.perries@cern.ch>
        * Addition of many variables for the Electrons
 
