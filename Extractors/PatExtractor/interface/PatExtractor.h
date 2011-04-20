@@ -174,9 +174,6 @@ class PatExtractor : public edm::EDAnalyzer {
   int   m_ele_numberOfMissedInnerLayer[m_electrons_MAX]; // Access the hit pattern counting (in the Tracker) the number of expected crossed layers  before the first trajectory's hit
 
 
- 
-
-
 
 
   int   m_n_jets;
@@ -190,7 +187,16 @@ class PatExtractor : public edm::EDAnalyzer {
   float	m_jet_vz[m_jets_MAX];
   float	m_jet_eta[m_jets_MAX];
   float	m_jet_phi[m_jets_MAX];
-
+  int	m_jet_chmult[m_jets_MAX];
+  float	m_jet_chmuEfrac[m_jets_MAX];
+  float	m_jet_chemEfrac[m_jets_MAX];
+  float	m_jet_chhadEfrac[m_jets_MAX];
+  float	m_jet_nemEfrac[m_jets_MAX];
+  float	m_jet_nhadEfrac[m_jets_MAX];
+  float	m_jet_btag_jetProb[m_jets_MAX];
+  float	m_jet_btag_BjetProb[m_jets_MAX];
+  float	m_jet_btag_SSVHE[m_jets_MAX];
+  float	m_jet_btag_SSVHP[m_jets_MAX];
 
   int   m_n_mets;
   TClonesArray* m_met_lorentzvector;

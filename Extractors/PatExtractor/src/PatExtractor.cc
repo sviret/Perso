@@ -74,9 +74,8 @@ void PatExtractor::beginJob()
   {
     m_tree_photon   = new TTree("photon","PAT photon info");  
     m_pho_lorentzvector = new TClonesArray("TLorentzVector");
-    m_tree_photon->Branch("photon_4vector","TClonesArray",&m_pho_lorentzvector, 1000, 0);
-    m_tree_photon   = new TTree("photon","PAT photon info");  
     m_tree_photon->Branch("n_photons",  &m_n_photons,"n_photons/I");  
+    m_tree_photon->Branch("photon_4vector","TClonesArray",&m_pho_lorentzvector, 1000, 0);    
     m_tree_photon->Branch("photon_e",   &m_pho_E,    "photon_e[n_photons]/F");  
     m_tree_photon->Branch("photon_px",  &m_pho_px,   "photon_px[n_photons]/F");  
     m_tree_photon->Branch("photon_py",  &m_pho_py,   "photon_py[n_photons]/F");  
@@ -92,9 +91,8 @@ void PatExtractor::beginJob()
   {
     m_tree_electron = new TTree("electron_PF","PAT PF electron info");  
     m_ele_lorentzvector = new TClonesArray("TLorentzVector");
-    m_tree_electron->Branch("electron_4vector","TClonesArray",&m_ele_lorentzvector, 1000, 0);
-    m_tree_electron = new TTree("electron_PF","PAT PF electron info");  
     m_tree_electron->Branch("n_electrons",  &m_n_electrons,"n_electrons/I");  
+    m_tree_electron->Branch("electron_4vector","TClonesArray",&m_ele_lorentzvector, 1000, 0);
     m_tree_electron->Branch("electron_e",   &m_ele_E,      "electron_e[n_electrons]/F");  
     m_tree_electron->Branch("electron_px",  &m_ele_px,     "electron_px[n_electrons]/F");  
     m_tree_electron->Branch("electron_py",  &m_ele_py,     "electron_py[n_electrons]/F");  
@@ -130,9 +128,8 @@ void PatExtractor::beginJob()
   {
     m_tree_jet      = new TTree("jet_PF","PAT PF jet info");   
     m_jet_lorentzvector = new TClonesArray("TLorentzVector");
-    m_tree_jet->Branch("jet_4vector","TClonesArray",&m_jet_lorentzvector, 1000, 0);
-    m_tree_jet      = new TTree("jet_PF","PAT PF jet info");  
     m_tree_jet->Branch("n_jets",  &m_n_jets,   "n_jets/I");  
+    m_tree_jet->Branch("jet_4vector","TClonesArray",&m_jet_lorentzvector, 1000, 0);
     m_tree_jet->Branch("jet_e",   &m_jet_E,    "jet_e[n_jets]/F");  
     m_tree_jet->Branch("jet_px",  &m_jet_px,   "jet_px[n_jets]/F");  
     m_tree_jet->Branch("jet_py",  &m_jet_py,   "jet_py[n_jets]/F");  
@@ -142,15 +139,25 @@ void PatExtractor::beginJob()
     m_tree_jet->Branch("jet_vz",  &m_jet_vz,   "jet_vz[n_jets]/F");  
     m_tree_jet->Branch("jet_eta", &m_jet_eta,  "jet_eta[n_jets]/F");  
     m_tree_jet->Branch("jet_phi", &m_jet_phi,  "jet_phi[n_jets]/F");  
+    m_tree_jet->Branch("jet_chmult",        &m_jet_chmult,       "jet_chmult[n_jets]/I");
+    m_tree_jet->Branch("jet_chmuEfrac",     &m_jet_chmuEfrac,    "jet_chmuEfrac[n_jets]/F");
+    m_tree_jet->Branch("jet_chemEfrac",     &m_jet_chemEfrac,    "jet_chemEfrac[n_jets]/F");
+    m_tree_jet->Branch("jet_chhadEfrac",    &m_jet_chhadEfrac,   "jet_nemEfrac[n_jets]/F");
+    m_tree_jet->Branch("jet_nemEfrac",      &m_jet_nemEfrac,     "jet_nemEfrac[n_jets]/F");
+    m_tree_jet->Branch("jet_nhadEfrac",     &m_jet_nhadEfrac,    "jet_nhadEfrac[n_jets]/F");
+    m_tree_jet->Branch("jet_btag_jetProb",  &m_jet_btag_jetProb, "jet_btag_jetProb[n_jets]/F");
+    m_tree_jet->Branch("jet_btag_BjetProb", &m_jet_btag_BjetProb,"jet_btag_BjetProb[n_jets]/F");
+    m_tree_jet->Branch("jet_btag_SSVHE",    &m_jet_btag_SSVHE,   "jet_btag_SSVHE[n_jets]/F");
+    m_tree_jet->Branch("jet_btag_SSVHP",    &m_jet_btag_SSVHP,   "jet_btag_SSVHP[n_jets]/F");
+
   }    
 
   if (do_MET_)
   {
     m_tree_met      = new TTree("MET_PF","PAT PF MET info");  
     m_met_lorentzvector = new TClonesArray("TLorentzVector");
-    m_tree_met->Branch("met_4vector","TClonesArray",&m_met_lorentzvector, 1000, 0);
-    m_tree_met      = new TTree("MET_PF","PAT PF MET info");  
     m_tree_met->Branch("n_mets",  &m_n_mets,   "n_mets/I");  
+    m_tree_met->Branch("met_4vector","TClonesArray",&m_met_lorentzvector, 1000, 0);
     m_tree_met->Branch("met_e",   &m_met_E,    "met_e[n_mets]/F");  
     m_tree_met->Branch("met_px",  &m_met_px,   "met_px[n_mets]/F");  
     m_tree_met->Branch("met_py",  &m_met_py,   "met_py[n_mets]/F");  
@@ -163,9 +170,8 @@ void PatExtractor::beginJob()
   {
     m_tree_muon     = new TTree("muon_PF","PAT PF muon info"); 
     m_muo_lorentzvector = new TClonesArray("TLorentzVector");
-    m_tree_muon->Branch("muon_4vector","TClonesArray",&m_muo_lorentzvector, 1000, 0);
-    m_tree_muon     = new TTree("muon_PF","PAT PF muon info"); 
     m_tree_muon->Branch("n_muons",  &m_n_muons,  "n_muons/I");  
+    m_tree_muon->Branch("muon_4vector","TClonesArray",&m_muo_lorentzvector, 1000, 0);
     m_tree_muon->Branch("muon_e",   &m_muo_E,    "muon_e[n_muons]/F");  
     m_tree_muon->Branch("muon_px",  &m_muo_px,   "muon_px[n_muons]/F");  
     m_tree_muon->Branch("muon_py",  &m_muo_py,   "muon_py[n_muons]/F");  
@@ -453,6 +459,22 @@ void PatExtractor::analyze(const edm::Event& event, const edm::EventSetup& setup
         m_jet_eta[i_jet]  = currentJet.eta();
         m_jet_phi[i_jet]  = currentJet.phi();
         new((*m_jet_lorentzvector)[i_jet]) TLorentzVector(currentJet.px(),currentJet.py(),currentJet.pz(),currentJet.energy());
+
+
+	if (currentJet.isPFJet())
+	{
+	  m_jet_chmult[i_jet]        = currentJet.chargedMultiplicity();
+	  m_jet_chmuEfrac[i_jet]     = currentJet.chargedMuEnergyFraction();
+	  m_jet_chemEfrac[i_jet]     = currentJet.chargedEmEnergyFraction();
+	  m_jet_chhadEfrac[i_jet]    = currentJet.chargedHadronEnergyFraction();
+	  m_jet_nemEfrac[i_jet]      = currentJet.neutralEmEnergyFraction();
+	  m_jet_nhadEfrac[i_jet]     = currentJet.neutralHadronEnergyFraction();
+	  m_jet_btag_jetProb[i_jet]  = currentJet.bDiscriminator("jetProbabilityBJetTags");
+	  m_jet_btag_BjetProb[i_jet] = currentJet.bDiscriminator("jetBProbabilityBJetTags");
+	  m_jet_btag_SSVHE[i_jet]    = currentJet.bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
+	  m_jet_btag_SSVHP[i_jet]    = currentJet.bDiscriminator("simpleSecondaryVertexHighPurBJetTags");
+	}
+
 
         i_jet++;
       } 
@@ -790,6 +812,18 @@ void PatExtractor::setVarToZero()
       m_jet_vz[i] = 0.;
       m_jet_eta[i] = 0.;
       m_jet_phi[i] = 0.;
+
+      m_jet_chmult[i] = 0;
+      m_jet_chmuEfrac[i] = 0.;
+      m_jet_chemEfrac[i] = 0.;
+      m_jet_chhadEfrac[i] = 0.;
+      m_jet_nemEfrac[i] = 0.;
+      m_jet_nhadEfrac[i] = 0.;
+      m_jet_btag_jetProb[i] = 0.;
+      m_jet_btag_BjetProb[i] = 0.;
+      m_jet_btag_SSVHE[i] = 0.;
+      m_jet_btag_SSVHP[i] = 0.;
+
     }
   }
 
