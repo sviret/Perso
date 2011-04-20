@@ -1,4 +1,7 @@
 2011-04-20 Seb Viret  <viret@in2p3.fr>
+       * Bug fix
+
+2011-04-20 Seb Viret  <viret@in2p3.fr>
        * Fixed some bugs in TTree initializations
        * Added variables for Jet (PF energy fraction, BTag infos,...)
 
