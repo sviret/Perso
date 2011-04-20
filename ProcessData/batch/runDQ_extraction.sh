@@ -4,10 +4,11 @@
 #
 # runDQ_extraction.sh
 #
-# Script producing MIB DQ rootfiles necessary to the 
+# Script automatically sent via a cron job every day
+# in order to produce MIB DQ rootfiles necessary to the 
 # TUCS analysis 
 #
-# We loop either on pp or Heavy Ion dataset (using option 0 or 1 respectively)
+# We loop on pp or Heavy Ion dataset (using option 0 or 1 respectively)
 #
 # --> Works in two steps:
 #
@@ -19,17 +20,18 @@
 #
 # More info on MIB monitoring:
 #
-# http://sviret.web.cern.ch/sviret/Welcome.php?n=CMS.MIB
+# http://sviret.web.cern.ch/sviret/Welcome.php?n=CMS.MIBMonitorHowTo
 #
 #################################################
 
 
-
+# For pp collisions
 if (${1} == 0) then
     set LHC_TYPE          = "data"          # The LHC running mode 
     set STREAM            = "Commissioning" # The Dataset we are looking at 
 endif
 
+# For heavy-ions collisions
 if (${1} == 1) then
     set LHC_TYPE          = "hidata"       # The LHC running mode 
     set STREAM            = "HIAllPhysics" # The Dataset we are looking at 
@@ -45,8 +47,8 @@ set day2              = `date -d '-1 day' '+%b %d'`
 #
 # STEP 0: running jobs control
 #
-# There can't be more than$njoblimit running jobs in batch
-# We need to do this in order to avoid CASTOR I/O overload
+# There can't be more than $njoblimit running jobs ib batch
+# We need to do this in order to avoid CASTOR overload
 # we are rejected if making too many rfio requests 
 
 cd $WORKDIR/$CMSSW_PROJECT_SRC
@@ -59,18 +61,18 @@ cd $WORKDIR/$CMSSW_PROJECT_SRC/$STEP/batch
 
 set n_running     = `bjobs | wc -l` # Number of running jobs
 @ njob            = $n_running 
-@ njoblimit       = 500              # Max number of running jobs
+@ njoblimit       = 10              # Max number of running jobs
 
 if ($njob >= $njoblimit) then
     echo "Too many jobs are already running, you have to wait a bit..."
-    exit
+    #exit
 endif
 
 #
 # Step 1: query the runlist (using CMS database)
 #
 
-@ initial_run  = 160000 # The first run possibly entering the analysis in 2011 (for getRunList.py)
+@ initial_run  = 160800 # The first run possibly entering the analysis iin 2011 (for getRunList.py)
 
 # Update the run list
 python $WORKDIR/$CMSSW_PROJECT_SRC/$STEP/batch/getRunList.py  -c frontier://LumiProd/CMS_LUMI_PROD -r ${initial_run} 
@@ -150,7 +152,7 @@ foreach l (`nsls /castor/cern.ch/cms/store/$LHC_TYPE | grep Run2011`)
 		set nsubsp  = `nsls /castor/cern.ch/user/s/sviret/CMS/MIB/DQ/Prod/${extent} | wc -l`
 
 		# Just to check if the skimmed rootuple is already there
-		set is_skim = `ls /afs/cern.ch/user/s/sviret/www/Images/CMS/MIB/Monitor/Rootuples/2011 | grep $i${j} | wc -l`
+		set is_skim = `ls /afs/cern.ch/user/s/sviret/www/Images/CMS/MIB/Monitor/Rootuples/2011 | grep $i${j} | grep root | wc -l`
 
 		# Some sanity check, to prevent empty files (!!!!TO BE IMPROVED!!!!)
 		set is_badA = `ls -lrt /afs/cern.ch/user/s/sviret/www/Images/CMS/MIB/Monitor/Rootuples/2011 | grep $i${j} | grep ' 7830 '| wc -l`
@@ -176,7 +178,8 @@ foreach l (`nsls /castor/cern.ch/cms/store/$LHC_TYPE | grep Run2011`)
 			echo "#\!/bin/bash" > TMP_FILES/data_skim_${i}${j}_S.sh
 			echo "source $WORKDIR/$CMSSW_PROJECT_SRC/$STEP/batch/data_skimmer.sh $i$j $nsubs" >> TMP_FILES/data_skim_${i}${j}_S.sh
 			chmod 755 TMP_FILES/data_skim_${i}${j}_S.sh
-			bsub -q 1nd -e /dev/null -o /tmp/${LOGNAME}_out.txt /afs/cern.ch/user/s/sviret/testarea/CMSSW_4_1_2_patch1/src/ProcessData/batch/TMP_FILES/data_skim_${i}${j}_S.sh					     
+			bsub -q 1nd -e /dev/null -o /tmp/${LOGNAME}_out.txt /afs/cern.ch/user/s/sviret/testarea/CMSSW_4_1_2_patch1/src/ProcessData/batch/TMP_FILES/data_skim_${i}${j}_S.sh 			
+			#bsub -q 1nd /afs/cern.ch/user/s/sviret/testarea/CMSSW_4_1_2_patch1/src/ProcessData/batch/TMP_FILES/data_skim_${i}${j}_S.sh 			
 		    endif
 		endif
 	    endif
@@ -208,6 +211,8 @@ foreach l (`nsls /castor/cern.ch/cms/store/$LHC_TYPE | grep Run2011`)
 	end
     end
 end
+
+mutt -a infoRun.txt -s '[MIB HI DQ]:List of runs launched to batch' viret@in2p3.fr < /dev/null
 
 rm infoRun.txt
 

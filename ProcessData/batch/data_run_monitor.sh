@@ -4,7 +4,7 @@
 #
 # data_run_monitor.sh
 #
-# Script invoked by runDQ_monitoring.sh
+# Script invoked by runDQ_monitoring.sh, uses TUCS
 # 
 # --> List of inputs:
 #
@@ -14,7 +14,7 @@
 #
 # More info on MIB monitoring:
 #
-# http://sviret.web.cern.ch/sviret/Welcome.php?n=CMS.MIB
+# http://sviret.web.cern.ch/sviret/Welcome.php?n=CMS.MIBMonitorHowTo
 #
 #################################################
 

@@ -15,7 +15,7 @@
 #
 # More info on MIB monitoring:
 #
-# http://sviret.web.cern.ch/sviret/Welcome.php?n=CMS.MIB
+# http://sviret.web.cern.ch/sviret/Welcome.php?n=CMS.MIBMonitorHowTo
 #
 #################################################
 
@@ -69,6 +69,7 @@ rfproblem=`ls plots/latest/ | wc -l`
 
 if [ $rfproblem != 0 ]; then
     cp output_${runnumber}.root /afs/cern.ch/user/s/sviret/www/Images/CMS/MIB/Monitor/Rootuples/$YEAR/MIB_summary_run_${runnumber}.root
+    cp BCID_list_${runnumber}.txt /afs/cern.ch/user/s/sviret/www/Images/CMS/MIB/Monitor/Rootuples/$YEAR/BCID_list_${runnumber}.txt
     cd plots/latest
     cp *.png /afs/cern.ch/user/s/sviret/scratch0/Monitor/$YEAR/
     #cp *.eps /afs/cern.ch/user/s/sviret/scratch0/Monitor/$YEAR/

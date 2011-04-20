@@ -2,17 +2,48 @@
 #
 # Machine-induced background monitoring
 #
-# Run procedure: S.V. 04/04/2011 (viret@in2p3.fr)
+# /batch/ directory description
+#
+# --> Link to the monitoring page:
+#
+# http://sviret.web.cern.ch/sviret/Images/CMS/MIB/Monitor/2011/Trends/MIB_monitor.html
+#
+# 19/04/2011 (viret@in2p3.fr)
 #
 ################################################
 
 
-The monitoring procedure is divided into two parts: data extraction and data processing.
+The monitoring procedure is divided into three parts: data extraction/skimming/processing.
 
-1. Data extraction
+In all cases complete details are provided in the script themselves
 
-Done by runDQ_extraction.sh
+1. Data extraction:
 
-2. Data processing
+--> Main script                                     : runDQ_extraction.sh
+--> Scripts used by the main script during this step: data_extractor.sh/getRunList.py
+--> Cron job frequency                              : every day at 4:00, 12:00, 20:00
 
-Done by runDQ_monitoring.sh
+--> FRAMEWORK       : CMSSW (C++)
+--> INPUT DIRECTORY : /castor/cern.ch/cms/store/data/Run2011A/Commissioning/RECO/
+--> OUTPUT DIRECTORY: /castor/cern.ch/user/s/sviret/MIB/DQ/Prod
+
+
+2. Data skimming:
+
+--> Main script                                     : runDQ_extraction.sh
+--> Scripts used by the main script during this step: data_skimmer.sh
+--> Cron job frequency                              : every day at 4:00, 12:00, 20:00
+
+--> FRAMEWORK       : Tucs (python)
+--> INPUT DIRECTORY : /castor/cern.ch/user/s/sviret/MIB/DQ/Prod
+--> OUTPUT DIRECTORY: /afs/cern.ch/user/s/sviret/www/Images/CMS/MIB/Monitor/Rootuples/2011
+
+3. Data processing:
+
+--> Main script                                     : runDQ_monitoring.sh
+--> Scripts used by the main script during this step: data_run_monitor.sh/data_trend_monitor.sh
+--> Cron job frequency                              : every day at 8:00, 16:00
+
+--> FRAMEWORK       : Tucs (python)
+--> INPUT DIRECTORY : /afs/cern.ch/user/s/sviret/www/Images/CMS/MIB/Monitor/Rootuples/2011
+--> OUTPUT DIRECTORY: /afs/cern.ch/user/s/sviret/www/Images/CMS/MIB/Monitor/2011

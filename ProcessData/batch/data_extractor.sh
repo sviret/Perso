@@ -18,7 +18,7 @@
 #
 # More info on MIB monitoring:
 #
-# http://sviret.web.cern.ch/sviret/Welcome.php?n=CMS.MIB
+# http://sviret.web.cern.ch/sviret/Welcome.php?n=CMS.MIBMonitorHowTo
 #
 #################################################
 
@@ -30,13 +30,15 @@ CMSSW_PROJECT_SRC=testarea/CMSSW_4_1_2_patch1/src
 STEP=ProcessData
 TOP=$PWD
 
-
+cd $HOME/$CMSSW_PROJECT_SRC
+export SCRAM_ARCH=slc5_amd64_gcc434
+eval `scramv1 runtime -sh` 
 
 rootdir=${3}
 nfiles=${4}
 npjob=${5}
 
-nruns=$(( nfiles / npjob))
+nruns=$(( nfiles / npjob))  
 
 nrest=$(( nfiles - nruns * npjob))
 
@@ -45,16 +47,17 @@ if [ $nrest != 0 ]; then
 fi
 
 echo $nruns,$nrest
-
+  
 rfmkdir /castor/cern.ch/user/s/sviret/CMS/MIB/DQ/Prod/${1}${2}_$nruns
 
 for (( c=0; c<$nruns; c++ ))
 do
 
+  # First of all we check that the data hasn't been already extracted
   is_proc=`nsls /castor/cern.ch/user/s/sviret/CMS/MIB/DQ/Prod/${1}${2}_$nruns | grep ${1}${2}_${c}_${nruns} | wc -l`
 
   if [ $is_proc = 1 ]; then
-      echo 'Skip that one'
+      echo 'Skip that one because data already extracted'
       continue
   fi
 
@@ -63,15 +66,13 @@ do
 
   echo $nfirst,$nlast
 
-  cd $HOME/$CMSSW_PROJECT_SRC
-  export SCRAM_ARCH=slc5_amd64_gcc434
-  eval `scramv1 runtime -sh`   
-
   cd $TOP
   cp $HOME/$CMSSW_PROJECT_SRC/$STEP/test/BH_data_proc_BASE.py BH_dummy.py 
 
   compteur=0
   compteur_real=0
+
+  # Here we put the list of files into the python script
 
   for l in `nsls $rootdir`	    	 
   do
@@ -95,10 +96,13 @@ do
 
   OUTPUT_NAME=MIB_data_result_${1}${2}_${c}_${nruns}.root
 
+
+  # Launch the job
+
   cmsRun BH_dummy.py 2> out.txt
 
-  # Recover the data
-  #
+  # Recover the data and check that there was no castor problem 
+  # during the process
 
   nlast=$(( $nlast + 1))
 
@@ -114,6 +118,8 @@ do
 
   echo $nprocfiles
   echo $ntots
+
+  # If there is no error we store the file, otherwise we send an error email
 
   if [ "$ntots" = "$nprocfiles" ]; then
       xrdcp output.root root://castorcms//castor/cern.ch/user/s/sviret/CMS/MIB/DQ/Prod/${1}${2}_$nruns/$OUTPUT_NAME

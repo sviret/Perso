@@ -1,4 +1,27 @@
 #!/usr/bin/env python
+
+################################################
+#
+# getRunList.py
+#
+# Script invoked by runDQ_extraction.sh
+# 
+# --> List of inputs:
+#
+# 
+# 
+# 
+# 
+# 
+# Adaptation: Seb Viret <viret@in2p3.fr>  (26/11/2010)
+#
+# More info on MIB monitoring:
+#
+# http://sviret.web.cern.ch/sviret/Welcome.php?n=CMS.MIBMonitorHowTo
+#
+#################################################
+
+
 VERSION='1.02'
 import os,sys,time
 import re
@@ -12,9 +35,14 @@ class constants(object):
         self.runinfoschema='CMS_RUNINFO'
         self.runsessionparameterTable='RUNSESSION_PARAMETER'
 
+
+#
+## 
+#
+
 def HLTkey_ForRun(dbsession,c,runnum):
     '''
-    select string_value from cms_runinfo.runsession_parameter where runnumber=129265 and name='CMS.LVL0:HLT_KEY_DESCRIPTION';    
+    Method providing the name of the HLT key for RUN number runnum  
     '''
     HLTkey=''
     try:
@@ -58,9 +86,15 @@ def HLTkey_ForRun(dbsession,c,runnum):
         dbsession.transaction().rollback()
         del dbsession
 
+
+
+#
+## 
+#
+
 def L1key_ForRun(dbsession,c,runnum):
     '''
-    select string_value from cms_runinfo.runsession_parameter where runnumber=129265 and name='CMS.TRG:TSC_KEY';    
+    Method providing the name of the L1 key for RUN number runnum  
     '''
     L1key=''
     try:
@@ -105,11 +139,15 @@ def L1key_ForRun(dbsession,c,runnum):
         del dbsession
 
 
+
+#
+##
+#
+
 def FillNum_ForRun(dbsession,c,runnum):
     '''
-    select string_value from cms_runinfo.runsession_parameter where runnumber=129265 and name='CMS.SCAL:FILLN';    
+     Method providing the name of the FILL number for RUN number runnum
     '''
-    L1key=''
     try:
         dbsession.transaction().start(True)        
         schema=dbsession.schema(c.runinfoschema)
@@ -152,9 +190,16 @@ def FillNum_ForRun(dbsession,c,runnum):
         dbsession.transaction().rollback()
         del dbsession
 
-def getRunInfo(dbsession,c,runnum):
-    '''select string_value from cms_runinfo.runsession_parameter where runnumber=129265 and name='CMS.SCAL:FILLN' and rownum<=1;
-    
+
+
+#
+# 
+#
+
+def getRunInfo(dbsession,c,runnum,lmin):
+    '''
+    Method retrievint the START/STOP times for RUN number runnum and cutting on run length  
+    Returns true only if runtime>lmin, expressed in hours 
     '''
     #print 'Start RunInfo'
     split_start=[]
@@ -244,7 +289,7 @@ def getRunInfo(dbsession,c,runnum):
         
         run_length = (t_stop-t_start)/3600
 
-        if run_length < 0.5:
+        if run_length < lmin:
             return [True,'']
 
 
@@ -261,8 +306,8 @@ def getRunInfo(dbsession,c,runnum):
 
         
 def getRunList(dbsession,c,runnum):
-    '''select string_value from cms_runinfo.runsession_parameter where runnumber=129265 and name='CMS.SCAL:FILLN' and rownum<=1;
-    
+    '''
+    Create a run list starting from run RUNNUM+1
     '''
     list_run=[]
     split_start=[]
@@ -290,34 +335,48 @@ def getRunList(dbsession,c,runnum):
         query_START.setCondition('RUNNUMBER>:runnum',query_STARTCond)
         query_START.defineOutput(query_STARTOutput)
 
-
-
         cursor=query_START.execute()
 
+        # Cursor contains the list of runs 
+        # We then loop on them and apply some selection criteria
+
         runval = 0
+
+        minlength=0.5
     
         while cursor.next():
             run = cursor.currentRow()['runnumber'].data()
-
+            
             if runval!=run:
 
-                L1key = L1key_ForRun(dbsession,c,run)
                 runval=run
-        
-                if 'collisions' not in L1key:
-                    continue
 
-                
-        
-                run_result=getRunInfo(dbsession,c,run)
+
+                # First check that the run lasts at least 30 minutes
+
+                run_result=getRunInfo(dbsession,c,run,minlength)
 
                 if run_result[1] == '':
                     continue
 
-                #print run
+                # Then select only clean collision data
+
+                L1key  = run_result[1]
+                HLTkey = HLTkey_ForRun(dbsession,c,run)
+        
+                if 'collisions' not in L1key:
+                    continue
+                
+                if 'physics' not in HLTkey:
+                    continue
+
+                if '2760GeV' in HLTkey:
+                    continue
+                
+                print run,HLTkey        
+
                 list_run.append(run)
 
-            
         return list_run
 
         del query_START
@@ -328,30 +387,24 @@ def getRunList(dbsession,c,runnum):
         dbsession.transaction().rollback()
         del dbsession
 
+
+#
+# Main method called
+#
+
+
 def main():
+
+
+    # First of all we retrieve the arguments
+    
     c=constants()
     parser = argparse.ArgumentParser(prog=os.path.basename(sys.argv[0]),description="Dump Run info")
     parser.add_argument('-c',dest='connect',action='store',required=True,help='connect string to trigger DB(required)')
     parser.add_argument('-r',dest='runnumber',action='store',required=False,help='run number')
 
-    run_list=[]
-
-    f=open('the_list.txt','r+')
-    #f=open('the_list_test.txt','r+')
-
-    lastrun = 0
-
-    for line in f:
-        if '1' in line:
-            split = line.split(' ')[0:]
-            lastrun = split[0]
-
-    print 'Last run in the list is',lastrun
-
-    args=parser.parse_args()
-
-    datenow   = time.time()
-    #datesince = time.mktime(time.strptime(args.fromdate, "%Y/%m/%d"))
+    args      = parser.parse_args()
+    #datenow   = time.time()
 
     connectstring=args.connect
     connectparser=connectstrParser.connectstrParser(connectstring)
@@ -364,21 +417,32 @@ def main():
         p=cacheconfigParser.cacheconfigParser()
         p.parse(cacheconfigpath)
         connectstring=connectparser.fullfrontierStr(connectparser.schemaname(),p.parameterdict())
-        
 
-    runnumber=args.runnumber
+        
+    lastrun  = args.runnumber
+
+    run_list = [] # The list of runs we will get
+ 
+    f=open('the_list.txt','r+') # The list of runs we start from 
+
+    for line in f:
+        if '1' in line:
+            split = line.split(' ')[0:]
+            lastrun = split[0] 
+
+    print 'Last run in the current list is',lastrun
+    print '...we start from there...'
 
     svc=coral.ConnectionService()
     session=svc.connect(connectstring,accessMode=coral.access_ReadOnly)
-    session.typeConverter().setCppTypeForSqlType("unsigned int","NUMBER(10)")
-    session.typeConverter().setCppTypeForSqlType("unsigned long long","NUMBER(20)")
 
     is_ok = True
     firstrun = int(lastrun)+1
 
     run_list=getRunList(session,c,firstrun)
-
     run_list.sort()
+
+    #print run_list
 
     for run in run_list:        
         if FillNum_ForRun(session,c,run) == '0':
