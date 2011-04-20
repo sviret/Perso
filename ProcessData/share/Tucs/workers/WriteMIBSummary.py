@@ -62,10 +62,12 @@ class WriteMIBSummary(ReadGenericCalibration):
         self.bx1     = array( 'i', [ 0 ] )        
         self.bx2     = array( 'i', [ 0 ] )        
         self.bxcoll  = array( 'i', [ 0 ] )        
-        self.pfact   = array( 'i', 6*[ 0 ] )
+        self.nevts   = array( 'i', 6*[ 0 ] )
         self.mdist   = array( 'i', [ 0 ] )
 
         self.occur   = array( 'i', 3564*5*[ 0 ] )
+        self.trk     = array( 'i', 3564*[ 0 ] )
+        self.vtx     = array( 'i', 3564*[ 0 ] )
         
         self.totSize = 6*2*5
         
@@ -85,9 +87,11 @@ class WriteMIBSummary(ReadGenericCalibration):
         self.to.Branch('bx1',self.bx1,'bx1/I')
         self.to.Branch('bx2',self.bx2,'bx2/I')
         self.to.Branch('bxcoll',self.bxcoll,'bxcoll/I')
-        self.to.Branch('pfactors',self.pfact,'pfactors[6]/I')
+        self.to.Branch('nevents',self.nevts,'nevents[6]/I')
         self.to.Branch('mdist',self.mdist,'mdist/I')
         self.to.Branch('occur',self.occur,'occur[17820]/I')
+        self.to.Branch('tracks',self.trk,'occur[3564]/I')
+        self.to.Branch('vertices',self.vtx,'occur[3564]/I')
 
 
         self.to.Branch('algo_prescale',self.presc_a,'algo_prescale[128]/I')
@@ -123,12 +127,12 @@ class WriteMIBSummary(ReadGenericCalibration):
                 self.bx1[0]     = event.data['BX1']    
                 self.bx2[0]     = event.data['BX2']    
                 self.bxcoll[0]  = event.data['BXcoll']
-                self.pfact[0]   = event.data['P3']
-                self.pfact[1]   = event.data['P4']
-                self.pfact[2]   = event.data['P5']
-                self.pfact[3]   = event.data['P6']
-                self.pfact[4]   = 0
-                self.pfact[5]   = event.data['P8']
+                self.nevts[0]   = event.data['N3']
+                self.nevts[1]   = event.data['N4']
+                self.nevts[2]   = event.data['N5']
+                self.nevts[3]   = event.data['N6']
+                self.nevts[4]   = 0
+                self.nevts[5]   = event.data['N8']
                 self.doitonce   = True
 
                 #print event.data['max_time'] 
@@ -138,8 +142,9 @@ class WriteMIBSummary(ReadGenericCalibration):
                 for ii in range(5*self.mdist[0]):
                     self.occur[ii] = event.data['occurences'][ii]
 
-                    #if self.occur[ii]:
-                    #    print ii,self.occur[ii]
+                for ii in range(self.mdist[0]):
+                    self.trk[ii] = event.data['tracks'][ii]
+                    self.vtx[ii] = event.data['vertices'][ii]
 
 
                 for ii in range(64):

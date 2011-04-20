@@ -9,7 +9,7 @@ execfile('src/load.py', globals()) # don't remove this!
 #
 # For more info, have a look at the CMS MIB webpage:
 # 
-# http://sviret.web.cern.ch/sviret/Welcome.php?n=CMS.MIB
+# http://sviret.web.cern.ch/sviret/Welcome.php?n=CMS.MIBMonitorHowTo
 #
 
 
@@ -23,8 +23,8 @@ execfile('src/load.py', globals()) # don't remove this!
 # where **** is the run number
 
 
-run = 160875
-ndat = 1
+run  = 160873  # Run number
+ndat = 1       # Number of files on CASTOR for this run
 
 #
 # Create the list of events to be analyzed, and read the ROOTuple information
@@ -35,11 +35,18 @@ ndat = 1
 a = Use(run)
 b = ReadMIB(processingDir='/tmp/sviret',nfiles=ndat)
 c = WriteMIBSummary(RNum=run)
-d = do_PIX_charge_plots(processingDir='/tmp/sviret',nfiles=ndat)
+e = do_charge_plots(processingDir='/tmp/sviret',nfiles=ndat)
+f = do_track_plots(processingDir='/tmp/sviret',nfiles=ndat)
+g = do_vertex_plots(processingDir='/tmp/sviret',nfiles=ndat)
+h = do_dedx_plots(processingDir='/tmp/sviret',bitnumber=4,nfiles=ndat)
+i = do_dedx_plots(processingDir='/tmp/sviret',bitnumber=6,nfiles=ndat,delay=1)
+j = do_dedx_plots(processingDir='/tmp/sviret',bitnumber=6,nfiles=ndat,delay=2)
 
 # Launch the analysis
 
-processors = [a,b,c,d]
+#processors = [a,b,c,f,g]
+#processors = [a,b,e,f,g,h,i]
+processors = [a,b,i,j]
 
 
 #

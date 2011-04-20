@@ -81,7 +81,7 @@ class do_bit_trend_plot(GenericWorker):
             if event.runNumber not in self.run_list:
                 self.run_list.append(event.runNumber)
 
-            if event.data.has_key('is_OK') and event.data['t_start']!=0:
+            if event.data.has_key('is_OK') and event.data['t_start']!=0 and event.data['bb_rate'][self.pixc]>0.1:    
 
                 if beam == 1:                
                     self.events1.add(event)
@@ -216,20 +216,9 @@ class do_bit_trend_plot(GenericWorker):
         mean_val_1_1 /= n_val_1
         mean_val_2_1 /= n_val_2
         
-            
-        #print mean_val_1,"/",mean_val_1_1
-        #print mean_val_2,"/",mean_val_2_1
-
         limit_1 = 1.5*mean_val_1_1
         limit_2 = 1.5*mean_val_2_1
 
-        '''
-        print mean_val_1,"+/-",std_val_1
-        print mean_val_2,"+/-",std_val_2
-
-        limit_1 = mean_val_1+2*std_val_1
-        limit_2 = mean_val_2+2*std_val_2
-        '''
         
         # Cosmetics (Part 2): the partition graph itself
 

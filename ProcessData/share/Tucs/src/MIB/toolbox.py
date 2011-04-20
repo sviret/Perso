@@ -37,124 +37,70 @@ class MIBTools:
         return -1
 
 
-    def GetnFiles(self, run):
-        f=open('/afs/cern.ch/user/s/sviret/testarea/CMSSW_4_1_2_patch1/src/ProcessData/share/Tucs/list_dirs.txt','r')
+    def GetCollidingBCIDs(self, run):
+
+        filename = 'BCID_list_%d.txt'%(run)
+        
+        f=open(filename,'r')
+
+        self.output      = []
 
         for line in f:
-            if '1' in line:
-                split = line.split('_')[0:]
-                if int(split[0])==run:
-                    #print split[0],'###',split[1]
-                    return int(split[1])
+            if 'COLLISIONS' in line:
+                break
 
-        return -1
-            
-    def get_index(self, ros, mod, chan, gain):
-        return ros  *64*48*2\
-            + mod      *48*2\
-            + chan        *2\
-            + gain
+        line2=f.next()
+        split = line2.split(' ')[0:]
+                
+        for i in range(len(split)-1):
+            #print split[i]
+            self.output.append(int(split[i]))
+                    
+        return self.output
 
-    def get_rev_index(self, index):
 
-        number = []
+    def GetUnpairedBCIDs(self, beam, run):
 
-        gain = index%2
-        index -= gain
+        filename = 'BCID_list_%d.txt'%run
 
-        chan = (index%96)/2
-        index -= 2*chan
-
-        mod = (index%6144)/96
-        index -= 96*mod
-
-        part = index/6144
-
-        number.append(part)
-        number.append(mod)
-        number.append(chan)
-        number.append(gain)
-
-        #print part, mod, chan, gain
-
-        return number
-            
-    # Reorder the PMTs (SV: how to get that from region.py???)
-    
-    def get_PMT_index(self,part,mod,j):
-    
-        chan2PMT_Special=[-1,-2,-3,-4,5,6,7,8,9,10, 
-			  11,12,13,14,15,16,17,18,-19,-20, 
-			  21,22,23,24,-27,-26,-25,-31,-32,-28, 
-			  33,29,30,-36,-35,34,44,38,37,43,42, 
-			  41,-45,-39,-40,-48,-47,-46]
-  
-        chan2PMT_LB=[1,2,3,4,5,6,7,8,9,10,
-                     11,12,13,14,15,16,17,18,19,20,
-                     21,22,23,24,27,26,25,30,29,28,
-                     -33,-32,31,36,35,34,39,38,37,42,41,
-                     40,45,-44,43,48,47,46]
+        reftext  = 'BEAM%d UNPAIRED'%beam
         
-        chan2PMT_EB=[1,2,3,4,5,6,7,8,9,10,
-                     11,12,13,14,15,16,17,18,-19,-20,
-                     21,22,23,24,-25,-26,-27,-28,-31,-32,
-                     33,29,30,-35,-36,34,44,38,37,43,42,
-                     41,-39,-40,-45,-46,-47,-48]
+        f=open(filename,'r')
 
-        if part == 2 and mod == 14:
-            return chan2PMT_Special[j]-1
+        self.output      = []
 
-        if part == 3 and mod == 17:
-            return chan2PMT_Special[j]-1
-  
-        if part <= 1: 
-            chan = chan2PMT_LB[j]-1
-        else:
-            chan = chan2PMT_EB[j]-1
-    
-        return chan
+        for line in f:
+            if reftext in line:
+                break
 
-    # Tells you if a PMT hole is instrumented or not
-    
-    def is_instrumented(self,part,mod,j):
-    
-        chan2PMT_Special=[-1,-2,-3,-4,5,6,7,8,9,10, 
-			  11,12,13,14,15,16,17,18,-19,-20, 
-			  21,22,23,24,-27,-26,-25,-31,-32,-28, 
-			  33,29,30,-36,-35,34,44,38,37,43,42, 
-			  41,-45,-39,-40,-48,-47,-46]
-  
-        chan2PMT_LB=[1,2,3,4,5,6,7,8,9,10,
-                     11,12,13,14,15,16,17,18,19,20,
-                     21,22,23,24,27,26,25,30,29,28,
-                     -33,-32,31,36,35,34,39,38,37,42,41,
-                     40,45,-44,43,48,47,46]
+        line2=f.next()
+        split = line2.split(' ')[0:]
+                
+        for i in range(len(split)-1):
+            #print split[i]
+            self.output.append(int(split[i]))
+                    
+        return self.output
+
+
+    def GetREFBCIDs(self, beam, run):
+
+        filename = 'BCID_list_%d.txt'%run
+
+        reftext  = 'BEAM%d REFERENCE'%beam
         
-        chan2PMT_EB=[1,2,3,4,5,6,7,8,9,10,
-                     11,12,13,14,15,16,17,18,-19,-20,
-                     21,22,23,24,-25,-26,-27,-28,-31,-32,
-                     33,29,30,-35,-36,34,44,38,37,43,42,
-                     41,-39,-40,-45,-46,-47,-48]
+        f=open(filename,'r')
 
-        pmt = j+1
+        self.output      = []
 
-        if part == 2 and mod == 14:
-            if pmt in chan2PMT_Special:
-                return True
-            else:
-                return False
-        elif part == 3 and mod == 17:
-            if pmt in chan2PMT_Special:
-                return True
-            else:
-                return False            
-        elif part <= 1 and pmt in chan2PMT_LB: 
-            return True
-        elif part > 1 and pmt in chan2PMT_EB: 
-            return True
-        else:
-            return False
+        for line in f:
+            if reftext in line:
+                break
 
+        line2=f.next()
+        split = line2.split(' ')[0:]
+                    
+        return int(split[0])
 
         
     # Macro necessary for the fiber re-ordering

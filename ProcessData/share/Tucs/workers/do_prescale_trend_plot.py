@@ -109,8 +109,8 @@ class do_prescale_trend_plot(GenericWorker):
         max_var  = 0
                     
         for event in self.events1:
-            if max_var<math.fabs(event.data['presc_4'] ):
-                max_var = event.data['presc_4'] 
+            if max_var<math.fabs(event.data['presc_a'][4]):
+                max_var = event.data['presc_a'][4] 
 
         if max_var == 0: # No events there
             return
@@ -149,7 +149,7 @@ class do_prescale_trend_plot(GenericWorker):
         
         for event in self.events1: # fill the histogram                    
             self.hhist_1.Fill((event.data['t_start']+event.data['t_stop'])/2.-self.time_min,\
-                              event.data['presc_4'])
+                              event.data['presc_a'][4])
 
         # Then draw it...
                 

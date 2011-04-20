@@ -41,6 +41,7 @@ processors = [a,b]
 
 
 processors.append(do_bcid_plots(runnum=run))
+processors.append(do_trkvtx_plots(runnum=run))
 
 for i in range(5):
     for j in range(6):

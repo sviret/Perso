@@ -99,16 +99,12 @@ class ReadMIBSummary(ReadGenericCalibration):
             bc2     = t.bx2
             bccoll  = t.bxcoll
             tspan   = t.tspan
-            p3      = t.pfactors[0]
-            p4      = t.pfactors[1]
-            p5      = t.pfactors[2]
-            p6      = t.pfactors[3]
-            p7      = t.pfactors[4]
-            p8      = t.pfactors[5]
-
-
-            #print self.BBTool.GetFillNumber(run)
-            #print 'Fill number for run',run,'is equal to',self.BBTool.GetFillNumber(run)
+            p3      = t.nevents[0]
+            p4      = t.nevents[1]
+            p5      = t.nevents[2]
+            p6      = t.nevents[3]
+            p7      = t.nevents[4]
+            p8      = t.nevents[5]
 
 
             if nslices==0 or bccoll==0: # Don't go further if the ROOTuple is empty
@@ -145,19 +141,24 @@ class ReadMIBSummary(ReadGenericCalibration):
                 event.data['bb_rate_tslice']      = []
                 event.data['presc_a']             = []
                 event.data['presc_t']             = []
-                event.data['presc_3']             = p3
-                event.data['presc_4']             = p4
-                event.data['presc_5']             = p5
-                event.data['presc_6']             = p6
-                event.data['presc_7']             = p7
-                event.data['presc_8']             = p8
+                event.data['nevts_3']             = p3
+                event.data['nevts_4']             = p4
+                event.data['nevts_5']             = p5
+                event.data['nevts_6']             = p6
+                event.data['nevts_7']             = p7
+                event.data['nevts_8']             = p8
                 
                 event.data['max_time']            = t.mdist
                 event.data['occurences']          = []
+                event.data['trk']                 = []
+                event.data['vtx']                 = []
 
                 for k in range(5*t.mdist):
                     event.data['occurences'].append(t.occur[k])
 
+                for k in range(t.mdist):
+                    event.data['trk'].append(t.tracks[k])
+                    event.data['vtx'].append(t.vertices[k])
                     
                 for k in range(128):
                     event.data['presc_a'].append(t.algo_prescale[k]) 

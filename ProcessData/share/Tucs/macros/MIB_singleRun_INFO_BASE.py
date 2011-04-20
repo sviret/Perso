@@ -35,11 +35,16 @@ inputdir = '/tmp/sviret'
 a = Use(run)
 b = ReadMIB(processingDir=inputdir,nfiles=ndat)
 c = WriteMIBSummary(RNum=run)
-d = do_PIX_charge_plots(processingDir=inputdir,nfiles=ndat)
+d = do_charge_plots(processingDir=inputdir,nfiles=ndat)
+e = do_track_plots(processingDir=inputdir,nfiles=ndat)
+f = do_vertex_plots(processingDir=inputdir,nfiles=ndat)
+g = do_dedx_plots(processingDir=inputdir,bitnumber=4,nfiles=ndat)
+h = do_dedx_plots(processingDir=inputdir,bitnumber=6,nfiles=ndat,delay=1)
+i = do_dedx_plots(processingDir=inputdir,bitnumber=6,nfiles=ndat,delay=2)
 
 # Launch the analysis
 
-processors = [a,b,c,d]
+processors = [a,b,c,d,e,f,g,h,i]
 
 
 #

@@ -39,6 +39,7 @@ class ReadGenericCalibration(GenericWorker):
         f, t1, t2 = [None, None, None]
 
         print "Getting file ",fileName
+        print "Getting trees ",treeName1, treeName2
 
         if self.tfile_cache.has_key(fileName):
             f, t1, t2 = self.tfile_cache[fileName]

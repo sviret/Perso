@@ -32,7 +32,8 @@ class do_trend_html(GenericWorker):
 
         self.typecut  = typecut
         self.filename = "MIB_monitor.html"
-        self.run_list = []
+        self.run_list  = []
+        self.fill_list = []
         
         self.htm = open(self.filename,"w")
 
@@ -88,7 +89,7 @@ class do_trend_html(GenericWorker):
         self.htm.write("<span id='run_part-tog' class='toggle'><input type='button' class='inputbutton togglebutton' value='usedRunList' onclick=\"javascript:toggleObj('run_part','show','usedRunList','Hide','','','','1')\" /><style type='text/css'> #run_part { display:none; }  @media print { #run_part {display:block} } </style></span>\n")
         self.htm.write("</p>\n")
         self.htm.write("<div  id='run_part' > \n")
-        self.htm.write("<p>For each run you got two links. If you click on the run number you have access to the CMS official info concerning this run (WBM). If you click on background info, you will be directed towards a page provided a more detailed analysis of the run MIB rates.</p>\n")
+        self.htm.write("<p>For each fill you got two type of links. If you click on the fill number you have access to the CMS official info concerned. If you click on the run number you will be directed towards a page provided a more detailed analysis of the run MIB rates.</p>\n")
         self.htm.write("<ul>\n")
 
         
@@ -104,16 +105,34 @@ class do_trend_html(GenericWorker):
     
             if event.runNumber not in self.run_list:
                 self.run_list.append(event.runNumber)
-
+                self.fill_list.append(event.data['fillnum'])
 
     def ProcessStop(self):
 
         self.run_list.sort()
+        self.fill_list.sort()
 
-        for run in self.run_list:
 
-            text="<li>Run <a target='_blank'  class='urllink' href='https://cmswbm.web.cern.ch/cmswbm/cmsdb/servlet/RunSummary?RUN=%d' title='' rel='nofollow'><strong>%d</strong></a>,  <a target='_blank'  class='urllink' href='http://sviret.web.cern.ch/sviret/Images/CMS/MIB/Monitor/2011/R%s%d/Run_%d_background_DQM.html' title='' rel='nofollow'>background info</a></li>\n"%(run,run,self.typecut,run,run)
+        first_fill = 0
+        index      = 0
+
+        for fill in self.fill_list:
+
+            if fill==first_fill:
+                print self.run_list[index]
+                text=", <a target='_blank'  class='urllink' href='http://sviret.web.cern.ch/sviret/Images/CMS/MIB/Monitor/2011/R%s%d/Run_%d_background_DQM.html' title='' rel='nofollow'><strong>%d</strong></a>\n"%(self.typecut,self.run_list[index],self.run_list[index],self.run_list[index])
+            else:                
+                first_fill=fill
+                print fill,self.run_list[index]
+                text="<li>Fill <a target='_blank'  class='urllink' href='https://cmswbm.web.cern.ch/cmswbm/cmsdb/servlet/FillReport?FILL=%d' title='' rel='nofollow'><strong>%d</strong></a> &#8658; <a target='_blank'  class='urllink' href='http://sviret.web.cern.ch/sviret/Images/CMS/MIB/Monitor/2011/R%s%d/Run_%d_background_DQM.html' title='' rel='nofollow'><strong>%d</strong></a>\n"%(fill,fill,self.typecut,self.run_list[index],self.run_list[index],self.run_list[index])
+
             self.htm.write(text)
+            index=index+1
+    
+        #for run in self.run_list:
+
+       #     text="<li>Run <a target='_blank'  class='urllink' href='https://cmswbm.web.cern.ch/cmswbm/cmsdb/servlet/RunSummary?RUN=%d' title='' rel='nofollow'><strong>%d</strong></a>,  <a target='_blank'  class='urllink' href='http://sviret.web.cern.ch/sviret/Images/CMS/MIB/Monitor/2011/R%s%d/Run_%d_background_DQM.html' title='' rel='nofollow'>background info</a></li>\n"%(run,run,self.typecut,run,run)
+#            self.htm.write(text)
 
         self.htm.write("</ul>\n")
         self.htm.write("</div>\n")
@@ -146,11 +165,11 @@ class do_trend_html(GenericWorker):
 
                     
         self.htm.write("<h2>Rate evolution along time</h2>\n")
-        self.htm.write("<p>Here we provide, for all the algo bits involved in the MIB rate estimation (3/4/5/8), the normalized rate evolution obtained using the runs mentionned before. </p>\n")
+        self.htm.write("<p>Here we provide, for all the algo bits involved in the MIB rate estimation (4 and 5), the normalized rate evolution obtained using the runs mentionned before. </p>\n")
 
         for i in range(6):
 
-            if i==3 or i==4:
+            if i!=1 and i!=2:
                 continue
             
             bitname = "%d"%(3+i)

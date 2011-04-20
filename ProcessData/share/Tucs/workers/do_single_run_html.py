@@ -47,6 +47,7 @@ class do_single_run_html(GenericWorker):
         
         self.rates_B1 = [0 for x in range(6)]
         self.rates_B2 = [0 for x in range(6)]
+        self.nevts    = [0 for x in range(6)]
 
         self.prescale = 666
 
@@ -131,7 +132,6 @@ class do_single_run_html(GenericWorker):
                 self.rDur     = (event.data['t_stop']-event.data['t_start'])/60.
                 self.nLB      = event.data['n_slices']
                 self.tslice   = event.data['slice_length']/60.
-                #self.prescale = event.data['presc_85']            
                 
                 for k in range(64):
                     self.presc_t[k] = event.data['presc_t'][k] 
@@ -141,7 +141,13 @@ class do_single_run_html(GenericWorker):
                     
                 self.doItonce=True
                     
-                
+            self.nevts[0] = event.data['nevts_3']
+            self.nevts[1] = event.data['nevts_4']
+            self.nevts[2] = event.data['nevts_5']
+            self.nevts[3] = event.data['nevts_6']
+            self.nevts[4] = event.data['nevts_7']
+            self.nevts[5] = event.data['nevts_8']
+               
             if beam==1:
                 self.rates_B1[tbit-3]  = event.data['bb_rate'][0]
           
@@ -165,22 +171,23 @@ class do_single_run_html(GenericWorker):
         self.htm.write(text)
         text="<li>Colliding: <strong>%d</strong></li></ul>\n"%(self.nBxc)
         self.htm.write(text)
+
         
         self.htm.write("<div class='vspace'></div>\n")
         self.htm.write("<h2>Overall normalized rates (in Hz/10<sup>11</sup>p)</h2>\n")
 
         self.htm.write("<p>Rate calculation is described on <a target='_blank'  class='urllink' href='http://sviret.web.cern.ch/sviret/Welcome.php?n=CMS.MIBMonitorHowTo' title='' rel='nofollow'>this page</a>. To get some info about the technical bits, have a look at the corresponding <a target='_blank'  class='urllink' href='https://twiki.cern.ch/twiki/bin/view/CMS/L1TechnicalTriggerBits' title='' rel='nofollow'>wiki</a>. The bit numbers given here corresponds to algo bits, which are described on <a target='_blank'  class='urllink' https://twiki.cern.ch/twiki/bin/view/CMS/GlobalTriggerAvailableMenus' title='' rel='nofollow'>this page</a>.</p>\n")
 
-        self.htm.write("<p>In order to further remove albedo effect, we are only using the single bunches which are in front of bunch trains, of far enough from the last colliding bunch crossing (more than 0.2 microsecond (8 bunch crossings)).</p>\n")
+        self.htm.write("<p>In order to further remove albedo effect, we are only using the single bunch which are in front of bunch trains, of far enough from the last colliding bunch crossing (more than 1. microsecond (40 bunch crossings)). In order to further reduce contamination effect, if there is a train of single bunches satisfying this conditions, only the first one is selected.</p>\n")
         
         self.htm.write("<br>\n")
         self.htm.write("<table align='center' border='1' cellpadding='5' cellspacing='0' >\n")
         self.htm.write("<tr>\n")
         self.htm.write("<td id='GreyCell'  valign='top'> Bit number</td>\n")
-        self.htm.write("<td id='GreyCell'  valign='top'> 3 (PreCollisions)</td>\n")
+        #self.htm.write("<td id='GreyCell'  valign='top'> 3 (PreCollisions)</td>\n")
         self.htm.write("<td id='GreyCell'  valign='top'> 4 (BGas_BSC)</td>\n")
         self.htm.write("<td id='GreyCell'  valign='top'> 5 (BGas_HF)</td>\n")
-        self.htm.write("<td id='GreyCell'  valign='top'> 8 (BHalo)</td>\n")
+        #self.htm.write("<td id='GreyCell'  valign='top'> 8 (BHalo)</td>\n")
         self.htm.write("</tr>\n")
 
         self.htm.write("<tr>\n")
@@ -188,7 +195,7 @@ class do_single_run_html(GenericWorker):
 
         for i in range(6):
 
-            if i==3 or i==4:
+            if i!=1 and i!=2:
                 continue
             
             if self.presc_a[3+i]==1:
@@ -197,13 +204,25 @@ class do_single_run_html(GenericWorker):
                 self.htm.write("<td id='RedCell' align='center'  valign='top'> %d</td>\n"%self.presc_a[3+i])
 
         self.htm.write("</tr>\n")
-                
+        
+        self.htm.write("<tr>\n")
+        self.htm.write("<td id='GreyCell'  valign='top'> <strong>Nevts used</strong></td>\n")
+
+        for i in range(6):
+
+            if i!=1 and i!=2:
+                continue
+            
+            self.htm.write("<td id='Code' align='center'  valign='top'> %d</td>\n"%self.nevts[i])
+            
+        self.htm.write("</tr>\n")        
+
         self.htm.write("<tr>\n")
         self.htm.write("<td id='GreyCell'  valign='top'> <strong>BEAM1</strong></td>\n")
 
         for i in range(6):
 
-            if i==3 or i==4:
+            if i!=1 and i!=2:
                 continue
             
             if self.rates_B1[i]>0.1:
@@ -217,7 +236,7 @@ class do_single_run_html(GenericWorker):
 
         for i in range(6):
 
-            if i==3 or i==4:
+            if i!=1 and i!=2:
                 continue
 
             if self.rates_B2[i]>0.1:
@@ -230,109 +249,27 @@ class do_single_run_html(GenericWorker):
         self.htm.write("</table>\n")
         self.htm.write("<br>\n")
 
-        self.htm.write("<div class='vspace'></div><h2>Rate as a function of the distance to the last collision (ALBEDO)</h2>\n")
 
-        self.htm.write("<p>The rate is not supposed to depend on the distance between the bunch crossing considered and the last collision bunch crossing. If such a dependance is observed, it would mean that our trigger selection is contaminated by some non-beam activity.</p>\n")
-
-        self.htm.write("<p>The following plot shows, for the events passing algo bit 6 (Interbunch_BSC), the number of events recorded as a function of the distance to the last colliding BX, measured in microseconds. Different cluster multiplicity cuts are applied. Interbunch bit is based on events recorded in quiet BXs (no beam at all).</p><br>\n")
-
-        self.htm.write("<a target='_blank' class='urllink' href='bit_rate_run_%d_BCID.png'>\n"%(self.run))
-        self.htm.write("<img id='fig2' src='bit_rate_run_%d_BCID.png'></a>\n"%(self.run))
-
-        self.htm.write("<div id='FigTitle'>Rate evolution as a function of the distance to the last collision.</div>\n")
+        self.WriteAlbedo()
 
         
-        self.htm.write("<div class='vspace'></div><h2>PIXEL mean charge versus Strips mean charge</h2>\n")
-
-        self.htm.write("<p>The three following plots shows, for events passing algo bits 4 and 5, and events passing bit 5 and having technical bit 8, the mean charge of the recorded clusters in the pixel barrel, either versus the mean charge of the clusters recorded in the tracker inner barrel (TIB) (fig 1 to 3).</p><br>\n")
-
-        self.htm.write("<div id='equation'>\n")
-        self.htm.write("<table class='center'>\n")
-        self.htm.write("<tbody>\n")
-        self.htm.write("<tr>\n")
-        self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='Charge_2D_0_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='Charge_2D_0_%d.png' alt=''></a>\n"%(self.run))
-        self.htm.write("<div id='FigTitle'>1. PIXB vs TIB mean cluster charge, for events passing bit 4.</div>\n")
-        self.htm.write("</td>\n")
-        self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='Charge_2D_1_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='Charge_2D_1_%d.png' alt=''></a>\n"%(self.run))
-        self.htm.write("<div id='FigTitle'>2. PIXB vs TIB mean cluster charge, for events passing bit 5.</div>\n")
-        self.htm.write("</td>\n")
-        self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='Charge_2D_2_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='Charge_2D_2_%d.png' alt=''></a>\n"%(self.run))
-        self.htm.write("<div id='FigTitle'>3. PIXB vs TIB mean cluster charge, for events passing bit 5 and tech.8.</div>\n")
-        self.htm.write("</td>\n")
-        self.htm.write("</tr>\n")
-        self.htm.write("</tbody>\n")
-        self.htm.write("</table>\n")
-
-
-        self.htm.write("<p>The three following plots shows, for the same configuration the mean charge of the clusters recorded in the pixel barrel (fig 4 to 6).</p><br>\n")
+        if self.rates_B1[1]>0.1 or self.rates_B2[1]>0.1 or self.rates_B1[2]>0.1 or self.rates_B2[2]>0.1:
         
-        self.htm.write("<div id='equation'>\n")
-        self.htm.write("<table class='center'>\n")
-        self.htm.write("<tbody>\n")
-        self.htm.write("<tr>\n")
-        self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='Charge_1D_0_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='Charge_1D_0_%d.png' alt=''></a>\n"%(self.run))
-        self.htm.write("<div id='FigTitle'>4. PIXB mean cluster charge, for events passing bit 4.</div>\n")
-        self.htm.write("</td>\n")
-        self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='Charge_1D_1_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='Charge_1D_1_%d.png' alt=''></a>\n"%(self.run))
-        self.htm.write("<div id='FigTitle'>5. PIXB mean cluster charge, for events passing bit 5.</div>\n")
-        self.htm.write("</td>\n")
-        self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='Charge_1D_2_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='Charge_1D_2_%d.png' alt=''></a>\n"%(self.run))
-        self.htm.write("<div id='FigTitle'>6. PIXB mean cluster charge, for events passing bit 5 and tech.8..</div>\n")
-        self.htm.write("</td>\n")
-        self.htm.write("</tr>\n")
-        self.htm.write("</tbody>\n")
-        self.htm.write("</table>\n")
+            self.WritePIX_SST_HF()
+            self.WriteTRK_VTX()
+      
+            self.htm.write(" <div class='vspace'></div><h2>Rate evolution during run (if applicable)</h2>\n")
+            self.htm.write("<p><br clear='all' /></p>\n")
 
+            for i in range(6):
 
-        self.htm.write("<p>The three following plots shows, for the same configuration the pixel vs HF asymmetry (fig 7 to 9).</p><br>\n")
-
-        self.htm.write("<div id='equation'>\n")
-        self.htm.write("<table class='center'>\n")
-        self.htm.write("<tbody>\n")
-        self.htm.write("<tr>\n")
-        self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='HF_vs_PIX_0_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='HF_vs_PIX_0_%d.png' alt=''></a>\n"%(self.run))
-        self.htm.write("<div id='FigTitle'>7. HF vs PIX asymetry, for events passing bit 4.</div>\n")
-        self.htm.write("</td>\n")
-        self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='HF_vs_PIX_1_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='HF_vs_PIX_1_%d.png' alt=''></a>\n"%(self.run))
-        self.htm.write("<div id='FigTitle'>8. HF vs PIX asymetry, for events passing bit 5..</div>\n")
-        self.htm.write("</td>\n")
-        self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='HF_vs_PIX_2_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='HF_vs_PIX_2_%d.png' alt=''></a>\n"%(self.run))
-        self.htm.write("<div id='FigTitle'>9. HF vs PIX asymetry, for events passing bit 5 and tech.8..</div>\n")
-        self.htm.write("</td>\n")
-        self.htm.write("</tr>\n")
-        self.htm.write("</tbody>\n")
-        self.htm.write("</table>\n")
-        self.htm.write("</div>\n")
-                
-        self.htm.write(" <div class='vspace'></div><h2>Rate evolution during run</h2>\n")
-        self.htm.write("<p><br clear='all' /></p>\n")
-
-
-        for i in range(6):
-
-            if i==3 or i==4:
-                continue
+                if i!=1 and i!=2:
+                    continue
             
-            bitname = "%d"%(3+i)
-            self.WriteInfo(bitname)
+                bitname = "%d"%(3+i)
+            
+                if self.rates_B1[i]>0.1 or self.rates_B2[i]>0.1:
+                    self.WriteInfo(bitname)
         
         self.htm.write("  </div>\n")
 
@@ -350,6 +287,34 @@ class do_single_run_html(GenericWorker):
         self.htm.write("</div><!-- id='content' -->\n")
         self.htm.write("</div><!-- id='globalwrapper' -->\n")
         self.htm.write("<!--HTMLFooter-->\n")
+
+        self.htm.write("	<script type=\"text/javascript\"><!--\n")
+        self.htm.write("		function toggleObj(obj, tog, show, hide, swap, set, cname, button) {\n")
+        self.htm.write("			var e = document.getElementById(obj);\n")
+        self.htm.write("			if (hide && swap!='') var e2 = document.getElementById(swap);\n")
+        self.htm.write("			var text    = document.getElementById(obj + \"-tog\");\n")
+        self.htm.write("			if (set=='1') document.cookie=cname+'='+tog+'; path=/';\n")
+        self.htm.write("			if (tog=='show') {\n")
+        self.htm.write("				e.style.display = 'block';\n")
+        self.htm.write("				if(swap!='') e2.style.display = 'none';\n")
+        self.htm.write("				var label = hide;\n")
+        self.htm.write("				tog='hide';\n")				
+        self.htm.write("			}\n")
+        self.htm.write("			else {\n")
+        self.htm.write("				e.style.display = 'none';\n")
+        self.htm.write("				if(swap!='') e2.style.display = 'block';\n")
+        self.htm.write("				var label = show;\n")
+        self.htm.write("				tog='show';\n")
+        self.htm.write("			}\n")
+        self.htm.write("         var act = '\"javascript:toggleObj(\\''+obj+'\\',\\''+tog+'\\',\\''+show+'\\',\\''+hide+'\\',\\''+swap+'\\',\\''+set+'\\',\\''+cname+'\\',\\''+button+'\\');\"';\n")
+        self.htm.write("         if (button==1)\n")
+        self.htm.write("         	copy = '<input type=\"button\" class=\"inputbutton togglebutton\" value=\"'+label+'\" onclick='+act+' />';\n")
+        self.htm.write("         else\n")
+        self.htm.write("         	var copy = '<a class=\"togglelink\" href='+act+'>'+label+'</a>';\n") 
+        self.htm.write("         text.innerHTML = copy; \n")  
+        self.htm.write("      }\n")
+        self.htm.write("   --></script>\n")
+        
         self.htm.write("</body>\n")
         self.htm.write("</html>\n")
         self.htm.close()
@@ -395,3 +360,239 @@ class do_single_run_html(GenericWorker):
         self.htm.write("<br />\n")
         self.htm.write("</div>\n")
         self.htm.write("<div class='vspace'></div>\n")
+
+
+    def WriteAlbedo(self):
+
+        self.htm.write("<div class='vspace'></div><h2>Rate as a function of the distance to the last collision (ALBEDO)</h2>\n")
+
+
+        self.htm.write("<p>The rate is not supposed to depend on the distance between the bunch crossing considered and the last collision bunch crossing. If such a dependance is observed, it would mean that our trigger selection is contaminated by some non-beam activity.</p>\n")
+
+        self.htm.write("<p>The following plot shows, for the events passing algo bit 6 (Interbunch_BSC), the number of events recorded as a function of the distance to the last colliding BX, measured in microseconds. Different cluster multiplicity cuts are applied. Interbunch bit is based on events recorded in quiet BXs (no beam at all).</p><br>\n")
+
+        self.htm.write("<a target='_blank' class='urllink' href='bit_rate_run_%d_BCID.png'>\n"%(self.run))
+        self.htm.write("<img id='fig2' src='bit_rate_run_%d_BCID.png'></a>\n"%(self.run))
+
+        self.htm.write("<div id='FigTitle'>Rate evolution as a function of the distance to the last collision.</div>\n")
+
+        self.htm.write("<p class='vspace'> \n")
+        self.htm.write("<span id='albedo-tog' class='toggle'><input type='button' class='inputbutton togglebutton' value='More details' onclick=\"javascript:toggleObj('albedo','show','More details','Hide','','','','1')\" /><style type='text/css'> #albedo { display:none; }  @media print { #albedo {display:block} } </style></span>\n")
+        self.htm.write("</p> \n")
+        
+        self.htm.write("<div  id='albedo' > \n")
+
+        self.htm.write("<p>For those events, we also plot the number of reconstructed tracks and vertices (generalTracks and offlinePV). The two plots below are providing this information.</p><br>\n")
+
+        self.htm.write("<div id='equation'>\n")
+        self.htm.write("<table class='center'>\n")
+        self.htm.write("<tbody>\n")
+        self.htm.write("<tr>\n")
+        self.htm.write("<td>\n")
+        self.htm.write("<a target='_blank' class='urllink' href='bit_rate_run_%d_TRK.png'>\n"%(self.run))
+        self.htm.write("<img id='fig3' src='bit_rate_run_%d_TRK.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<div id='FigTitle'>Number of events with tracks in empty bunches, as a function of the distance to the last collision.</div>\n")
+        self.htm.write("</td>\n")
+        self.htm.write("<td>\n")
+        self.htm.write("<a target='_blank' class='urllink' href='bit_rate_run_%d_VTX.png'>\n"%(self.run))
+        self.htm.write("<img id='fig3' src='bit_rate_run_%d_VTX.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<div id='FigTitle'>Number of events with vertices in empty bunches, as a function of the distance to the last collision.</div>\n")
+        self.htm.write("</td>\n")
+        self.htm.write("</tr>\n")
+        self.htm.write("</tbody>\n")
+        self.htm.write("</table>\n")
+        self.htm.write("</div>\n")
+
+
+        self.htm.write("<p>Finally, for all the tracks with at least 3 tracker hits and a normalized chisquare lower than 10, we provide some dE/dx information.</p><br>\n")
+
+        self.htm.write("<div id='equation'>\n")
+        self.htm.write("<table class='center'>\n")
+        self.htm.write("<tbody>\n")
+        self.htm.write("<tr>\n")
+        self.htm.write("<td>\n")
+        self.htm.write("<a target='_blank' class='urllink' href='dEdx_6_1_%d.png'>\n"%(self.run))
+        self.htm.write("<img id='fig3' src='dEdx_6_1_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<div id='FigTitle'>dEdx as a function of the track momentum, for events recorded 25ns after the last collision.</div>\n")
+        self.htm.write("</td>\n")
+        self.htm.write("<td>\n")
+        self.htm.write("<a target='_blank' class='urllink' href='etaphi_6_1_%d.png'>\n"%(self.run))
+        self.htm.write("<img id='fig3' src='etaphi_6_1_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<div id='FigTitle'>Eta/Phi coordinates of the selected tracks, for events recorded 25ns after the last collision.</div>\n")
+        self.htm.write("</td>\n")
+        self.htm.write("</tr>\n")
+        self.htm.write("</tbody>\n")
+        self.htm.write("</table>\n")
+        self.htm.write("</div>\n")
+
+        self.htm.write("<div id='equation'>\n")
+        self.htm.write("<table class='center'>\n")
+        self.htm.write("<tbody>\n")
+        self.htm.write("<tr>\n")
+        self.htm.write("<td>\n")
+        self.htm.write("<a target='_blank' class='urllink' href='dEdx_6_2_%d.png'>\n"%(self.run))
+        self.htm.write("<img id='fig3' src='dEdx_6_2_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<div id='FigTitle'>dEdx as a function of the track momentum, for events recorded 50ns after the last collision.</div>\n")
+        self.htm.write("</td>\n")
+        self.htm.write("<td>\n")
+        self.htm.write("<a target='_blank' class='urllink' href='etaphi_6_2_%d.png'>\n"%(self.run))
+        self.htm.write("<img id='fig3' src='etaphi_6_2_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<div id='FigTitle'>Eta/Phi coordinates of the selected tracks, for events recorded 50ns after the last collision.</div>\n")
+        self.htm.write("</td>\n")
+        self.htm.write("</tr>\n")
+        self.htm.write("</tbody>\n")
+        self.htm.write("</table>\n")
+        self.htm.write("</div>\n")        
+        
+        self.htm.write("</div>\n")
+
+
+
+    def WritePIX_SST_HF(self):
+
+        self.htm.write("<div class='vspace'></div><h2>PIXEL mean charge versus Strips mean charge for beam gas candidates </h2>\n")
+
+        self.htm.write("<p>The following plots show, for events passing algo bits 4 and 5, the mean charge of the recorded clusters in the pixel barrel (using only clusters having at least 4000e-), either versus the mean charge of the clusters recorded in the tracker inner barrel (TIB) (fig 1 and 2).</p><br>\n")
+
+        self.htm.write("<div id='equation'>\n")
+        self.htm.write("<table class='center'>\n")
+        self.htm.write("<tbody>\n")
+        self.htm.write("<tr>\n")
+        self.htm.write("<td>\n")
+        self.htm.write("<a target='_blank' class='urllink' href='Charge_2D_0_%d.png'>\n"%(self.run))
+        self.htm.write("<img id='fig3' src='Charge_2D_0_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<div id='FigTitle'>1. PIXB vs TIB mean cluster charge, for events passing bit 4.</div>\n")
+        self.htm.write("</td>\n")
+        self.htm.write("<td>\n")
+        self.htm.write("<a target='_blank' class='urllink' href='Charge_2D_1_%d.png'>\n"%(self.run))
+        self.htm.write("<img id='fig3' src='Charge_2D_1_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<div id='FigTitle'>2. PIXB vs TIB mean cluster charge, for events passing bit 5.</div>\n")
+        self.htm.write("</td>\n")
+        self.htm.write("</tr>\n")
+        self.htm.write("</tbody>\n")
+        self.htm.write("</table>\n")
+
+
+        self.htm.write("<p>The three following plots show, for the same configuration the mean charge of the clusters recorded in the pixel barrel (fig 3/4).</p><br>\n")
+        
+        self.htm.write("<div id='equation'>\n")
+        self.htm.write("<table class='center'>\n")
+        self.htm.write("<tbody>\n")
+        self.htm.write("<tr>\n")
+        self.htm.write("<td>\n")
+        self.htm.write("<a target='_blank' class='urllink' href='Charge_1D_0_%d.png'>\n"%(self.run))
+        self.htm.write("<img id='fig3' src='Charge_1D_0_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<div id='FigTitle'>3. PIXB mean cluster charge, for events passing bit 4.</div>\n")
+        self.htm.write("</td>\n")
+        self.htm.write("<td>\n")
+        self.htm.write("<a target='_blank' class='urllink' href='Charge_1D_1_%d.png'>\n"%(self.run))
+        self.htm.write("<img id='fig3' src='Charge_1D_1_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<div id='FigTitle'>4. PIXB mean cluster charge, for events passing bit 5.</div>\n")
+        self.htm.write("</td>\n")
+        self.htm.write("</tr>\n")
+        self.htm.write("</tbody>\n")
+        self.htm.write("</table>\n")
+
+
+        self.htm.write("<p>The three last plots show, for the same configuration the pixel vs HF asymmetry (fig 5 to 6).</p><br>\n")
+
+        self.htm.write("<div id='equation'>\n")
+        self.htm.write("<table class='center'>\n")
+        self.htm.write("<tbody>\n")
+        self.htm.write("<tr>\n")
+        self.htm.write("<td>\n")
+        self.htm.write("<a target='_blank' class='urllink' href='HF_vs_PIX_0_%d.png'>\n"%(self.run))
+        self.htm.write("<img id='fig3' src='HF_vs_PIX_0_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<div id='FigTitle'>5. HF vs PIX asymetry, for events passing bit 4.</div>\n")
+        self.htm.write("</td>\n")
+        self.htm.write("<td>\n")
+        self.htm.write("<a target='_blank' class='urllink' href='HF_vs_PIX_1_%d.png'>\n"%(self.run))
+        self.htm.write("<img id='fig3' src='HF_vs_PIX_1_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<div id='FigTitle'>6. HF vs PIX asymetry, for events passing bit 5..</div>\n")
+        self.htm.write("</td>\n")
+        self.htm.write("</tr>\n")
+        self.htm.write("</tbody>\n")
+        self.htm.write("</table>\n")
+        self.htm.write("</div>\n")
+
+
+
+    def WriteTRK_VTX(self):              
+
+        self.htm.write("<div class='vspace'></div><h2>Track and vertex properties for beam gas candidates </h2>\n")
+
+        self.htm.write("<p>The following plots are made only with events passing algo bit 4 (beam gas BSC). They show the number of tracks, primary vertices, and some of their basic properties</p><br>\n")
+
+        self.htm.write("<div id='equation'>\n")
+        self.htm.write("<table class='center'>\n")
+        self.htm.write("<tbody>\n")
+        self.htm.write("<tr>\n")
+        self.htm.write("<td>\n")
+        self.htm.write("<a target='_blank' class='urllink' href='TrackMult_%d.png'>\n"%(self.run))
+        self.htm.write("<img id='fig3' src='TrackMult_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<div id='FigTitle'>1. Track multiplicity.</div>\n")
+        self.htm.write("</td>\n")
+        self.htm.write("<td>\n")
+        self.htm.write("<a target='_blank' class='urllink' href='TrackPt_%d.png'>\n"%(self.run))
+        self.htm.write("<img id='fig3' src='TrackPt_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<div id='FigTitle'>2. Tracks transverse momentum.</div>\n")
+        self.htm.write("</td>\n")
+        self.htm.write("<td>\n")
+        self.htm.write("<a target='_blank' class='urllink' href='TrackEta1_%d.png'>\n"%(self.run))
+        self.htm.write("<img id='fig3' src='TrackEta1_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<div id='FigTitle'>3. Tracks eta for beam 1 events.</div>\n")
+        self.htm.write("</td>\n")
+        self.htm.write("<td>\n")
+        self.htm.write("<a target='_blank' class='urllink' href='TrackEta2_%d.png'>\n"%(self.run))
+        self.htm.write("<img id='fig3' src='TrackEta2_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<div id='FigTitle'>4. Tracks eta for beam 2 events.</div>\n")
+        self.htm.write("</td>\n")
+        self.htm.write("</tr>\n")
+        self.htm.write("</tbody>\n")
+        self.htm.write("</table>\n")
+        self.htm.write("</div>\n")
+        
+        self.htm.write("<div id='equation'>\n")
+        self.htm.write("<table class='center'>\n")
+        self.htm.write("<tbody>\n")
+        self.htm.write("<tr>\n")
+        self.htm.write("<td>\n")
+        self.htm.write("<a target='_blank' class='urllink' href='VtxMult_%d.png'>\n"%(self.run))
+        self.htm.write("<img id='fig3' src='VtxMult_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<div id='FigTitle'>5. Vertex multiplicity.</div>\n")
+        self.htm.write("</td>\n")
+        self.htm.write("<td>\n")
+        self.htm.write("<a target='_blank' class='urllink' href='VtxZ_%d.png'>\n"%(self.run))
+        self.htm.write("<img id='fig3' src='VtxZ_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<div id='FigTitle'>6. Vertices Z distribution.</div>\n")
+        self.htm.write("</td>\n")
+        self.htm.write("<td>\n")
+        self.htm.write("<a target='_blank' class='urllink' href='VtxXY_%d.png'>\n"%(self.run))
+        self.htm.write("<img id='fig3' src='VtxXY_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<div id='FigTitle'>7. Vertices XY distribution.</div>\n")
+        self.htm.write("</td>\n")
+        self.htm.write("</tr>\n")
+        self.htm.write("</tbody>\n")
+        self.htm.write("</table>\n")
+        self.htm.write("</div>\n")
+
+        self.htm.write("<p>Finally, for all the tracks with at least 3 tracker hits and a normalized chisquare lower than 5, we provide some dE/dx information.</p><br>\n")
+
+        self.htm.write("<div id='equation'>\n")
+        self.htm.write("<table class='center'>\n")
+        self.htm.write("<tbody>\n")
+        self.htm.write("<tr>\n")
+        self.htm.write("<td>\n")
+        self.htm.write("<a target='_blank' class='urllink' href='dEdx_4_0_%d.png'>\n"%(self.run))
+        self.htm.write("<img id='fig3' src='dEdx_4_0_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<div id='FigTitle'>dEdx as a function of the track momentum.</div>\n")
+        self.htm.write("</td>\n")
+        self.htm.write("<td>\n")
+        self.htm.write("<a target='_blank' class='urllink' href='etaphi_4_0_%d.png'>\n"%(self.run))
+        self.htm.write("<img id='fig3' src='etaphi_4_0_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<div id='FigTitle'>Eta/Phi coordinates of the selected tracks.</div>\n")
+        self.htm.write("</td>\n")
+        self.htm.write("</tr>\n")
+        self.htm.write("</tbody>\n")
+        self.htm.write("</table>\n")
+        self.htm.write("</div>\n")
