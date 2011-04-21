@@ -1,3 +1,8 @@
+2011-04-21 Seb Viret  <viret@in2p3.fr>
+       * Added HLTrigger information to the ntuple (fired paths are stored as a chain of strings)
+       * Added a small ROOT macro in the /test/ directory. Just to show how 
+	to read the extracted ROOTuple: PAT_extractor_reader.C
+
 2011-04-20 Seb Viret  <viret@in2p3.fr>
        * Bug fix
 

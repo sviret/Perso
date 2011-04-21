@@ -14,6 +14,9 @@ PATextraction = cms.EDAnalyzer("PatExtractor",
 ## Then you define the content of the output file
 ##
                                
+   # Add HLT information
+   doHLT         = cms.untracked.bool(True),
+                               
    # Add MC information
    doMC          = cms.untracked.bool(False),
    MC_tag        = cms.InputTag( "" ),

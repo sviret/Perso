@@ -35,9 +35,11 @@
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 
-#include "HLTrigger/HLTfilters/interface/HLTHighLevel.h"
-#include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
-#include "HLTrigger/HLTfilters/interface/HLTHighLevel.h"
+//#include "HLTrigger/HLTfilters/interface/HLTHighLevel.h"
+//#include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
+//#include "HLTrigger/HLTfilters/interface/HLTHighLevel.h"
+
+#include <vector>
 
 #include "TMath.h"
 #include "TTree.h"
@@ -65,6 +67,7 @@ class PatExtractor : public edm::EDAnalyzer {
   
  private:
 
+  bool do_HLT_;
   bool do_MC_;
   bool do_Photon_;
   bool do_Electron_;
@@ -86,13 +89,6 @@ class PatExtractor : public edm::EDAnalyzer {
   bool isPFMuon;
   bool isPFElectron;
 
-  // select tracking particles 
-  //(i.e. "denominator" of the efficiency ratio)
-  //  TrackingParticleSelector tpSelector;				      
-
-  HLTConfigProvider                  hltConfig;
-  std::vector< std::string > hltPaths;
-  std::vector<std::string>  hlNames_;  // name of each HLT algorithm
 
   //______________________________
   //
@@ -108,7 +104,8 @@ class PatExtractor : public edm::EDAnalyzer {
   TTree* m_tree_met;
   TTree* m_tree_vtx;
   TTree* m_tree_MC;
-  
+  TTree* m_tree_HLT;
+
   //______________________
   //
   // Tracking Particles :
@@ -128,7 +125,8 @@ class PatExtractor : public edm::EDAnalyzer {
   int   m_lumi;
   int   m_run; 
 
-
+  int   m_n_paths;
+  std::vector< std::string > m_HLT_vector;
 
   int   m_n_photons;
   TClonesArray* m_pho_lorentzvector;

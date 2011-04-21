@@ -5,6 +5,7 @@ using namespace edm;
 
 PatExtractor::PatExtractor(const edm::ParameterSet& config) :
 
+  do_HLT_        (config.getUntrackedParameter<bool>("doHLT", false)),
   do_MC_         (config.getUntrackedParameter<bool>("doMC", false)),
   do_Photon_     (config.getUntrackedParameter<bool>("doPhoton", false)),
   do_Electron_   (config.getUntrackedParameter<bool>("doElectron", false)),
@@ -47,6 +48,14 @@ void PatExtractor::beginJob()
   m_tree_event->Branch("run",    &m_run,"run/I");
   m_tree_event->Branch("BCID",   &m_BCID,"BCID/I");
   m_tree_event->Branch("time",   &m_time,"time/I");
+
+  if (do_HLT_)
+  {
+    m_tree_HLT       = new TTree("HLT","HLT info");  
+    m_tree_HLT->Branch("n_paths",  &m_n_paths,"n_paths/I");       
+    m_tree_HLT->Branch("HLT_vector","vector<string>",&m_HLT_vector);
+  }
+
 
   if (do_MC_)
   {
@@ -252,6 +261,40 @@ void PatExtractor::analyze(const edm::Event& event, const edm::EventSetup& setup
 
   m_tree_event->Fill();
 
+
+  //
+  // HLT info
+  //
+
+  if (do_HLT_)
+  {
+    edm::Handle<edm::TriggerResults> triggerResults ;
+    edm::InputTag tag("TriggerResults", "", "HLT");
+    event.getByLabel(tag,triggerResults);
+
+    if (triggerResults.isValid())
+    {
+      const edm::TriggerNames & triggerNames = event.triggerNames(*triggerResults);
+    
+      for(int i = 0 ; i < static_cast<int>(triggerResults->size()); i++) 
+      {
+	if (triggerResults->accept(i)!=0)
+	{
+	  if (triggerNames.triggerName(i) == "HLTriggerFinalPath") continue; // This one is pretty useless...
+	  if ((triggerNames.triggerName(i).c_str())[0] == 'A') continue;     // Remove AlCa HLT paths
+	  
+	  //std::cout <<  i
+	  //	    << "trigger path= " << triggerNames.triggerName(i)
+	  //	    << std::endl;
+	  
+	  m_HLT_vector.push_back(triggerNames.triggerName(i));
+	  m_n_paths++;
+	}
+      }
+    }
+    
+    m_tree_HLT->Fill();
+  }
 
   //
   // Photon info
@@ -719,6 +762,8 @@ void PatExtractor::setVarToZero()
   m_lumi    =  0;
   m_run     =  0;
 
+  m_n_paths = 0;
+  m_HLT_vector.clear();
 
   if (do_MC_)
   {
