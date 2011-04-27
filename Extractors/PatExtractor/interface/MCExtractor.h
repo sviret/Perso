@@ -21,7 +21,6 @@
 
 #include "TMath.h"
 #include "TTree.h"
-#include "TFile.h"
 #include "TLorentzVector.h"
 #include "TClonesArray.h"
 
@@ -40,6 +39,14 @@ class MCExtractor
   void fillTree(); 
   void fillSize(int size);
   int  getSize();
+
+  inline int   getStatus(int index){return m_MC_status[index];}
+  inline int   getType(int index){return m_MC_type[index];}
+  inline float getPx(int index){return m_MC_px[index];}
+  inline float getPy(int index){return m_MC_py[index];}
+  inline float getPz(int index){return m_MC_pz[index];}
+  inline float getE(int index){return m_MC_E[index];}
+
 
  private:
   

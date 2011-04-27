@@ -21,9 +21,9 @@ process.maxEvents = cms.untracked.PSet(
 )
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
-    #'rfio:/castor/cern.ch/user/s/sviret/CMS/MIB/RECO/Prod/MIB_reco_woT1_BSCbits_BEAM_2_E_0.0_PT_0.0_90.root'
+    'rfio:/castor/cern.ch/user/s/sperriespatTuple_PATandPF2PAT_9_1_Fal.root'
     #'file:/tmp/sviret/patTuple_PATandPF2PAT.root'
-    'rfio:/castor/cern.ch/user/s/sordini/Test/data/2011/try2/patTuple_PATandPF2PAT_data_100_1_2Wa.root'
+    #'rfio:/castor/cern.ch/user/s/sordini/Test/data/2011/try2/patTuple_PATandPF2PAT_data_100_1_2Wa.root'
     #'file:/tmp/sviret/patTuple_PATandPF2PAT_data_101_1_baK.root'
     #'file:/tmp/sviret/patTuple_PATandPF2PAT_data.root'
     ),                           

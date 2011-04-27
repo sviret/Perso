@@ -7,6 +7,7 @@ JetExtractor::JetExtractor(edm::InputTag tag)
 
 
   m_tag = tag;
+  m_deltaR_cut = 0.2; // Maximum acceptable distance for MC matching
 
   // Tree definition
 
@@ -36,7 +37,7 @@ JetExtractor::JetExtractor(edm::InputTag tag)
   m_tree_jet->Branch("jet_btag_BjetProb", &m_jet_btag_BjetProb,"jet_btag_BjetProb[n_jets]/F");
   m_tree_jet->Branch("jet_btag_SSVHE",    &m_jet_btag_SSVHE,   "jet_btag_SSVHE[n_jets]/F");
   m_tree_jet->Branch("jet_btag_SSVHP",    &m_jet_btag_SSVHP,   "jet_btag_SSVHP[n_jets]/F");
-
+  m_tree_jet->Branch("jet_mcParticleIndex",&m_jet_MCIndex,"jet_mcParticleIndex[n_jets]/I");
 
   // Set everything to 0
 
@@ -65,6 +66,30 @@ void JetExtractor::writeInfo(const edm::Event *event)
   {
     for(int i=0; i<JetExtractor::getSize(); ++i) 
       JetExtractor::writeInfo(&p_jets.at(i),i); 
+  }
+
+  JetExtractor::fillTree();
+}
+
+
+void JetExtractor::writeInfo(const edm::Event *event, MCExtractor* m_MC) 
+{
+  edm::Handle< edm::View<pat::Jet> >  jetHandle;
+  event->getByLabel(m_tag, jetHandle);
+  edm::View<pat::Jet> p_jets = *jetHandle;
+
+  JetExtractor::reset();
+  JetExtractor::fillSize(static_cast<int>(p_jets.size()));
+
+  if (JetExtractor::getSize())
+  {
+    for(int i=0; i<JetExtractor::getSize(); ++i)
+    { 
+      JetExtractor::writeInfo(&p_jets.at(i),i); 
+
+      int idx_min = JetExtractor::getMatch(&p_jets.at(i),m_MC); 
+      m_jet_MCIndex[i] = idx_min;
+    }
   }
 
   JetExtractor::fillTree();
@@ -130,6 +155,7 @@ void JetExtractor::reset()
     m_jet_btag_BjetProb[i] = 0.;
     m_jet_btag_SSVHE[i] = 0.;
     m_jet_btag_SSVHP[i] = 0.;
+    m_jet_MCIndex[i]    = -1;
   }
 }
 
@@ -148,3 +174,39 @@ int  JetExtractor::getSize()
 {
   return m_n_jets;
 }
+
+int JetExtractor::getMatch(const pat::Jet *part, MCExtractor* m_MC)
+{
+  float deltaR_min = 1e6;
+  int idx_min    = -1;
+      
+  for(int mcPart_i=0; mcPart_i<m_MC->getSize(); ++mcPart_i) 
+  {
+    if (m_MC->getStatus(mcPart_i)!=3) continue;
+    if (fabs(m_MC->getType(mcPart_i))>5 && fabs(m_MC->getType(mcPart_i))!=21) continue;
+
+
+    TLorentzVector TL_genPart(m_MC->getPx(mcPart_i),m_MC->getPy(mcPart_i),m_MC->getPz(mcPart_i),m_MC->getE(mcPart_i));
+    TLorentzVector TL_jet(part->px(),part->py(),part->pz(),part->energy());
+    	   
+    if(TL_genPart.Pt())
+    {
+      float deltaR = TL_genPart.DeltaR(TL_jet);
+      //float deltaP = fabs(TL_genPart.Pt()-TL_jet.Pt());
+
+      if(deltaR<deltaR_min)
+      {
+	deltaR_min = deltaR;
+	idx_min = mcPart_i;
+      }
+    }
+  }
+  
+  if (deltaR_min>m_deltaR_cut)
+    return -1;
+
+  //  if (idx_min != -1)
+  //    std::cout << idx_min << " / " << deltaR_min << " / " << m_MC->getType(idx_min) << std::endl;
+
+  return idx_min;
+} 

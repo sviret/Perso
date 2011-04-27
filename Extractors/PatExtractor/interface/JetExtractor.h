@@ -15,6 +15,8 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/Common/interface/View.h"
 
+#include "../interface/MCExtractor.h"
+
 //Include std C++
 #include <iostream>
 
@@ -33,14 +35,18 @@ class JetExtractor
   ~JetExtractor();
 
 
-  void writeInfo(const pat::Jet *part, int index); 
+  void writeInfo(const edm::Event *event, MCExtractor* m_MC); 
   void writeInfo(const edm::Event *event); 
+
+  void writeInfo(const pat::Jet *part, int index); 
 
   void reset();
   void fillTree(); 
   void fillSize(int size);
   int  getSize();
 
+
+  int getMatch(const pat::Jet *part, MCExtractor* m_MC);
 
  private:
   
@@ -49,6 +55,8 @@ class JetExtractor
   static const int 	m_jets_MAX       = 100;
 
   edm::InputTag m_tag;
+  float m_deltaR_cut;
+
   int   m_n_jets;
 
   TClonesArray* m_jet_lorentzvector;
@@ -71,6 +79,9 @@ class JetExtractor
   float	m_jet_btag_BjetProb[m_jets_MAX];
   float	m_jet_btag_SSVHE[m_jets_MAX];
   float	m_jet_btag_SSVHP[m_jets_MAX];
+  int   m_jet_MCIndex[m_jets_MAX];
+
+  MCExtractor* MC_Coll;
 };
 
 #endif 

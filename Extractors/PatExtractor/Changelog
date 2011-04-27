@@ -1,3 +1,9 @@
+2011-04-27 Nicolas Beaupere/ Seb Viret  <viret@in2p3.fr>
+       * Added MC matching info into JetExtractor class. Match is done based on container producer by MC extractor
+ 	using the DeltaR matching method.
+	For the moment DeltaR maximum val for a match is set to 0.2
+	!!! Double matching protection not yet implemented --> Jets could be matched to the same MC parton (tough unlikely).
+
 2011-04-26 Seb Viret  <viret@in2p3.fr>
        * PatExtractor goes to class... Completely new architecture, one class per object type
          !!!Changes are fully transparent for the final ROOTuple!!!

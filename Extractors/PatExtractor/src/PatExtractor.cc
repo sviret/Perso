@@ -68,10 +68,17 @@ void PatExtractor::analyze(const edm::Event& event, const edm::EventSetup& setup
   if (do_Photon_)   m_photon->writeInfo(&event);
   if (do_Electron_) m_electron->writeInfo(&event);
   if (do_Muon_)     m_muon->writeInfo(&event);
-  if (do_Jet_)      m_jet->writeInfo(&event);
   if (do_MET_)      m_MET->writeInfo(&event);
   if (do_Vertex_)   m_vertex->writeInfo(&event);
   if (do_MC_)       m_MC->writeInfo(&event);
+
+  if (do_Jet_)
+  {
+    (do_MC_)
+      ? m_jet->writeInfo(&event,m_MC)
+      : m_jet->writeInfo(&event);
+  }
+
 
   ++nevent;
   ++nevent_tot;
