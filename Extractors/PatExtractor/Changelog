@@ -1,3 +1,6 @@
+2011-05-06 Nicolas Beaupere <beaupere@ipnl.in2p3.fr>
+	* Added Chi2, KinFit class (AlienGS.h, AlienKinFit.h) and text file of old resolution values
+
 2011-04-27 Nicolas Beaupere/ Seb Viret  <viret@in2p3.fr>
        * Added MC matching info into JetExtractor class. Match is done based on container producer by MC extractor
  	using the DeltaR matching method.
