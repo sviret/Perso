@@ -161,6 +161,7 @@ void ElectronExtractor::reset()
     m_ele_pfPhotonIso[i]=0;
     m_ele_numberOfMissedInnerLayer[i]=0;
   }
+  m_ele_lorentzvector->Clear();
 }
 
 

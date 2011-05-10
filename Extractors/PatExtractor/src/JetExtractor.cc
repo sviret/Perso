@@ -157,6 +157,7 @@ void JetExtractor::reset()
     m_jet_btag_SSVHP[i] = 0.;
     m_jet_MCIndex[i]    = -1;
   }
+  m_jet_lorentzvector->Clear();
 }
 
 

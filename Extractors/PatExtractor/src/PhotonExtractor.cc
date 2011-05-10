@@ -93,6 +93,7 @@ void PhotonExtractor::reset()
     m_pho_eta[i] = 0.;
     m_pho_phi[i] = 0.;
   }
+  m_pho_lorentzvector->Clear();
 }
 
 

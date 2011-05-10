@@ -181,6 +181,7 @@ void MCExtractor::reset()
     m_MC_eta[i] = 0.;
     m_MC_phi[i] = 0.; 
   }
+  m_MC_lorentzvector->Clear();
 }
 
 

@@ -170,6 +170,7 @@ void MuonExtractor::reset()
     m_muo_d0[i]=0.;
     m_muo_d0error[i]=0.;
   }
+  m_muo_lorentzvector->Clear();
 }
 
 

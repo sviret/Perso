@@ -86,6 +86,7 @@ void METExtractor::reset()
     m_met_eta[i] = 0.;
     m_met_phi[i] = 0.;
   }
+  m_met_lorentzvector->Clear();
 }
 
 
