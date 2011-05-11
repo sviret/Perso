@@ -7,6 +7,7 @@ MuonExtractor::MuonExtractor(edm::InputTag tag)
 
 
   m_tag = tag;
+  m_deltaR_cut = 0.5; // Maximum acceptable distance for MC matching
 
   // Tree definition
 
@@ -44,7 +45,8 @@ MuonExtractor::MuonExtractor(edm::InputTag tag)
   m_tree_muon->Branch("muon_pfPhotonIso",        &m_muo_pfPhotonIso,"muon_pfPhotonIso[n_muons]/F");
   m_tree_muon->Branch("muon_d0",      &m_muo_d0,"muon_d0[n_muons]/F");
   m_tree_muon->Branch("muon_d0error", &m_muo_d0error,"muon_d0error[n_muons]/F");
-
+  m_tree_muon->Branch("muon_mcParticleIndex",&m_muo_MCIndex,"muon_mcParticleIndex[n_muons]/I");
+  
   m_isPF_muon=true; // By default we use PF muons
 
   // Set everything to 0
@@ -77,6 +79,29 @@ void MuonExtractor::writeInfo(const edm::Event *event)
   {
     for(int i=0; i<MuonExtractor::getSize(); ++i) 
       MuonExtractor::writeInfo(&p_muons.at(i),i); 
+  }
+
+  MuonExtractor::fillTree();
+}
+
+void MuonExtractor::writeInfo(const edm::Event *event,MCExtractor* m_MC) 
+{
+  edm::Handle< edm::View<pat::Muon> >  muonHandle;
+  event->getByLabel(m_tag, muonHandle);
+  edm::View<pat::Muon> p_muons = *muonHandle;
+
+  MuonExtractor::reset();
+  MuonExtractor::fillSize(static_cast<int>(p_muons.size()));
+  
+  if (MuonExtractor::getSize())
+  {
+    for(int i=0; i<MuonExtractor::getSize(); ++i) 
+    {
+      MuonExtractor::writeInfo(&p_muons.at(i),i);
+      
+      int idx_min = MuonExtractor::getMatch(&p_muons.at(i),m_MC); 
+      m_muo_MCIndex[i] = idx_min;
+    }
   }
 
   MuonExtractor::fillTree();
@@ -140,7 +165,7 @@ void MuonExtractor::writeInfo(const pat::Muon *part, int index)
 void MuonExtractor::reset()
 {
   m_n_muons = 0;
-  
+
   for (int i=0;i<m_muons_MAX;++i) 
   {
     m_muo_E[i] = 0.;
@@ -169,6 +194,7 @@ void MuonExtractor::reset()
     m_muo_pfPhotonIso[i]=0.;
     m_muo_d0[i]=0.;
     m_muo_d0error[i]=0.;
+    m_muo_MCIndex[i]=-1;
   }
   m_muo_lorentzvector->Clear();
 }
@@ -192,4 +218,40 @@ int  MuonExtractor::getSize()
 void MuonExtractor::setPF(bool isPF)
 {
   m_isPF_muon=isPF;
+}
+
+int MuonExtractor::getMatch(const pat::Muon *part, MCExtractor* m_MC)
+{
+  float deltaR_min = 1e6;
+  int idx_min    = -1;
+    
+  for(int mcPart_i=0; mcPart_i<m_MC->getSize(); ++mcPart_i) 
+  {
+    if (m_MC->getStatus(mcPart_i)!=3) continue;
+    if (fabs(m_MC->getType(mcPart_i))!=13) continue;
+    
+    TLorentzVector TL_genPart(m_MC->getPx(mcPart_i),m_MC->getPy(mcPart_i),m_MC->getPz(mcPart_i),m_MC->getE(mcPart_i));
+    TLorentzVector TL_muon(part->px(),part->py(),part->pz(),part->energy());
+    
+    if(TL_genPart.Pt())
+    {
+      float deltaR = TL_genPart.DeltaR(TL_muon);
+      //float deltaP = fabs(TL_genPart.Pt()-TL_muon.Pt());
+
+      if(deltaR<deltaR_min)
+      {
+	deltaR_min = deltaR;
+	idx_min = mcPart_i;
+      }
+    }
+  }
+  
+  if (deltaR_min>m_deltaR_cut)
+    return -1;
+
+  //  if (idx_min != -1)
+  //    std::cout << idx_min << " / " << deltaR_min << " / " << m_MC->getType(idx_min) << std::endl;
+
+  return idx_min;
+
 }

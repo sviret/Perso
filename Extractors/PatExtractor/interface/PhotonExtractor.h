@@ -15,6 +15,8 @@
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/View.h"
 
+#include "../interface/MCExtractor.h"
+
 //Include std C++
 #include <iostream>
 
@@ -32,14 +34,17 @@ class PhotonExtractor
   PhotonExtractor(edm::InputTag tag);
   ~PhotonExtractor();
 
+  void writeInfo(const edm::Event *event,MCExtractor* m_MC); 
+  void writeInfo(const edm::Event *event); 
 
   void writeInfo(const pat::Photon *part, int index); 
-  void writeInfo(const edm::Event *event); 
 
   void reset();
   void fillTree(); 
   void fillSize(int size);
   int  getSize();
+  
+  int getMatch(const pat::Photon *part, MCExtractor* m_MC);
 
  private:
   
@@ -48,6 +53,7 @@ class PhotonExtractor
   static const int 	m_photons_MAX    = 100;
 
   edm::InputTag m_tag;
+  float m_deltaR_cut;
 
   int   m_n_photons;
 
@@ -61,7 +67,9 @@ class PhotonExtractor
   float	m_pho_vz[m_photons_MAX];
   float	m_pho_eta[m_photons_MAX];
   float	m_pho_phi[m_photons_MAX];
+  int   m_pho_MCIndex[m_photons_MAX];
 
+  MCExtractor* MC_Coll;
 };
 
 #endif 

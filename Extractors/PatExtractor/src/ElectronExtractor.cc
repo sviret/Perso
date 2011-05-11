@@ -7,6 +7,7 @@ ElectronExtractor::ElectronExtractor(edm::InputTag tag)
 
 
   m_tag = tag;
+  m_deltaR_cut = 0.5; // Maximum acceptable distance for MC matching
 
   // Tree definition
 
@@ -44,6 +45,7 @@ ElectronExtractor::ElectronExtractor(edm::InputTag tag)
   m_tree_electron->Branch("electron_pfNeutralHadronIso",       &m_ele_pfNeutralHadronIso,"electron_pfNeutralHadronIso[n_electrons]/F");  
   m_tree_electron->Branch("electron_pfPhotonIso",              &m_ele_pfPhotonIso,       "electron_pfPhotonIso[n_electrons]/F");  
   m_tree_electron->Branch("electron_numberOfMissedInnerLayer", &m_ele_numberOfMissedInnerLayer, "electron_numberOfMissedInnerLayer[n_electrons]/I");  
+  m_tree_electron->Branch("electron_mcParticleIndex",          &m_ele_MCIndex,   "electron_mcParticleIndex[n_electrons]/I");  
 
   m_isPF_electron=true; // By default we use PF electrons
 
@@ -76,6 +78,29 @@ void ElectronExtractor::writeInfo(const edm::Event *event)
   {
     for(int i=0; i<ElectronExtractor::getSize(); ++i) 
       ElectronExtractor::writeInfo(&p_electrons.at(i),i); 
+  }
+
+  ElectronExtractor::fillTree();
+}
+
+void ElectronExtractor::writeInfo(const edm::Event *event,MCExtractor* m_MC) 
+{
+  edm::Handle< edm::View<pat::Electron> >  electronHandle;
+  event->getByLabel(m_tag, electronHandle);
+  edm::View<pat::Electron> p_electrons = *electronHandle;
+
+  ElectronExtractor::reset();
+  ElectronExtractor::fillSize(static_cast<int>(p_electrons.size()));
+
+  if (ElectronExtractor::getSize())
+  {
+    for(int i=0; i<ElectronExtractor::getSize(); ++i)
+    {
+      ElectronExtractor::writeInfo(&p_electrons.at(i),i);
+      
+      int idx_min = ElectronExtractor::getMatch(&p_electrons.at(i),m_MC); 
+      m_ele_MCIndex[i] = idx_min;
+    }
   }
 
   ElectronExtractor::fillTree();
@@ -160,6 +185,7 @@ void ElectronExtractor::reset()
     m_ele_pfNeutralHadronIso[i]=0;
     m_ele_pfPhotonIso[i]=0;
     m_ele_numberOfMissedInnerLayer[i]=0;
+    m_ele_MCIndex[i]=-1;
   }
   m_ele_lorentzvector->Clear();
 }
@@ -183,4 +209,41 @@ int  ElectronExtractor::getSize()
 void ElectronExtractor::setPF(bool isPF)
 {
   m_isPF_electron=isPF;
+}
+
+int ElectronExtractor::getMatch(const pat::Electron *part, MCExtractor* m_MC)
+{
+  float deltaR_min = 1e6;
+  int idx_min    = -1;
+      
+  for(int mcPart_i=0; mcPart_i<m_MC->getSize(); ++mcPart_i) 
+  {
+    if (m_MC->getStatus(mcPart_i)!=3) continue;
+    if (fabs(m_MC->getType(mcPart_i))!=11) continue;
+
+
+    TLorentzVector TL_genPart(m_MC->getPx(mcPart_i),m_MC->getPy(mcPart_i),m_MC->getPz(mcPart_i),m_MC->getE(mcPart_i));
+    TLorentzVector TL_electron(part->px(),part->py(),part->pz(),part->energy());
+    	   
+    if(TL_genPart.Pt())
+    {
+      float deltaR = TL_genPart.DeltaR(TL_electron);
+      //float deltaP = fabs(TL_genPart.Pt()-TL_electron.Pt());
+
+      if(deltaR<deltaR_min)
+      {
+	deltaR_min = deltaR;
+	idx_min = mcPart_i;
+      }
+    }
+  }
+  
+  if (deltaR_min>m_deltaR_cut)
+    return -1;
+
+  //  if (idx_min != -1)
+  //    std::cout << idx_min << " / " << deltaR_min << " / " << m_MC->getType(idx_min) << std::endl;
+
+  return idx_min;
+
 }

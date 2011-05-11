@@ -15,6 +15,8 @@
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/Common/interface/View.h"
 
+#include "../interface/MCExtractor.h"
+
 //Include std C++
 #include <iostream>
 
@@ -32,15 +34,18 @@ class MuonExtractor
   MuonExtractor(edm::InputTag tag);
   ~MuonExtractor();
 
+  void writeInfo(const edm::Event *event,MCExtractor* m_MC); 
+  void writeInfo(const edm::Event *event); 
 
   void writeInfo(const pat::Muon *part, int index); 
-  void writeInfo(const edm::Event *event); 
 
   void reset();
   void fillTree(); 
   void fillSize(int size);
   int  getSize();
-  void setPF(bool isPF); 
+  void setPF(bool isPF);
+  
+  int getMatch(const pat::Muon *part, MCExtractor* m_MC);
 
  private:
   
@@ -49,7 +54,8 @@ class MuonExtractor
   static const int 	m_muons_MAX  = 100;
 
   edm::InputTag m_tag;
-
+  float m_deltaR_cut;
+  
   bool  m_isPF_muon;
 
   int   m_n_muons;
@@ -73,14 +79,16 @@ class MuonExtractor
   float m_muo_trackIso[m_muons_MAX];
   float m_muo_ecalIso[m_muons_MAX];
   float m_muo_hcalIso[m_muons_MAX];
-  int	  m_muo_charge[m_muons_MAX];
+  int	m_muo_charge[m_muons_MAX];
   float m_muo_d0[m_muons_MAX];
   float m_muo_d0error[m_muons_MAX];
   float m_muo_pfParticleIso[m_muons_MAX]; // isolation calculated with all the PFCandidates
   float m_muo_pfChargedHadronIso[m_muons_MAX]; // isolation calculated with only the charged hadron PFCandidates
   float m_muo_pfNeutralHadronIso[m_muons_MAX]; // isolation calculated with only the neutral hadron PFCandidates
   float m_muo_pfPhotonIso[m_muons_MAX]; // Returns the isolation calculated with only the photon PFCandidates
+  int m_muo_MCIndex[m_muons_MAX];
 
+  MCExtractor* MC_Coll;
 };
 
 #endif 

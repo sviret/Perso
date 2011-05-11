@@ -15,7 +15,7 @@
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/Common/interface/View.h"
 
-
+#include "../interface/MCExtractor.h"
 
 //Include std C++
 #include <iostream>
@@ -34,15 +34,18 @@ class ElectronExtractor
   ElectronExtractor(edm::InputTag tag);
   ~ElectronExtractor();
 
+  void writeInfo(const edm::Event *event,MCExtractor* m_MC); 
+  void writeInfo(const edm::Event *event); 
 
   void writeInfo(const pat::Electron *part, int index); 
-  void writeInfo(const edm::Event *event); 
 
   void reset();
   void fillTree(); 
   void fillSize(int size);
   int  getSize();
   void setPF(bool isPF); 
+  
+  int getMatch(const pat::Electron *part, MCExtractor* m_MC);
 
  private:
   
@@ -52,6 +55,8 @@ class ElectronExtractor
 
 
   edm::InputTag m_tag;
+  float m_deltaR_cut;
+  
   bool  m_isPF_electron;
 
   int   m_n_electrons;
@@ -85,7 +90,9 @@ class ElectronExtractor
   float m_ele_pfNeutralHadronIso[m_electrons_MAX]; // isolation calculated with only the neutral hadron PFCandidates
   float m_ele_pfPhotonIso[m_electrons_MAX]; // Returns the isolation calculated with only the photon PFCandidates
   int   m_ele_numberOfMissedInnerLayer[m_electrons_MAX]; // Access the hit pattern counting (in the Tracker) the number of expected crossed layers  before the first trajectory's hit
-
+  int   m_ele_MCIndex[m_electrons_MAX];
+  
+  MCExtractor* MC_Coll;
 };
 
 #endif 
