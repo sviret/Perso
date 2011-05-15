@@ -1,3 +1,7 @@
+
+2011-05-15 Stephane <saucisson@cern.ch>
+       * Bug fix to allow compilation of AlienGS and AlienKinFit
+
 2011-05-11 Nicolas Beaupere <beaupere@ipnl.in2p3.fr>
        * Added MC matching info into Electron,Muon and Photon Extractor class. Matched base on same method than to
        JetExtractor.

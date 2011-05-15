@@ -1,4 +1,4 @@
-/// $Id: AlienGS.h,v 1.4 2009/03/11 09:12:53 boumedie Exp boumedie $
+/// $Id: AlienGS.h,v 1.1 2011/05/06 13:33:10 beaupere Exp $
 
 #ifndef AlienGS_h  
 #define AlienGS_h
@@ -39,20 +39,6 @@
 #include "TRootEmbeddedCanvas.h"
 #include "TStyle.h"
 #include "TTree.h"
-
-/// Input Morgan
-#include "../include/TRootCluster.h"
-#include "../include/TRootElectron.h"
-#include "../include/TRootEvent.h"
-#include "../include/TRootJet.h"
-#include "../include/TRootMCParticle.h"
-#include "../include/TRootMET.h"
-#include "../include/TRootMuon.h"
-#include "../include/TRootPhoton.h"
-#include "../include/TRootRun.h"
-#include "../include/TRootSignalEvent.h"
-#include "../include/TRootSuperCluster.h"
-#include "../include/TRootTopTop.h"
 
 double PzNeutrino( double Px_l, double Py_l, double Pz_l, double Px_nu, double Py_nu, double *Pz1, double *Pz2);
 double PzPtNeutrino( double Px_l, double Py_l, double Pz_l, double Px_nu, double Py_nu, double *Pz, double *Pt);

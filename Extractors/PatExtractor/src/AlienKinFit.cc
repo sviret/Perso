@@ -12,7 +12,7 @@
  *                           Diane Cinca diane.cinca@cern.ch            *
  * TODO : parametrization of Neutrino + Muon + electron from .dat file  *
  * internal tracking :                                                  *
- * $Id: AlienKinFit.cc,v 1.7 2010/03/25 15:55:39 boumedie Exp boumedie $*
+ * $Id: AlienKinFit.cc,v 1.1 2011/05/06 13:33:11 beaupere Exp $*
  ************************************************************************/
 
 #include <TROOT.h>
@@ -150,7 +150,8 @@ unsigned int AlienKinFit::ReadAlienErrors(TString ParamsFile)
    
    std::string var="%%";
    
-   int ieta=0, ivar=0, iflavor=0; 
+   int ivar=0;
+   unsigned int ieta=0, iflavor=0; 
    double A=0, B=0, C=0, D=0;
 
    unsigned int security=0;

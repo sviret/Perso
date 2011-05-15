@@ -1,5 +1,5 @@
 /*************************************************************************
-*      $Id: AlienGS.cc,v 1.4 2009/03/11 09:16:38 boumedie Exp boumedie $ *
+*      $Id: AlienGS.cc,v 1.1 2011/05/06 13:33:11 beaupere Exp $ *
 *                                                                        *
 * Last modif : dans cette version, le fit cinematique nest pas utilise   *
 *	      afin de fournir un chi2 rapidement                         *
@@ -248,7 +248,7 @@ int RecoLeptSide(TLorentzVector TheMuon, TLorentzVector vMET, TLorentzVector bJe
       VTT += vMET;
       VTT += bJet;
 
-      double mtt_1 = sqrt(max(0.,VTT.M2()));
+      double mtt_1 = sqrt(std::max(0.,VTT.M2()));
 
       vMET.SetPz(Pz2);
       xE=sqrt((vMET.Px()*vMET.Px())+(vMET.Py()*vMET.Py())+(vMET.Pz()*vMET.Pz()));
@@ -259,7 +259,7 @@ int RecoLeptSide(TLorentzVector TheMuon, TLorentzVector vMET, TLorentzVector bJe
       VTT2 += vMET;
       VTT2 += bJet;
 
-      double mtt_2 = sqrt(max(0.,VTT2.M2()));
+      double mtt_2 = sqrt(std::max(0.,VTT2.M2()));
 
       if(fabs(mtt_1-171) < fabs(mtt_2-171))
       {
@@ -314,10 +314,10 @@ double GlobalSimpleChi2(TLorentzVector Jet1, TLorentzVector Jet2, TLorentzVector
    RecoLeptSide(SelMuon, vMET, JetBL, &vMET_Cor);
    
    double Angle=JetBL.Vect().Angle(SelMuon.Vect());
-   double MW=sqrt(max(0.,(Jet1+Jet2).M2()));
-   double MtopH=sqrt(max(0.,(Jet1+Jet2+JetBH).M2()));
+   double MW=sqrt(std::max(0.,(Jet1+Jet2).M2()));
+   double MtopH=sqrt(std::max(0.,(Jet1+Jet2+JetBH).M2()));
    double ptratio=JetBH.Pt()/(Jet1+Jet2).Pt();
-   double MtopL=sqrt(max(0.,(vMET_Cor+SelMuon+JetBL).M2()));
+   double MtopL=sqrt(std::max(0.,(vMET_Cor+SelMuon+JetBL).M2()));
    double SolPtSystem = (Jet1.Pt()+Jet2.Pt()+JetBL.Pt()+JetBH.Pt())/TotPt;
    double SolPtVSystem = ((Jet1+Jet2+JetBL+JetBH+SelMuon+vMET).Pt())/TotPt;
    
@@ -412,10 +412,10 @@ void GlobalSimpleChi2_vars(std::vector<TLorentzVector> MaxPtSelectedJets, std::v
    RecoLeptSide(SelMuon, vMET, JetBL, &vMET_Cor);
    
    double Angle=JetBL.Vect().Angle(SelMuon.Vect());
-   double MW=sqrt(max(0.,(Jet1+Jet2).M2()));
-   double MtopH=sqrt(max(0.,(Jet1+Jet2+JetBH).M2()));
+   double MW=sqrt(std::max(0.,(Jet1+Jet2).M2()));
+   double MtopH=sqrt(std::max(0.,(Jet1+Jet2+JetBH).M2()));
    double ptratio=log(JetBH.Pt()/(Jet1+Jet2).Pt());
-   double MtopL=sqrt(max(0.,(vMET_Cor+SelMuon+JetBL).M2()));
+   double MtopL=sqrt(std::max(0.,(vMET_Cor+SelMuon+JetBL).M2()));
    double SolPtSystem = (Jet1.Pt()+Jet2.Pt()+JetBL.Pt()+JetBH.Pt())/TotPt;
    double SolPtVSystem = ((Jet1+Jet2+JetBL+JetBH+SelMuon+vMET).Pt())/TotPt;
 
