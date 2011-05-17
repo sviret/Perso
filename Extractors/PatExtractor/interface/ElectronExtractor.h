@@ -47,6 +47,9 @@ class ElectronExtractor
   
   int getMatch(const pat::Electron *part, MCExtractor* m_MC);
 
+  TLorentzVector *getEleLorentzVector(int eidx) {return (TLorentzVector*)m_ele_lorentzvector->At(eidx);}
+
+
  private:
   
   TTree* m_tree_electron;

@@ -47,6 +47,22 @@ class MuonExtractor
   
   int getMatch(const pat::Muon *part, MCExtractor* m_MC);
 
+  float getMuonpx(int muidx) {return m_muo_px[muidx];}
+  float getMuonpy(int muidx) {return m_muo_py[muidx];}
+  float getMuonpz(int muidx) {return m_muo_pz[muidx];}
+  float getMuonE(int muidx) {return m_muo_E[muidx];}
+  TLorentzVector *getMuLorentzVector(int muidx) {return (TLorentzVector*)m_muo_lorentzvector->At(muidx);}
+  int getMuisGlobal(int muidx) {return m_muo_isGlobal[muidx];}
+  int getMuisTracker(int muidx) {return m_muo_isTracker[muidx];}
+  int getMunValPixelHits(int muidx) {return m_muo_nValPixelHits[muidx];}
+  int getMunValTrackerHits(int muidx) {return m_muo_nValTrackerHits[muidx];}
+  int getMunMatches(int muidx) {return m_muo_nMatches[muidx];}
+  float getMunormChi2(int muidx) {return m_muo_normChi2[muidx];}
+  float getMudB(int muidx) {return m_muo_dB[muidx];}
+  float getMupfChargedHadronIso(int muidx) {return m_muo_pfChargedHadronIso[muidx];}
+  float getMupfNeutralHadronIso(int muidx) {return m_muo_pfNeutralHadronIso[muidx];}
+  float getMupfPhotonIso(int muidx) {return m_muo_pfPhotonIso[muidx];}
+
  private:
   
   TTree* m_tree_muon;

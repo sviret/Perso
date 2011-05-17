@@ -40,6 +40,8 @@ class VertexExtractor
   void fillTree(); 
   void fillSize(int size);
   int  getSize();
+  float getVtxNdof(int vtxidx) {return m_vtx_ndof[vtxidx];}
+  bool getVtxIsFake(int vtxidx) {return m_vtx_isFake[vtxidx];}
 
  private:
   

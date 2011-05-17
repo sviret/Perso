@@ -45,8 +45,10 @@ class JetExtractor
   void fillSize(int size);
   int  getSize();
 
-
   int getMatch(const pat::Jet *part, MCExtractor* m_MC);
+
+  TLorentzVector *getJetLorentzVector(int jetidx) {return (TLorentzVector*)m_jet_lorentzvector->At(jetidx);}
+  float getJetBTagProb_SSVHE(int jetidx) {return m_jet_btag_SSVHE[jetidx];}
 
  private:
   

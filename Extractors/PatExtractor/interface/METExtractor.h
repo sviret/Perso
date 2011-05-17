@@ -42,6 +42,7 @@ class METExtractor
   void fillTree(); 
   void fillSize(int size);
   int  getSize();
+  TLorentzVector *getMETLorentzVector(int metidx) {return (TLorentzVector*)m_met_lorentzvector->At(metidx);}
 
  private:
   

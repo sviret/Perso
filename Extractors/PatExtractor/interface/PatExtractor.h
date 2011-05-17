@@ -23,6 +23,7 @@
 #include "../interface/VertexExtractor.h"
 #include "../interface/EventExtractor.h"
 #include "../interface/HLTExtractor.h"
+#include "../interface/mtt_analysis.h"
 
 #include "TFile.h"
 
@@ -54,6 +55,9 @@ class PatExtractor : public edm::EDAnalyzer {
   bool do_Muon_;
   bool do_MET_;
   bool do_Vertex_;
+  bool do_Mtt_;
+  bool do_SemiMu_;  
+  bool do_Chi2_;
 
   edm::InputTag photon_tag_;   // 
   edm::InputTag electron_tag_; // 
@@ -78,6 +82,7 @@ class PatExtractor : public edm::EDAnalyzer {
   VertexExtractor*   m_vertex;
   EventExtractor*    m_event;
   HLTExtractor*      m_HLT;
+  mtt_analysis*      m_Mtt_analysis;
 
 };
 

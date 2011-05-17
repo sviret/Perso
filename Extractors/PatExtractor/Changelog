@@ -1,3 +1,11 @@
+2011-05-17 viola <sordini@cern.ch>
+	(seriously: we write the dates mirrored??)
+	First commit of mtt_analysis (for event selection) and Chi2 (for chi2 calculation)
+	with some minor related changes in other classes (Jet,Mu,El,vtx,met extractors, plus
+	python file to write on data). 
+	For the moment the analysis is there only for seminuonic channel. 
+	For this commit i started working on some files modified by Nicolas, so i happen 
+	to commit also some changes from him about MC truth and matching (in MCExtractor and mtt_analysis).
 
 2011-05-15 Stephane <saucisson@cern.ch>
        * Bug fix to allow compilation of AlienGS and AlienKinFit

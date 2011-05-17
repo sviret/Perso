@@ -43,6 +43,11 @@ PATextraction = cms.EDAnalyzer("PatExtractor",
 
    # Add PV information
    doVertex      = cms.untracked.bool(True),
-   vtx_tag       = cms.InputTag( "offlinePrimaryVertices" )
+   vtx_tag       = cms.InputTag( "offlinePrimaryVertices" ),
+
+   # Add PV information
+   doMtt      = cms.untracked.bool(True),
+   doSemiMu      = cms.untracked.bool(True),
+   doChi2      = cms.untracked.bool(True)
 
 )

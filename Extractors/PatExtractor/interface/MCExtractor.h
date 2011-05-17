@@ -46,6 +46,7 @@ class MCExtractor
   inline float getPy(int index){return m_MC_py[index];}
   inline float getPz(int index){return m_MC_pz[index];}
   inline float getE(int index){return m_MC_E[index];}
+  inline float getMom1Index(int index){return m_MC_imot1[index];}
 
 
  private:

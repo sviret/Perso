@@ -22,7 +22,8 @@ process.maxEvents = cms.untracked.PSet(
 
 myfilelist = cms.untracked.vstring()
 myfilelist.extend( [
-        'file:/gridgroup/cms/stephane/CMSSW/CMSSW_4_1_3_patch2/src/TopProd/PatTopProd/patTuple_PATandPF2PAT_data.root'
+#        'file:/gridgroup/cms/stephane/CMSSW/CMSSW_4_1_3_patch2/src/TopProd/PatTopProd/patTuple_PATandPF2PAT_data.root'
+    'file:/scratch/viola/patTuple_PATandPF2PAT_1_2_S3q.root'
         ] 
 )
 
@@ -34,9 +35,16 @@ process.source = cms.Source("PoolSource",
 process.load("Extractors.PatExtractor.PAT_extractor_cff")
 process.PATextraction.doMuon = True
 process.PATextraction.doElectron = True
-process.PATextraction.doJet = False
-process.PATextraction.doMET = False
-process.PATextraction.doVertex = False
+process.PATextraction.doJet = True
+process.PATextraction.doMET = True
+process.PATextraction.doVertex = True
+##analysis switches
+process.PATextraction.doMtt = True
+#doSemiMu is only read out if doMtt is true, so if we perform the analysis
+#id doSemiMu is true, we perform the analysis for the semimuonic channel (you couldnt guess eh!)
+#if doSemiMu is false, it means we perform the analysis for the semielectronic channel
+process.PATextraction.doSemiMu = True
+process.PATextraction.doChi2 = True
 process.p = cms.Path(process.PATextraction)
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
