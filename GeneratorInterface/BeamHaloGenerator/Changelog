@@ -1,0 +1,4 @@
+2011-05-17  Seb Viret  <viret@in2p3.fr>
+ 
+       	* Adding a first version of the BeamHaloGenerator package, 
+	working with CMSSW 4_1_2_patch1. This version could handle MARS and FLUKA inputs
