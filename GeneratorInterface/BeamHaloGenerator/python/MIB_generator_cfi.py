@@ -85,6 +85,7 @@ MARS_generator = cms.EDProducer("BeamHaloProducer",
 FLUKA_generator = cms.EDProducer("BeamHaloProducer",
 
     InputType = cms.string('FLUKA'),
+    #InputFile = cms.string('beam-halo_3.5TeV-R5'),
     InputFile = cms.string('beam-gas_IR5'),
 
      generatorSettings = cms.untracked.vstring(
@@ -94,7 +95,7 @@ FLUKA_generator = cms.EDProducer("BeamHaloProducer",
     "pxLimits     -1 -1",   # x momentum (in GeV)
     "pyLimits     -1 -1",   # y momentum (in GeV)
     "pzLimits     -1 -1",   # z momentum (in GeV) 
-    "energyLimits 0.02 -1",   # energy (in GeV)
+    "energyLimits 0.2 -1",   # energy (in GeV)
     "xLimits      -1 -1",   # x position (in mm)
     "yLimits      -1 -1",   # y position (in mm)
     "ptLimits     -1 -1",

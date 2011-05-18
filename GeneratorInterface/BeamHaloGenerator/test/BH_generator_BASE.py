@@ -1,13 +1,10 @@
 ###########################################
 #
-# BH_generator.py
+# BH_generator_BASE.py
 #
-# Test script for MIB generation (generate 1000 B1 events
+# Script for MIB batch generation (generate 1000 B1 events
 # using either FLUKA or MARS inputs)
 #
-# To use is just do
-#
-# cmsRun BH_generator.py
 #
 # SV: 20/12/2010
 #
@@ -31,26 +28,28 @@ process.load('Configuration.EventContent.EventContent_cff')
 
 process.configurationMetadata = cms.untracked.PSet(
     version = cms.untracked.string('$Revision: 1.168.2.1 $'),
-    annotation = cms.untracked.string('Test script for MIB production'),
+    annotation = cms.untracked.string('Configuration/Generator/python/BeamHalo_cfi.py'),
     name = cms.untracked.string('PyReleaseValidation')
 )
 
-# Number of events
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(NEVTS)
 )
 
 # Input source
 process.source = cms.Source("EmptySource")
+
+# Add this line to generate event with a different seed
+#process.RandomNumberGeneratorService.generator.initialSeed = YOURSEED
 
 
 # Output definition
 process.output = cms.OutputModule("PoolOutputModule",
     splitLevel = cms.untracked.int32(0),
     outputCommands = process.RAWSIMEventContent.outputCommands,
-    fileName = cms.untracked.string('/tmp/sviret/BeamHalo_GEN.root'),
+    fileName = cms.untracked.string('BeamHalo_GEN.root'),
     dataset = cms.untracked.PSet(
-        dataTier = cms.untracked.string('GEN'),
+        dataTier = cms.untracked.string('GEN-SIM-RAW'),
         filterName = cms.untracked.string('')
     ),
     SelectEvents = cms.untracked.PSet(
@@ -60,24 +59,42 @@ process.output = cms.OutputModule("PoolOutputModule",
 
 # Additional output definition
 
-# Global tal clearly depends on the release you are working on
-# To get the correct GT, look at this page:
+# Other statements
 #
-# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideFrontierConditions?redirectedfrom=CMS.SWGuideFrontierConditions#Global_Tags_for_Monte_Carlo_Prod
-#
+# !!! Please check that the global tag corresponds to the CMSSW version you're using !!!
+# 
 
-process.GlobalTag.globaltag = 'START42_V11::All'
+process.GlobalTag.globaltag = 'MYGLOBALTAG'
+
 
 
 # Here we choose the input, look into MIB_generator_cfi for more infos about the inputs
  
 process.load('GeneratorInterface.BeamHaloGenerator.MIB_generator_cff')
 
-process.generator       = process.FLUKA_generator  # FLUKA
-#process.generator       = process.MARS_generator   # MARS
+process.generator = process.MYGENNAME_generator  # FLUKA OR MARS
+
+process.generator.InputFile = cms.string('MYFNAME')
+
+process.generator.generatorSettings = cms.untracked.vstring(
+    #ONLYMU"allowedPdgId 13 -13",  # The PDG IDs of the allowed particles
+    "BEAM NBEAM",             # Beam number to generate (DEFAULT is 2)
+    "SEED NSEED",             # Input val for the seed (DEFAULT is 1)    
+    "pxLimits     -1 -1",   # x momentum (in GeV)
+    "pyLimits     -1 -1",   # y momentum (in GeV)
+    "pzLimits     -1 -1",   # z momentum (in GeV) 
+    "energyLimits MINE -1",   # energy (in GeV)
+    "xLimits      -1 -1",   # x position (in mm)
+    "yLimits      -1 -1",   # y position (in mm)
+    "ptLimits     MINPT -1",
+    "phiLimits    -1 -1",
+    "etaLimits    -1 -1",
+    "rLimits      -1 -1",
+    "weightLimits -1 -1"
+)
+
 
 # Path and EndPath definitions
-
 process.generation_step = cms.Path(process.pgen)
 process.endjob_step     = cms.Path(process.endOfProcess)
 process.out_step        = cms.EndPath(process.output)
@@ -86,5 +103,5 @@ process.out_step        = cms.EndPath(process.output)
 process.schedule = cms.Schedule(process.generation_step,process.endjob_step,process.out_step)
 
 # special treatment in case of production filter sequence  
-for path in process.paths:     
+for path in process.paths: 
     getattr(process,path)._seq = process.generator*getattr(process,path)._seq

@@ -186,9 +186,13 @@ int FlukaHaloGenerator::readEvent(std::vector<BeamHaloParticle> *beamHaloEvent)
 	std::cout << "Conversion from FlukaParticle to BeamHaloParticle failed." << std::endl;
 	return 0;
       }
-      // Append the BeamHalo particle to the event.
-      beamHaloEvent->push_back(beamHaloParticle);
-      
+
+      // Append the BeamHalo particle to the event if it passes the cuts.
+      if(m_BHG_settings->checkParticle(&beamHaloParticle)) 
+      {
+	beamHaloEvent->push_back(beamHaloParticle);
+      }
+
       // Set the same event flag to enter the while loop to read the
       // rest of this event.
       m_sameEvent = true;
@@ -252,20 +256,27 @@ int FlukaHaloGenerator::readEvent(std::vector<BeamHaloParticle> *beamHaloEvent)
 	return 0;
       }
  
-      // Append the BeamHalo particle to the event.
-      beamHaloEvent->push_back(beamHaloParticle);
+      // Append the BeamHalo particle to the event if it passes the cuts.
+      if(m_BHG_settings->checkParticle(&beamHaloParticle)) 
+      {
+	beamHaloEvent->push_back(beamHaloParticle);
+      }
     }
     
     // Copy this particle into the last particle.
     m_lastFlukaParticle = m_flukaParticle;
   }
- 
+
+  //  cout << "Number of particles " << beamHaloEvent->size() << endl;
+
+
   if(beamHaloEvent->size() == 0) 
   {
-    cout << "No particles read from " << m_inputFile << endl;
-    return 0;
+    //cout << "No particles read from " << m_inputFile << endl;
+    if(!FlukaHaloGenerator::readEvent(beamHaloEvent)) return 0;
+    //return 0;
   }
-  
+
   m_nRead++;
   m_wRead++;
   
