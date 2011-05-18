@@ -48,7 +48,7 @@ class ElectronExtractor
   int getMatch(const pat::Electron *part, MCExtractor* m_MC);
 
   TLorentzVector *getEleLorentzVector(int eidx) {return (TLorentzVector*)m_ele_lorentzvector->At(eidx);}
-
+  float getEledB(int eidx) {return m_ele_dB[eidx];}
 
  private:
   

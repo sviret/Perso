@@ -1,3 +1,6 @@
+2011-05-18 viola <sordini@cern.ch>
+	fisrt version of mtt_analysis with skeleton for semie selection (not sure yet wether the chi2 does
+	meaningful stuff for semie)
 2011-05-17 viola <sordini@cern.ch>
 	(seriously: we write the dates mirrored??)
 	First commit of mtt_analysis (for event selection) and Chi2 (for chi2 calculation)

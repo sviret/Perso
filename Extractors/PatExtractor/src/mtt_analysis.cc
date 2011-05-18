@@ -5,7 +5,10 @@ mtt_analysis::mtt_analysis(bool do_MC_,bool do_SemiMu_, MuonExtractor *m_muon, E
 {
   /// Tree definition
   m_tree_Mtt = new TTree("Mtt","Analysis info");  
-  if (do_Chi2_)   m_tree_Chi2 = new TTree("Chi2","Chi2 info for selected events");  
+  if (do_Chi2_) {
+    m_tree_Chi2 = new TTree("Chi2","Chi2 info for selected events");  
+    m_Chi2 = new Chi2();
+  }
   
   /// Branches definition
   if(do_MC_)
@@ -14,18 +17,28 @@ mtt_analysis::mtt_analysis(bool do_MC_,bool do_SemiMu_, MuonExtractor *m_muon, E
     m_tree_Mtt->Branch("MC_mtt"    ,&m_MC_mtt    ,"MC_mtt/F");
   }
   reset(do_MC_);
-
-  m_tree_Mtt->Branch("mtt_NGoodMuons"    ,&m_mtt_NGoodMuons    ,"mtt_NGoodMuons/I");
-  m_tree_Mtt->Branch("mtt_NLooseGoodMuons"    ,&m_mtt_NLooseGoodMuons    ,"mtt_NLooseGoodMuons/I");
-  m_tree_Mtt->Branch("mtt_MuonPt"    ,&m_mtt_MuonPt ,"mtt_MuonPt[mtt_NGoodMuons]/F");
-  m_tree_Mtt->Branch("mtt_isSel"    ,&m_mtt_isSel    ,"mtt_isSel/I");
-
-  if (do_Chi2_) {
-    m_tree_Chi2->Branch("mtt_NumComb"    ,&m_mtt_NumComb    ,"mtt_NumComb/I");
-    m_tree_Chi2->Branch("mtt_SolChi2"    ,&m_mtt_SolChi2    ,"mtt_SolChi2[mtt_NumComb]/F");
-    m_tree_Chi2->Branch("mtt_BestSolChi2",&m_mtt_BestSolChi2,"mtt_BestSolChi2/F");
-    m_Chi2 = new Chi2();
+  if (do_SemiMu_){
+    m_tree_Mtt->Branch("mtt_NGoodMuons"    ,&m_mtt_NGoodMuons    ,"mtt_NGoodMuons/I");
+    m_tree_Mtt->Branch("mtt_NLooseGoodMuons"    ,&m_mtt_NLooseGoodMuons    ,"mtt_NLooseGoodMuons/I");
+    m_tree_Mtt->Branch("mtt_MuonPt"    ,&m_mtt_MuonPt ,"mtt_MuonPt[mtt_NGoodMuons]/F");
+    m_tree_Mtt->Branch("mtt_isSel"    ,&m_mtt_isSel    ,"mtt_isSel/I");
+    
+    if (do_Chi2_) {
+      m_tree_Chi2->Branch("mtt_NumComb"    ,&m_mtt_NumComb    ,"mtt_NumComb/I");
+      m_tree_Chi2->Branch("mtt_SolChi2"    ,&m_mtt_SolChi2    ,"mtt_SolChi2[mtt_NumComb]/F");
+      m_tree_Chi2->Branch("mtt_BestSolChi2",&m_mtt_BestSolChi2,"mtt_BestSolChi2/F");
+    }
+  } else {
+    m_tree_Mtt->Branch("mtt_NGoodElectrons"    ,&m_mtt_NGoodElectrons    ,"mtt_NGoodElectrons/I");
+    m_tree_Mtt->Branch("mtt_ElectronPt"    ,&m_mtt_ElectronPt ,"mtt_ElectronPt[mtt_NGoodElectrons]/F");
+    m_tree_Mtt->Branch("mtt_isSel"    ,&m_mtt_isSel    ,"mtt_isSel/I");
+    
+    if (do_Chi2_) {
+      m_tree_Chi2->Branch("mtt_NumComb"    ,&m_mtt_NumComb    ,"mtt_NumComb/I");
+      m_tree_Chi2->Branch("mtt_SolChi2"    ,&m_mtt_SolChi2    ,"mtt_SolChi2[mtt_NumComb]/F");
+      m_tree_Chi2->Branch("mtt_BestSolChi2",&m_mtt_BestSolChi2,"mtt_BestSolChi2/F");
   }
+}
 }
 
 mtt_analysis::~mtt_analysis(){;}
@@ -35,15 +48,20 @@ void mtt_analysis::reset(bool do_MC_)
   m_mtt_NGoodMuons=0;
   m_mtt_NLooseGoodMuons=0;
   m_mtt_isSel=0;
-  //define a resetvector!!
-  for (int tmp=0;tmp<20; tmp++) {
-    m_mtt_MuonPt[tmp]=0.;
-  }
+
+  m_mtt_NGoodElectrons=0;
+
   SelJetsIdx.clear();
   SelLeptIdx=-1;
   AllJetsPt=0.;
   m_mtt_NumComb=0;
   m_mtt_BestSolChi2=0.;
+
+  //ok, i know it's ugly, i will define a method resetvector promised!!
+  for (int tmp=0;tmp<20; tmp++) {
+    m_mtt_MuonPt[tmp]=0.;
+    m_mtt_ElectronPt[tmp]=0.;
+  }
   for (int tmp=0;tmp<100; tmp++) {
     m_mtt_SolChi2[tmp]=0.;
   }
@@ -77,7 +95,7 @@ int mtt_analysis::mtt_Sel(bool do_MC_,bool do_SemiMu_, MuonExtractor *m_muon, El
   //isSel=6 if it fails electron veto
   //isSel=7 if <4 good jets
   //isSel=8 if NO good muons in the event
-  int isSel=1;
+  isSel=1;
   if (isSel==1) isSel=VertexSel(m_vertex,isSel);
   if (isSel==1) isSel=METSel(m_MET,isSel);
   if (isSel==1) isSel=LeptonSel(do_SemiMu_,m_muon,m_electron,m_jet,isSel);
@@ -88,7 +106,7 @@ int mtt_analysis::mtt_Sel(bool do_MC_,bool do_SemiMu_, MuonExtractor *m_muon, El
 }
 
 int mtt_analysis::VertexSel(VertexExtractor *m_vertex, int isSel) {
-int  NGoodVtx=0;
+  NGoodVtx=0;
   for(int ivtx=0; ivtx<m_vertex->getSize(); ivtx++) {
     if (m_vertex->getVtxIsFake(ivtx) || m_vertex->getVtxNdof(ivtx)<4) continue;
     NGoodVtx++;
@@ -102,8 +120,8 @@ int  NGoodVtx=0;
 }
 
 int mtt_analysis::METSel(METExtractor *m_MET, int isSel) {
-  float minmet=20;
-  TLorentzVector *metP = m_MET->getMETLorentzVector(0);
+  minmet=20;
+  metP = m_MET->getMETLorentzVector(0);
   if (metP->Pt()>minmet) {
     isSel=1;
   } else {
@@ -113,44 +131,37 @@ int mtt_analysis::METSel(METExtractor *m_MET, int isSel) {
 }
 
 int mtt_analysis::LeptonSel(bool do_SemiMu_,MuonExtractor* m_muon, ElectronExtractor *m_electron, JetExtractor* m_jet, int isSel) {
+  //semimuonic channel
   if(do_SemiMu_){  
     //muon selection cuts
-    float minmupt=20.;
-    float maxmueta=2.1;
+    minmupt=20.;
+    maxmueta=2.1;
     
-    float minmupt_veto=10.;
-    float maxmueta_veto=2.5;
-    
-    TLorentzVector *muP;
-    TVector3 mu3P;
-    int nGoodMuons=0;
-    int goodmuidx=-1;
+    minmupt_veto=10.;
+    maxmueta_veto=2.5;
 
-    TLorentzVector *lmuP;
-    int nLooseGoodMuons=0;
-    
-    int Mupass2Dcut=0;  
-    float MuDRmin=0.4;
-    float MupTrelmin=35.;
-    
-    TLorentzVector *eP;
-    TVector3 e3P;
+    nGoodMuons=0;
+    goodmuidx=-1;
 
+    nLooseGoodMuons=0;
+    
+    Mupass2Dcut=0;  
+    MuDRmin=0.4;
+    MupTrelmin=35.;
     //electron veto for semimu channel selection cuts
-    float minept_veto=15.;
-    float maxeeta_veto=2.5;
-    int nGoodElectrons_veto=0;
-    int Elepass2Dcut=0;  
-    float EleDRmin=0.4;
-    float ElepTrelmin=35.;
+    minept_veto=15.;
+    maxeeta_veto=2.5;
+    nGoodElectrons_veto=0;
+    Elepass2Dcut_veto=0;  
+    EleDRmin_veto=0.4;
+    ElepTrelmin_veto=35.;
 
     for(int imu=0; imu<m_muon->getSize(); imu++) {   
       muP = m_muon->getMuLorentzVector(imu);
       if (fabs(muP->Pt())<minmupt || fabs(muP->Eta())>maxmueta) continue;
-      /*      if (m_muon->getMuisGlobal(imu)!=1 || m_muon->getMuisTracker(imu)!=1) continue;
+      if (m_muon->getMuisGlobal(imu)!=1 || m_muon->getMuisTracker(imu)!=1) continue;
       if (m_muon->getMunormChi2(imu)>=10. || m_muon->getMunValTrackerHits(imu)<=10. || m_muon->getMunMatches(imu)<=1 || m_muon->getMunValPixelHits(imu)<1) continue; //not sure what i have to do with the pixelhits!
-      if (fabs(m_muon->getMudB(imu))>0.2) continue; //ACHTUNG!! nominal cut is 0.02! put 0.2 for testing
-      */
+      if (fabs(m_muon->getMudB(imu))>0.02) continue; 
       //add the vertex cut!
       //get the 3-momentum
       mu3P = muP->Vect();
@@ -178,8 +189,8 @@ int mtt_analysis::LeptonSel(bool do_SemiMu_,MuonExtractor* m_muon, ElectronExtra
       eP = m_electron->getEleLorentzVector(ie);  
       if (fabs(eP->Pt())<minept_veto || fabs(eP->Eta())>maxeeta_veto) continue;
       e3P = eP->Vect();
-      Elepass2Dcut=Make2DCut(e3P,m_jet,EleDRmin,ElepTrelmin);
-      if(Elepass2Dcut==0) continue;
+      Elepass2Dcut_veto=Make2DCut(e3P,m_jet,EleDRmin_veto,ElepTrelmin_veto);
+      if(Elepass2Dcut_veto==0) continue;
       nGoodElectrons_veto++;
     }
     if(nGoodMuons<1) isSel=8;
@@ -190,28 +201,76 @@ int mtt_analysis::LeptonSel(bool do_SemiMu_,MuonExtractor* m_muon, ElectronExtra
     if (nGoodMuons>1) isSel=4;
     if (nLooseGoodMuons>0) isSel=5; 
     if (nGoodElectrons_veto>0) isSel=6;
+  } else { //else: we perform the semielectronic analysis
+
+    minelpt=20.;
+    maxeleta=2.5;
+    
+    nGoodElectrons=0;
+    goodelidx=-1;
+
+    Elepass2Dcut=0;  
+    EleDRmin=0.4;
+    ElepTrelmin=35.;
+
+    nGoodMuons_veto=0;
+    
+    Mupass2Dcut_veto=0;  
+    MuDRmin_veto=0.4;
+    MupTrelmin_veto=35.;
+    
+    for(int ie=0; ie<m_electron->getSize(); ie++) { 
+      eP = m_electron->getEleLorentzVector(ie);  
+      if(fabs(eP->Pt())<minelpt || fabs(eP->Eta())>maxeleta) continue;
+      if (fabs(m_electron->getEledB(ie))>0.02) continue; 
+      //IMPORTANT MISSING: cut in the electronID!!!
+      e3P = eP->Vect();
+      Elepass2Dcut=Make2DCut(e3P,m_jet,EleDRmin,ElepTrelmin);
+      //if(Elepass2Dcut==0) continue;
+      //ADD THE Z VETO
+      m_mtt_ElectronPt[nGoodElectrons]=eP->Pt();
+      nGoodElectrons++;
+      goodelidx=ie;
+    }
+    //muon veto for semie channel
+    for(int imu=0; imu<m_muon->getSize(); imu++) {   
+      muP = m_muon->getMuLorentzVector(imu);
+      if (fabs(muP->Pt())<minmupt_veto || fabs(muP->Eta())>maxmueta_veto) continue;
+      if (m_muon->getMuisGlobal(imu)!=1) continue;
+	mu3P = muP->Vect();
+	Mupass2Dcut_veto=Make2DCut(mu3P,m_jet,MuDRmin_veto,MupTrelmin_veto);
+	if(Mupass2Dcut_veto==0) continue;
+	nGoodMuons_veto++;
+    }
+    m_mtt_NGoodElectrons=nGoodElectrons;
+    if(nGoodElectrons<1) isSel=8;
+    if(nGoodElectrons==1) {
+      isSel=1;
+      SelLeptIdx=goodelidx;
+    }
+    if (nGoodElectrons>1) isSel=4;
+    //ADD THE Z VETO for issel=5!! 
+    if (nGoodMuons_veto>0) isSel=6;
   }
   return  isSel;
 }
 
 int mtt_analysis::Make2DCut(TVector3 lept3P,JetExtractor* m_jet, float cutDR, float cutPtrel) 
 {
-  int pass2Dcut=0;
-  TLorentzVector *jetP;
-  TVector3 jet3P;
-  float minjetpt=30.;
-  float DrMin=999.;
-  float pTRel=999.;
+  pass2Dcut=0;
+  minjetpt2D=30.;
+  DrMin=999.;
+  pTRel=999.;
 
   //loop over the jets to calculate variables for 2D cut
   for (int ij=0; ij<m_jet->getSize(); ij++) {
-    jetP = m_jet->getJetLorentzVector(ij);
-    if(fabs(jetP->Pt())<minjetpt) continue;
+    jetP2D = m_jet->getJetLorentzVector(ij);
+    if(fabs(jetP2D->Pt())<minjetpt2D) continue;
     //get the 3-momentum
-    jet3P = jetP->Vect();
-    if (jet3P.DeltaR(lept3P)<DrMin) {
-      DrMin=jet3P.DeltaR(lept3P);
-      pTRel=(lept3P.Px()*jetP->Px()+lept3P.Py()*jetP->Py())/fabs(jetP->Pt()); 
+    jet3P2D = jetP2D->Vect();
+    if (jet3P2D.DeltaR(lept3P)<DrMin) {
+      DrMin=jet3P2D.DeltaR(lept3P);
+      pTRel=(lept3P.Px()*jetP2D->Px()+lept3P.Py()*jetP2D->Py())/fabs(jetP2D->Pt()); 
     }
   }
   if (DrMin>cutDR || pTRel>cutPtrel) pass2Dcut=1;
@@ -221,13 +280,11 @@ int mtt_analysis::Make2DCut(TVector3 lept3P,JetExtractor* m_jet, float cutDR, fl
 
 
 int mtt_analysis::JetsSel(JetExtractor *m_jet, int isSel) {
-  int  NGoodJets=0;
-  float minjetpt=30.;
-  float maxjeteta=2.4; 
-  float min_btag_SSVHEM=1.74;
-  TLorentzVector *jetP;
+  NGoodJets=0;
+  minjetpt=30.;
+  maxjeteta=2.4; 
+  min_btag_SSVHEM=1.74;
   AllJetsPt=0.;
-
   for(int ij=0; ij<m_jet->getSize(); ij++) {
     jetP = m_jet->getJetLorentzVector(ij);
     if(fabs(jetP->Pt())<minjetpt || fabs(jetP->Eta())>maxjeteta) continue;
@@ -248,20 +305,14 @@ int mtt_analysis::JetsSel(JetExtractor *m_jet, int isSel) {
 void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,vector<int> JetsIdx,int LeptIdx, METExtractor *m_MET, MuonExtractor *m_muon, ElectronExtractor *m_electron, bool do_SemiMu_, float AllJetsPt)
 {
   //how do i define a jet as b-tagged for chi2 calculation
-  float min_btag_SSVHEM=1.74; 
+  min_btag_SSVHEM_chi2=1.74; 
   //jets indices
-  unsigned int bjet1idx=-1;
-  unsigned int bjet2idx=-1;
-  unsigned int jet3idx=-1;
-  unsigned int jet4idx=-1;
+bjet1idx=-1;
+bjet2idx=-1;
+jet3idx=-1;
+jet4idx=-1;
   //chi2 variables
-  float thischi2;
-  float minchi2;
-  //
-  vector<unsigned int> dontdoublecount;
-  bool doublecount;
-  vector<unsigned int> btaggedjets;
-  bool notthisone;
+  minchi2=999.;
   //count the b-tagged jets in the selected jets sample
   for (unsigned int i=0; i<JetsIdx.size(); i++) {
     if(m_jet->getJetBTagProb_SSVHE(i)>min_btag_SSVHEM) {
@@ -273,7 +324,7 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,vector<int> JetsIdx,
   //on the other hand the b-tag efficiency is low, so non-b-tagged jets can be associated to bjets
   //bottom line: only non b-tagged jets can be associated to the light jets (indices jet3idx and jet4idx below) 
   //in the chi2 calculation for this reason in the selected jets we need at least 2 non b-tagged jets
-  int numberoflightjets=JetsIdx.size()-btaggedjets.size();
+  numberoflightjets=JetsIdx.size()-btaggedjets.size();
   if(numberoflightjets<2) {
     //if we dont have at least 2 non b-tagged jets, chi2 is -1
     minchi2=999.;
@@ -317,7 +368,11 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,vector<int> JetsIdx,
 	    jet4idx=j4;
 	    m_mtt_NumComb++;
 	    //here we use the method to actually calculate the chi2
-	    if(do_SemiMu_) thischi2=m_Chi2->GlobalSimpleChi2(*(m_jet->getJetLorentzVector(jet3idx)),*(m_jet->getJetLorentzVector(jet4idx)),*(m_jet->getJetLorentzVector(bjet1idx)),*(m_jet->getJetLorentzVector(bjet2idx)), *(m_muon->getMuLorentzVector(LeptIdx)), *(m_MET->getMETLorentzVector(0)),AllJetsPt,do_SemiMu_);
+	    if(do_SemiMu_) {
+	      thischi2=m_Chi2->GlobalSimpleChi2(*(m_jet->getJetLorentzVector(jet3idx)),*(m_jet->getJetLorentzVector(jet4idx)),*(m_jet->getJetLorentzVector(bjet1idx)),*(m_jet->getJetLorentzVector(bjet2idx)), *(m_muon->getMuLorentzVector(LeptIdx)), *(m_MET->getMETLorentzVector(0)),AllJetsPt,do_SemiMu_); 
+	    } else {
+	      thischi2=m_Chi2->GlobalSimpleChi2(*(m_jet->getJetLorentzVector(jet3idx)),*(m_jet->getJetLorentzVector(jet4idx)),*(m_jet->getJetLorentzVector(bjet1idx)),*(m_jet->getJetLorentzVector(bjet2idx)), *(m_electron->getEleLorentzVector(LeptIdx)), *(m_MET->getMETLorentzVector(0)),AllJetsPt,do_SemiMu_); 
+	    }
 	    if(thischi2<minchi2) minchi2=thischi2;
 	    m_mtt_SolChi2[m_mtt_NumComb]=thischi2;
 	  }

@@ -35,6 +35,7 @@ class mtt_analysis
 {
  public:
   mtt_analysis(bool do_MC_,bool do_SemiMu_, MuonExtractor *m_muon, ElectronExtractor *m_electron, JetExtractor *m_jet, METExtractor *m_MET, VertexExtractor *m_vertex, bool do_Chi2_);
+
   ~mtt_analysis();
   
   //Selection
@@ -93,12 +94,91 @@ class mtt_analysis
   float m_mtt_MuonPt[20];
   int m_mtt_NLooseGoodMuons;
 
+  int m_mtt_NGoodElectrons;
+  float m_mtt_ElectronPt[20];
+
   vector<int> SelJetsIdx;
   int SelLeptIdx;
   float AllJetsPt;
   int m_mtt_NumComb;
   float m_mtt_SolChi2[100];
   float m_mtt_BestSolChi2;
+
+  //variables for semilept selection
+  int isSel;
+  int  NGoodVtx;
+  float minmet;
+  TLorentzVector *metP;
+
+  //generic variables for 2D cut
+  int pass2Dcut;
+  TLorentzVector *jetP2D;
+  TVector3 jet3P2D;
+  float minjetpt2D;
+  float DrMin;
+  float pTRel;
+
+    //variables for semimu selection
+    float minmupt;
+    float maxmueta;
+    float minmupt_veto;
+    float maxmueta_veto;
+    TLorentzVector *muP;
+    TVector3 mu3P;
+    int nGoodMuons;
+    int goodmuidx;
+    TLorentzVector *lmuP;
+    int nLooseGoodMuons;
+    int Mupass2Dcut;  
+    float MuDRmin;
+    float MupTrelmin;
+    TLorentzVector *eP;
+    TVector3 e3P;
+    //electron veto for semimu channel selection cuts
+    float minept_veto;
+    float maxeeta_veto;
+    int nGoodElectrons_veto;
+    int Elepass2Dcut_veto;  
+    float EleDRmin_veto;
+    float ElepTrelmin_veto;
+    //variables for semie selection
+    float minelpt;
+    float maxeleta;
+    TLorentzVector *elP;
+    TVector3 el3P;
+    int nGoodElectrons;
+    int goodelidx;
+    int Elepass2Dcut;  
+    float EleDRmin;
+    float ElepTrelmin;
+    int Mupass2Dcut_veto;
+    float MuDRmin_veto;
+    float MupTrelmin_veto;
+    int nGoodMuons_veto;
+    //variables for jet selection
+    int  NGoodJets;
+    float minjetpt;
+    float maxjeteta; 
+    float min_btag_SSVHEM;
+    TLorentzVector *jetP;
+    //variables to loop over combinations
+  //how do i define a jet as b-tagged for chi2 calculation
+  float min_btag_SSVHEM_chi2; 
+  //jets indices
+  unsigned int bjet1idx;
+  unsigned int bjet2idx;
+  unsigned int jet3idx;
+  unsigned int jet4idx;
+  //chi2 variables
+  float thischi2;
+  float minchi2;
+  //
+  vector<unsigned int> dontdoublecount;
+  bool doublecount;
+  vector<unsigned int> btaggedjets;
+  bool notthisone;
+  int numberoflightjets;
+
 };
 
 #endif 
