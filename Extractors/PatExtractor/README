@@ -1,0 +1,2 @@
+cvs co -d ./Extractors/PatExtractor UserCode/sviret/Extractors/PatExtractor
+
