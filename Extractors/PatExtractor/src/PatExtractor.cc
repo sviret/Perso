@@ -73,7 +73,7 @@ void PatExtractor::analyze(const edm::Event& event, const edm::EventSetup& setup
   if (do_Vertex_)   m_vertex->writeInfo(&event);
   if (do_MC_)       m_MC->writeInfo(&event);
   
-  if (do_Electron_) m_electron->writeInfo(&event);
+  if (do_Electron_)
   {
     (do_MC_)   
        ? m_electron->writeInfo(&event,m_MC)
