@@ -33,15 +33,16 @@ set TYPE         = "FLUKA"  # Input data type (MARS or FLUKA)
 # beam-gas_IR5       : BEAM1 beam gas inelastic events
 #
 
-set FILENAME     = "beam-halo_3.5TeV-R5"  # Input type 
+#set FILENAME     = "beam-halo_3.5TeV-R5"  # Input type 
+set FILENAME     = "beam-gas_IR5"  # Input type 
 set BEAM         = 1      # Which beam to simulate
 set PARTICLES    = ALL    # Which particles (replace by PDG_ID is necessary)
 set MIN_NRJ      = 0.02    # Minimal energy of generated particles, in GeV
 set MIN_PT       = 0.0    # Minimal transverse mom of gen. particles, in GeV/c
 
 
-set N_RUN        = 2       # Number of samples 
-set EVTS_PER_RUN = 50000   # Number of events per sample
+set N_RUN        = 1        # Number of samples 
+set EVTS_PER_RUN = 500000   # Number of events per sample
 
 # With FLUKA, we have N_RUN = 1 (events are not picked up randomly) 
 if ($TYPE == "FLUKA") then
@@ -54,10 +55,14 @@ echo $N_RUN
 while ($i != $N_RUN)
 echo $i
 @ i++
+
+set OUTPUT_DIR = $CASTOR_HOME/CMS/MIB/RECO/Prod/$TYPE
+set OUT_NAME   = "MIB_gen_"$TYPE"_BEAM_"$BEAM"_E_"$MIN_NRJ"_PT_"$MIN_PT"_"$i".root"  
+
 echo "#\!/bin/bash" > gen_job_${BEAM}_${i}.sh
-echo "source $HOME/testarea/$RELEASE/src/GeneratorInterface/BeamHaloGenerator/batch/generator.sh $EVTS_PER_RUN $PARTICLES $BEAM $MIN_NRJ $MIN_PT $TYPE $GTAG $FILENAME $i $RELEASE_DIR " >> gen_job_${BEAM}_${i}.sh
+echo "source $HOME/testarea/$RELEASE/src/GeneratorInterface/BeamHaloGenerator/batch/generator.sh $EVTS_PER_RUN $PARTICLES $BEAM $MIN_NRJ $MIN_PT $TYPE $GTAG $FILENAME $i $RELEASE_DIR" >> gen_job_${BEAM}_${i}.sh
 chmod 755 gen_job_${BEAM}_${i}.sh
-#bsub -q 1nd gen_job_${BEAM}_${i}.sh
+bsub -q 1nd gen_job_${BEAM}_${i}.sh
 end 
 
 

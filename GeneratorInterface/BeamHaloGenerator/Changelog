@@ -1,3 +1,7 @@
+2011-05-19  Seb Viret  <viret@in2p3.fr>
+ 
+       	* Update of the batch scripts to fit with the SIMRECO part
+
 2011-05-18  Seb Viret  <viret@in2p3.fr>
  
        	* A new /batch/ directory has been added for massive MC sample production.

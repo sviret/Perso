@@ -78,9 +78,6 @@ fi
 DATA_NAME=MIB_gen_${6}_$tag$tag_MU${9}.root
 CONTROL_NAME=MIB_gen_${6}_$tag$tag_MU${9}_control.root
 
-#echo $DATA_NAME
-#echo $PATH
-
 # Launch the whole thing
 #
 
@@ -92,5 +89,5 @@ cmsRun BH_dummy.py
 
 ls -l
 
-xrdcp BeamHalo_GEN.root root://castorcms/$CASTOR_HOME/CMS/MIB/GEN/Prod/$DATA_NAME
-xrdcp HALO_*.root root://castorcms/$CASTOR_HOME/CMS/MIB/GEN/Control/$CONTROL_NAME
+xrdcp BeamHalo_GEN.root root://castorcms/$CASTOR_HOME/CMS/MIB/GEN/Prod/${6}/$DATA_NAME
+#xrdcp HALO_*.root root://castorcms/$CASTOR_HOME/CMS/MIB/GEN/Control/$CONTROL_NAME
