@@ -33,6 +33,44 @@ PhotonExtractor::PhotonExtractor(edm::InputTag tag)
   PhotonExtractor::reset();
 }
 
+
+PhotonExtractor::PhotonExtractor(TFile *a_file)
+{
+  std::cout << "PhotonExtractor objet is retrieved" << std::endl;
+
+  // Tree definition
+  m_OK = false;
+
+  m_tree_photon = dynamic_cast<TTree*>(a_file->Get("photon"));
+
+  if (!m_tree_photon)
+  {
+    std::cout << "This tree doesn't exist!!!" << std::endl;
+    return;
+  } 
+
+  m_OK = true;
+
+  m_pho_lorentzvector = new TClonesArray("TLorentzVector");
+
+
+  // Branches definition
+
+  m_tree_photon->SetBranchAddress("n_photons",  &m_n_photons);
+  m_tree_photon->SetBranchAddress("photon_4vector",&m_pho_lorentzvector);
+  m_tree_photon->SetBranchAddress("photon_e",   &m_pho_E);				
+  m_tree_photon->SetBranchAddress("photon_px",  &m_pho_px);
+  m_tree_photon->SetBranchAddress("photon_py",  &m_pho_py);
+  m_tree_photon->SetBranchAddress("photon_pz",  &m_pho_pz);
+  m_tree_photon->SetBranchAddress("photon_vx",  &m_pho_vx);
+  m_tree_photon->SetBranchAddress("photon_vy",  &m_pho_vy);
+  m_tree_photon->SetBranchAddress("photon_vz",  &m_pho_vz);
+  m_tree_photon->SetBranchAddress("photon_eta", &m_pho_eta);
+  m_tree_photon->SetBranchAddress("photon_phi", &m_pho_phi);
+  m_tree_photon->SetBranchAddress("photon_mcParticleIndex",&m_pho_MCIndex);  
+}
+
+
 PhotonExtractor::~PhotonExtractor()
 {}
 
@@ -100,6 +138,15 @@ void PhotonExtractor::writeInfo(const pat::Photon *part, int index)
   m_pho_phi[index]  = part->phi();
 }
 
+
+//
+// Method getting the info from an input file
+//
+
+void PhotonExtractor::getInfo(int ievt) 
+{
+  m_tree_photon->GetEntry(ievt); 
+}
 
 // Method initializing everything (to do for each event)
 

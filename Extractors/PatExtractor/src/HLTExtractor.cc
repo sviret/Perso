@@ -7,6 +7,7 @@ HLTExtractor::HLTExtractor()
 
 
   // Tree definition
+  m_OK = true;
 
   m_tree_HLT       = new TTree("HLT","HLT info");  
 
@@ -18,6 +19,29 @@ HLTExtractor::HLTExtractor()
   // Set everything to 0
 
   HLTExtractor::reset();
+}
+
+HLTExtractor::HLTExtractor(TFile *a_file)
+{
+  std::cout << "HLTExtractor objet is retrieved" << std::endl;
+
+  // Tree definition
+  m_OK = false;
+
+  m_tree_HLT = dynamic_cast<TTree*>(a_file->Get("HLT"));
+
+  if (!m_tree_HLT)
+  {
+    std::cout << "This tree doesn't exist!!!" << std::endl;
+    return;
+  }
+
+  m_OK = true;
+
+  // Branches definition
+
+  m_tree_HLT->SetBranchAddress("n_paths",  &m_n_HLTs);       
+  m_tree_HLT->SetBranchAddress("HLT_vector",&m_HLT_vector);
 }
 
 HLTExtractor::~HLTExtractor()
@@ -54,7 +78,7 @@ void HLTExtractor::writeInfo(const edm::Event *event)
 	  << std::endl;
 	*/
 
-	m_HLT_vector.push_back(triggerNames.triggerName(i));
+	m_HLT_vector->push_back(triggerNames.triggerName(i));
 	m_n_HLTs++;
       }
     }
@@ -65,12 +89,21 @@ void HLTExtractor::writeInfo(const edm::Event *event)
 }
 
 
+//
+// Method getting the info from an input file
+//
+
+void HLTExtractor::getInfo(int ievt) 
+{
+  m_tree_HLT->GetEntry(ievt); 
+}
+
 // Method initializing everything (to do for each HLT)
 
 void HLTExtractor::reset()
 {
   m_n_HLTs = 0;
-  m_HLT_vector.clear();
+  m_HLT_vector->clear();
 }
 
 
@@ -89,3 +122,22 @@ int  HLTExtractor::getSize()
   return m_n_HLTs;
 }
  
+ 
+void HLTExtractor::print()
+{
+  if (HLTExtractor::isOK())
+  {
+    std::cout << "------------------------------------" << std::endl;
+    std::cout << "This event fired " << HLTExtractor::getSize() << " HLT path(s):" << std::endl;
+    
+    for(int i=0 ; i<HLTExtractor::getSize(); ++i) 
+    {
+      std::cout << i+1 << " : " << HLTExtractor::paths(i) << std::endl;
+    }
+    std::cout << "------------------------------------" << std::endl;
+  }
+  else
+  {
+    std::cout << "There is no HLT tree in this rootuple" << std::endl;
+  }
+}

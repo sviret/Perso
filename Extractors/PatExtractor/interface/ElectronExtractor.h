@@ -32,6 +32,7 @@ class ElectronExtractor
  public:
 
   ElectronExtractor(edm::InputTag tag);
+  ElectronExtractor(TFile *a_file);
   ~ElectronExtractor();
 
   void writeInfo(const edm::Event *event,MCExtractor* m_MC); 
@@ -44,9 +45,11 @@ class ElectronExtractor
   void fillSize(int size);
   int  getSize();
   void setPF(bool isPF); 
+  void getInfo(int ievt); 
   
   int getMatch(const pat::Electron *part, MCExtractor* m_MC);
 
+  bool isOK() {return m_OK;}
   TLorentzVector *getEleLorentzVector(int eidx) {return (TLorentzVector*)m_ele_lorentzvector->At(eidx);}
   float getEledB(int eidx) {return m_ele_dB[eidx];}
 
@@ -62,6 +65,7 @@ class ElectronExtractor
   
   bool  m_isPF_electron;
 
+  bool m_OK;
   int   m_n_electrons;
 
   TClonesArray* m_ele_lorentzvector;

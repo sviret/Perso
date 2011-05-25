@@ -21,6 +21,7 @@
 
 #include "TMath.h"
 #include "TTree.h"
+#include "TFile.h"
 #include "TLorentzVector.h"
 #include "TClonesArray.h"
 
@@ -30,6 +31,7 @@ class MCExtractor
  public:
 
   MCExtractor();
+  MCExtractor(TFile *a_file);
   ~MCExtractor();
 
 
@@ -39,14 +41,19 @@ class MCExtractor
   void fillTree(); 
   void fillSize(int size);
   int  getSize();
+  void getInfo(int ievt); 
 
-  inline int   getStatus(int index){return m_MC_status[index];}
-  inline int   getType(int index){return m_MC_type[index];}
-  inline float getPx(int index){return m_MC_px[index];}
-  inline float getPy(int index){return m_MC_py[index];}
-  inline float getPz(int index){return m_MC_pz[index];}
-  inline float getE(int index){return m_MC_E[index];}
-  inline float getMom1Index(int index){return m_MC_imot1[index];}
+  // Setters/Getters
+
+  bool isOK() {return m_OK;}
+
+  int   getStatus(int index){return m_MC_status[index];}
+  int   getType(int index){return m_MC_type[index];}
+  float getPx(int index){return m_MC_px[index];}
+  float getPy(int index){return m_MC_py[index];}
+  float getPz(int index){return m_MC_pz[index];}
+  float getE(int index){return m_MC_E[index];}
+  float getMom1Index(int index){return m_MC_imot1[index];}
 
 
  private:
@@ -54,6 +61,8 @@ class MCExtractor
   TTree* m_tree_MC;
 
   static const int 	m_MCs_MAX        = 1000;
+
+  bool m_OK;
 
   int   m_n_MCs;
   TClonesArray *m_MC_lorentzvector;

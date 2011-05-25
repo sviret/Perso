@@ -29,6 +29,37 @@ METExtractor::METExtractor(edm::InputTag tag)
   METExtractor::reset();
 }
 
+METExtractor::METExtractor(TFile *a_file)
+{
+  std::cout << "METExtractor objet is retrieved" << std::endl;
+
+
+  // Tree definition
+  m_OK = false;
+
+  m_tree_met = dynamic_cast<TTree*>(a_file->Get("MET_PF"));
+
+
+  if (!m_tree_met)
+  {
+    std::cout << "This tree doesn't exist!!!" << std::endl;
+    return;
+  }
+
+  m_OK = true;
+
+  m_met_lorentzvector = new TClonesArray("TLorentzVector");
+
+  m_tree_met->SetBranchAddress("n_mets",  &m_n_mets);
+  m_tree_met->SetBranchAddress("met_4vector",&m_met_lorentzvector);
+  m_tree_met->SetBranchAddress("met_e",   &m_met_E);
+  m_tree_met->SetBranchAddress("met_px",  &m_met_px);
+  m_tree_met->SetBranchAddress("met_py",  &m_met_py);
+  m_tree_met->SetBranchAddress("met_pz",  &m_met_pz);
+  m_tree_met->SetBranchAddress("met_eta", &m_met_eta);
+  m_tree_met->SetBranchAddress("met_phi", &m_met_phi);
+}
+
 METExtractor::~METExtractor()
 {}
 
@@ -70,6 +101,15 @@ void METExtractor::writeInfo(const pat::MET *part, int index)
   m_met_phi[index]      = part->phi();
 }
 
+
+//
+// Method getting the info from an input file
+//
+
+void METExtractor::getInfo(int ievt) 
+{
+  m_tree_met->GetEntry(ievt); 
+}
 
 // Method initializing everything (to do for each event)
 

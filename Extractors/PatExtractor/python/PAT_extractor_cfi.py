@@ -2,20 +2,36 @@ import FWCore.ParameterSet.Config as cms
 
 PATextraction = cms.EDAnalyzer("PatExtractor",
 
+
+
+
 ##
 ## First you define the name of the  output ROOTfile
 ##
-
-
+                               
   extractedRootFile = cms.string('extracted.root'),
 
 
 ##
-## Then you define the content of the output file
+## Then the name of the input ROOTfile, if you start from already extracted file
+##
+                               
+  inputRootFile     = cms.string('default.root'),
+
+
+##
+## Here you tell is you start from a PATuple (True) or an extracted ROOTuple (False)
+##
+
+  fillTree = cms.untracked.bool(True),
+
+
+##
+## Then you define the content of the output file (all set to false, turn on on request in you config files)
 ##
                                
    # Add HLT information
-   doHLT         = cms.untracked.bool(True),
+   doHLT         = cms.untracked.bool(False),
                                
    # Add MC information
    doMC          = cms.untracked.bool(False),
@@ -26,28 +42,36 @@ PATextraction = cms.EDAnalyzer("PatExtractor",
    photon_tag    = cms.InputTag( "selectedPatPhotons" ),
 
    # Add Electron information
-   doElectron    = cms.untracked.bool(True),
+   doElectron    = cms.untracked.bool(False),
    electron_tag  = cms.InputTag( "selectedPatElectronsPFlow" ),
 
    # Add Muon information
-   doMuon        = cms.untracked.bool(True),
+   doMuon        = cms.untracked.bool(False),
    muon_tag      = cms.InputTag( "selectedPatMuonsPFlow" ),
 
    # Add Jet information
-   doJet         = cms.untracked.bool(True),
+   doJet         = cms.untracked.bool(False),
    jet_tag       = cms.InputTag( "selectedPatJetsPFlow" ),
 
    # Add MET information
-   doMET         = cms.untracked.bool(True),
+   doMET         = cms.untracked.bool(False),
    met_tag       = cms.InputTag( "patMETsPFlow" ),
 
    # Add PV information
-   doVertex      = cms.untracked.bool(True),
+   doVertex      = cms.untracked.bool(False),
    vtx_tag       = cms.InputTag( "offlinePrimaryVertices" ),
 
-   # Add PV information
-   doMtt      = cms.untracked.bool(True),
-   doSemiMu      = cms.untracked.bool(True),
-   doChi2      = cms.untracked.bool(True)
+   # Add Track information
+   doTrack       = cms.untracked.bool(False),
+   trk_tag       = cms.InputTag( "generalTracks" ),
+
+
+##
+## Finally you put some details on the analysis
+##
+
+   doMtt         = cms.untracked.bool(False),
+   doSemiMu      = cms.untracked.bool(False),
+   doChi2        = cms.untracked.bool(False)
 
 )

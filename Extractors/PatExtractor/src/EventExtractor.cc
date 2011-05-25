@@ -23,6 +23,33 @@ EventExtractor::EventExtractor()
   EventExtractor::reset();
 }
 
+EventExtractor::EventExtractor(TFile *a_file)
+{
+  std::cout << "EventExtractor objet is retrieved" << std::endl;
+
+
+  // Tree definition
+
+  m_tree_event = dynamic_cast<TTree*>(a_file->Get("event"));
+
+
+  if (!m_tree_event)
+    std::cout << "Event tree not defined, this is bad" << std::endl;
+
+  // Branches definition
+
+  m_n_events = m_tree_event->GetEntries();
+
+  std::cout << "This file contains " << m_n_events << " events..." << std::endl;
+
+
+  m_tree_event->SetBranchAddress("evtID",  &m_evtID);
+  m_tree_event->SetBranchAddress("lumi",   &m_lumi);
+  m_tree_event->SetBranchAddress("run",    &m_run);
+  m_tree_event->SetBranchAddress("BCID",   &m_BCID);
+  m_tree_event->SetBranchAddress("time",   &m_time);
+}
+
 EventExtractor::~EventExtractor()
 {}
 
@@ -44,6 +71,15 @@ void EventExtractor::writeInfo(const edm::Event *event)
 }
 
 
+//
+// Method getting the info from an input file
+//
+
+void EventExtractor::getInfo(int ievt) 
+{
+  m_tree_event->GetEntry(ievt); 
+}
+
 // Method initializing everything (to do for each event)
 
 void EventExtractor::reset()
@@ -55,5 +91,12 @@ void EventExtractor::reset()
   m_run     =  0;
 }
 
+// Method print the event info
 
- 
+void EventExtractor::print()
+{
+  std::cout << "------------------------------------" << std::endl;
+  std::cout << "Dealing with event : " << EventExtractor::evtID() << std::endl;
+  std::cout << "From run           : " << EventExtractor::run() << std::endl;
+  std::cout << "------------------------------------" << std::endl;
+}

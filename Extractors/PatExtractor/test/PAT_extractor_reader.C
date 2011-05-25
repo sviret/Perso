@@ -27,7 +27,7 @@
   // The input file (adapt it to your situation)
 
   //TFile *res = new TFile("THE_NAME_OF_YOUR_FILE");
-  TFile *res = new TFile("extracted.root");
+  TFile *res = new TFile("/tmp/sviret/test.root");
 
 
   // The variables you will look at 

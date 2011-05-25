@@ -44,6 +44,54 @@ JetExtractor::JetExtractor(edm::InputTag tag)
   JetExtractor::reset();
 }
 
+
+JetExtractor::JetExtractor(TFile *a_file)
+{
+  std::cout << "JetExtractor objet is retrieved" << std::endl;
+
+  // Tree definition
+  m_OK = false;
+
+  m_tree_jet = dynamic_cast<TTree*>(a_file->Get("jet_PF"));
+
+  if (!m_tree_jet)
+  {
+    std::cout << "This tree doesn't exist!!!" << std::endl;
+    return;
+  }
+
+  m_OK = true;
+
+  m_jet_lorentzvector = new TClonesArray("TLorentzVector");
+
+
+  m_tree_jet->SetBranchAddress("n_jets",  &m_n_jets);
+  m_tree_jet->SetBranchAddress("jet_4vector",&m_jet_lorentzvector);
+  m_tree_jet->SetBranchAddress("jet_e",   &m_jet_E);
+  m_tree_jet->SetBranchAddress("jet_px",  &m_jet_px);
+  m_tree_jet->SetBranchAddress("jet_py",  &m_jet_py);
+  m_tree_jet->SetBranchAddress("jet_pz",  &m_jet_pz);
+  m_tree_jet->SetBranchAddress("jet_vx",  &m_jet_vx);
+  m_tree_jet->SetBranchAddress("jet_vy",  &m_jet_vy);
+  m_tree_jet->SetBranchAddress("jet_vz",  &m_jet_vz);
+  m_tree_jet->SetBranchAddress("jet_eta", &m_jet_eta);
+  m_tree_jet->SetBranchAddress("jet_phi", &m_jet_phi);
+  m_tree_jet->SetBranchAddress("jet_chmult",        &m_jet_chmult);
+  m_tree_jet->SetBranchAddress("jet_chmuEfrac",     &m_jet_chmuEfrac);
+  m_tree_jet->SetBranchAddress("jet_chemEfrac",     &m_jet_chemEfrac);
+  m_tree_jet->SetBranchAddress("jet_chhadEfrac",    &m_jet_chhadEfrac);
+  m_tree_jet->SetBranchAddress("jet_nemEfrac",      &m_jet_nemEfrac);
+  m_tree_jet->SetBranchAddress("jet_nhadEfrac",     &m_jet_nhadEfrac);
+  m_tree_jet->SetBranchAddress("jet_btag_jetProb",  &m_jet_btag_jetProb);
+  m_tree_jet->SetBranchAddress("jet_btag_BjetProb", &m_jet_btag_BjetProb);
+  m_tree_jet->SetBranchAddress("jet_btag_SSVHE",    &m_jet_btag_SSVHE);
+  m_tree_jet->SetBranchAddress("jet_btag_SSVHP",    &m_jet_btag_SSVHP);
+  m_tree_jet->SetBranchAddress("jet_mcParticleIndex",&m_jet_MCIndex);
+
+
+}
+
+
 JetExtractor::~JetExtractor()
 {}
 
@@ -124,6 +172,16 @@ void JetExtractor::writeInfo(const pat::Jet *part, int index)
     m_jet_btag_SSVHE[index]    = part->bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
     m_jet_btag_SSVHP[index]    = part->bDiscriminator("simpleSecondaryVertexHighPurBJetTags");
   }
+}
+
+
+//
+// Method getting the info from an input file
+//
+
+void JetExtractor::getInfo(int ievt) 
+{
+  m_tree_jet->GetEntry(ievt); 
 }
 
 

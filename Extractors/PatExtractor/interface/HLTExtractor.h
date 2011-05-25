@@ -28,22 +28,32 @@ class HLTExtractor
  public:
 
   HLTExtractor();
+  HLTExtractor(TFile *a_file);
   ~HLTExtractor();
 
 
   void writeInfo(const edm::Event *event); 
+  void getInfo(int ievt); 
   void reset();
   void fillTree(); 
   void fillSize(int size);
   int  getSize();
+  void print();
+
+  // Setters/Getters
+
+  bool isOK() {return m_OK;}
+
+  std::string paths(int i) {return m_HLT_vector->at(i);}
 
  private:
   
   TTree* m_tree_HLT;
 
   int   m_n_HLTs;
-  std::vector< std::string > m_HLT_vector;
+  std::vector< std::string > *m_HLT_vector;
 
+  bool m_OK;
 };
 
 #endif 

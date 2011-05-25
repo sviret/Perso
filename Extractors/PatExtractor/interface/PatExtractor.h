@@ -24,6 +24,7 @@
 #include "../interface/EventExtractor.h"
 #include "../interface/HLTExtractor.h"
 #include "../interface/mtt_analysis.h"
+#include "../interface/TrackExtractor.h"
 
 #include "TFile.h"
 
@@ -45,8 +46,15 @@ class PatExtractor : public edm::EDAnalyzer {
 
   void analyze(const edm::Event&, const edm::EventSetup& );
   
+  void fillInfo(const edm::Event *event);
+  void getInfo(int ievent);
+  void initialize();
+  void retrieve();
+  void doAna();
+
  private:
 
+  bool do_fill_;
   bool do_HLT_;
   bool do_MC_;
   bool do_Photon_;
@@ -58,6 +66,8 @@ class PatExtractor : public edm::EDAnalyzer {
   bool do_Mtt_;
   bool do_SemiMu_;  
   bool do_Chi2_;
+  bool do_Trk_;
+
 
   edm::InputTag photon_tag_;   // 
   edm::InputTag electron_tag_; // 
@@ -66,11 +76,16 @@ class PatExtractor : public edm::EDAnalyzer {
   edm::InputTag met_tag_;      // 
   edm::InputTag MC_tag_;       // 
   edm::InputTag vtx_tag_;      // 
+  edm::InputTag trk_tag_;      // 
 
   // Definition of root-tuple :
 
   std::string outFilename_;
-  TFile* m_file;
+  std::string inFilename_;
+
+
+  TFile* m_infile;
+  TFile* m_outfile;
 
 
   ElectronExtractor* m_electron;
@@ -80,6 +95,7 @@ class PatExtractor : public edm::EDAnalyzer {
   METExtractor*      m_MET;
   MuonExtractor*     m_muon;
   VertexExtractor*   m_vertex;
+  TrackExtractor*    m_track;
   EventExtractor*    m_event;
   HLTExtractor*      m_HLT;
   mtt_analysis*      m_Mtt_analysis;

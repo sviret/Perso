@@ -30,11 +30,13 @@ class VertexExtractor
  public:
 
   VertexExtractor(edm::InputTag tag);
+  VertexExtractor(TFile *a_file);
   ~VertexExtractor();
 
 
   void writeInfo(const reco::Vertex *part, int index); 
   void writeInfo(const edm::Event *event); 
+  void getInfo(int ievt); 
 
   void reset();
   void fillTree(); 
@@ -43,12 +45,14 @@ class VertexExtractor
   float getVtxNdof(int vtxidx) {return m_vtx_ndof[vtxidx];}
   bool getVtxIsFake(int vtxidx) {return m_vtx_isFake[vtxidx];}
 
+  bool isOK() {return m_OK;}
  private:
   
   TTree* m_tree_vtx;
 
   static const int 	m_vertices_MAX   = 50;
 
+  bool m_OK;
   edm::InputTag m_tag;
 
   int   m_n_vertices;

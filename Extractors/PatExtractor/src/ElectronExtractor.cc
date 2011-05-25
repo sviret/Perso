@@ -56,6 +56,64 @@ ElectronExtractor::ElectronExtractor(edm::InputTag tag)
   ElectronExtractor::reset();
 }
 
+
+
+ElectronExtractor::ElectronExtractor(TFile *a_file)
+{
+  std::cout << "ElectronExtractor objet is retrieved" << std::endl;
+
+  // Tree definition
+  m_OK = false;
+
+  m_tree_electron = dynamic_cast<TTree*>(a_file->Get("electron_PF"));
+
+  if (!m_tree_electron)
+  {
+    std::cout << "This tree doesn't exist!!!" << std::endl;
+    return;
+  }
+
+
+  m_OK = true;
+
+  m_ele_lorentzvector = new TClonesArray("TLorentzVector");
+
+
+  // Branches definition
+
+  m_tree_electron->SetBranchAddress("n_electrons",&m_n_electrons);
+  m_tree_electron->SetBranchAddress("electron_4vector",&m_ele_lorentzvector);
+  m_tree_electron->SetBranchAddress("electron_e",&m_ele_E);
+  m_tree_electron->SetBranchAddress("electron_px",&m_ele_px);
+  m_tree_electron->SetBranchAddress("electron_py",&m_ele_py);
+  m_tree_electron->SetBranchAddress("electron_pz",&m_ele_pz);
+  m_tree_electron->SetBranchAddress("electron_vx",&m_ele_vx);
+  m_tree_electron->SetBranchAddress("electron_vy",&m_ele_vy);
+  m_tree_electron->SetBranchAddress("electron_vz",&m_ele_vz);
+  m_tree_electron->SetBranchAddress("electron_eta",&m_ele_eta);
+  m_tree_electron->SetBranchAddress("electron_phi",&m_ele_phi);
+  m_tree_electron->SetBranchAddress("electron_charge",&m_ele_charge);
+  m_tree_electron->SetBranchAddress("electron_eidLoose",&m_ele_eidLoose);
+  m_tree_electron->SetBranchAddress("electron_eidRobustHighEnergy",&m_ele_eidRobustHighEnergy);
+  m_tree_electron->SetBranchAddress("electron_eidRobustLoose",&m_ele_eidRobustLoose);
+  m_tree_electron->SetBranchAddress("electron_eidRobustTight",&m_ele_eidRobustTight);
+  m_tree_electron->SetBranchAddress("electron_eidTight",&m_ele_eidTight);
+  m_tree_electron->SetBranchAddress("electron_eidpf_evspi",&m_ele_eidpf_evspi);
+  m_tree_electron->SetBranchAddress("electron_eidpf_evsmu",&m_ele_eidpf_evsmu);
+  m_tree_electron->SetBranchAddress("electron_dB",&m_ele_dB);
+  m_tree_electron->SetBranchAddress("electron_trackIso",&m_ele_trackIso);
+  m_tree_electron->SetBranchAddress("electron_ecalIso",&m_ele_ecalIso);
+  m_tree_electron->SetBranchAddress("electron_hcalIso",&m_ele_hcalIso);
+  m_tree_electron->SetBranchAddress("electron_pfParticleIso",&m_ele_pfParticleIso);
+  m_tree_electron->SetBranchAddress("electron_pfChargedHadronIso",&m_ele_pfChargedHadronIso);
+  m_tree_electron->SetBranchAddress("electron_pfNeutralHadronIso",&m_ele_pfNeutralHadronIso);
+  m_tree_electron->SetBranchAddress("electron_pfPhotonIso",&m_ele_pfPhotonIso);
+  m_tree_electron->SetBranchAddress("electron_numberOfMissedInnerLayer",&m_ele_numberOfMissedInnerLayer);
+  m_tree_electron->SetBranchAddress("electron_mcParticleIndex",&m_ele_MCIndex);
+
+}
+
+
 ElectronExtractor::~ElectronExtractor()
 {}
 
@@ -150,6 +208,15 @@ void ElectronExtractor::writeInfo(const pat::Electron *part, int index)
   }
 }
 
+
+//
+// Method getting the info from an input file
+//
+
+void ElectronExtractor::getInfo(int ievt) 
+{
+  m_tree_electron->GetEntry(ievt); 
+}
 
 // Method initializing everything (to do for each event)
 

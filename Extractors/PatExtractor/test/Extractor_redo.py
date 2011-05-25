@@ -1,3 +1,10 @@
+#################
+#
+# This is a basic script for testing the analysis on already extracted file 
+#
+#
+#################
+
 import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("PATextractor")
@@ -17,35 +24,32 @@ process.options = cms.untracked.PSet(
 )
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(1) # Don't change this!!!!!!
 )
 
-myfilelist = cms.untracked.vstring()
-myfilelist.extend( [
-    'file:/tmp/sviret/patTuple_PATandPF2PAT_1_2_S3q.root'
-        ] 
-)
-
-process.source = cms.Source("PoolSource",
-                            fileNames=myfilelist,
-                            duplicateCheckMode = cms.untracked.string( 'noDuplicateCheck' )
-)
+process.source = cms.Source("EmptySource")
 
 process.load("Extractors.PatExtractor.PAT_extractor_cff")
-process.PATextraction.doMuon     = True
-process.PATextraction.doElectron = True
-process.PATextraction.doJet      = True
-process.PATextraction.doMET      = True
-process.PATextraction.doVertex   = True
-##analysis switches
-process.PATextraction.doMtt      = True
+
+
+# Here you put the different options you want to turn ON 
+
+process.PATextraction.fillTree = False # Don't redo the PatExtraction
+
+#analysis switches
+process.PATextraction.doMtt = True
 #doSemiMu is only read out if doMtt is true, so if we perform the analysis
 #id doSemiMu is true, we perform the analysis for the semimuonic channel (you couldnt guess eh!)
 #if doSemiMu is false, it means we perform the analysis for the semielectronic channel
-process.PATextraction.doSemiMu   = True
-process.PATextraction.doChi2     = True
+process.PATextraction.doSemiMu = True
+process.PATextraction.doChi2 = True
+
+# Input file name
+process.PATextraction.inputRootFile=cms.string('extracted.root')
+
+# Output file name
+process.PATextraction.extractedRootFile=cms.string('reprocessed.root')
+
 process.p = cms.Path(process.PATextraction)
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
-#process.out.fileName = cms.untracked.string('test.root')
-process.PATextraction.extractedRootFile=cms.string('extracted.root')

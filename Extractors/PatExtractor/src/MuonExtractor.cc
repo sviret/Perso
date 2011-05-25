@@ -48,6 +48,7 @@ MuonExtractor::MuonExtractor(edm::InputTag tag)
   m_tree_muon->Branch("muon_mcParticleIndex",&m_muo_MCIndex,"muon_mcParticleIndex[n_muons]/I");
   
   m_isPF_muon=true; // By default we use PF muons
+  m_OK = true;
 
   // Set everything to 0
  
@@ -55,6 +56,59 @@ MuonExtractor::MuonExtractor(edm::InputTag tag)
   MuonExtractor::setPF((tag.label()).find("PFlow")); 
 
   MuonExtractor::reset();
+}
+
+MuonExtractor::MuonExtractor(TFile *a_file)
+{
+  std::cout << "MuonExtractor objet is retrieved" << std::endl;
+
+  // Tree definition
+  m_OK = false;
+
+  m_tree_muon = dynamic_cast<TTree*>(a_file->Get("muon_PF"));
+
+  if (!m_tree_muon)
+  {
+    std::cout << "This tree doesn't exist!!!" << std::endl;
+    return;
+  }
+
+  m_OK = true;
+
+  m_muo_lorentzvector = new TClonesArray("TLorentzVector");
+
+
+  // Branches definition
+
+  m_tree_muon->SetBranchAddress("n_muons",  &m_n_muons);
+  m_tree_muon->SetBranchAddress("muon_4vector",&m_muo_lorentzvector);
+  m_tree_muon->SetBranchAddress("muon_e",   &m_muo_E);				
+  m_tree_muon->SetBranchAddress("muon_px",  &m_muo_px);
+  m_tree_muon->SetBranchAddress("muon_py",  &m_muo_py);
+  m_tree_muon->SetBranchAddress("muon_pz",  &m_muo_pz);
+  m_tree_muon->SetBranchAddress("muon_vx",  &m_muo_vx);
+  m_tree_muon->SetBranchAddress("muon_vy",  &m_muo_vy);
+  m_tree_muon->SetBranchAddress("muon_vz",  &m_muo_vz);
+  m_tree_muon->SetBranchAddress("muon_eta", &m_muo_eta);
+  m_tree_muon->SetBranchAddress("muon_phi", &m_muo_phi);
+  m_tree_muon->SetBranchAddress("muon_charge", &m_muo_charge);
+  m_tree_muon->SetBranchAddress("muon_isGlobal", 	&m_muo_isGlobal);
+  m_tree_muon->SetBranchAddress("muon_isTracker", &m_muo_isTracker);
+  m_tree_muon->SetBranchAddress("muon_dB",        &m_muo_dB);
+  m_tree_muon->SetBranchAddress("muon_normChi2",  &m_muo_normChi2);
+  m_tree_muon->SetBranchAddress("muon_nValTrackerHits",&m_muo_nValTrackerHits);
+  m_tree_muon->SetBranchAddress("muon_nValPixelHits",  &m_muo_nValPixelHits);
+  m_tree_muon->SetBranchAddress("muon_nMatches",       &m_muo_nMatches);
+  m_tree_muon->SetBranchAddress("muon_trackIso",       &m_muo_trackIso);
+  m_tree_muon->SetBranchAddress("muon_ecalIso",        &m_muo_ecalIso);
+  m_tree_muon->SetBranchAddress("muon_hcalIso",        &m_muo_hcalIso);
+  m_tree_muon->SetBranchAddress("muon_pfParticleIso",      &m_muo_pfParticleIso);
+  m_tree_muon->SetBranchAddress("muon_pfChargedHadronIso", &m_muo_pfChargedHadronIso);
+  m_tree_muon->SetBranchAddress("muon_pfNeutralHadronIso", &m_muo_pfNeutralHadronIso);
+  m_tree_muon->SetBranchAddress("muon_pfPhotonIso",        &m_muo_pfPhotonIso);
+  m_tree_muon->SetBranchAddress("muon_d0",      &m_muo_d0);
+  m_tree_muon->SetBranchAddress("muon_d0error", &m_muo_d0error);
+  m_tree_muon->SetBranchAddress("muon_mcParticleIndex",&m_muo_MCIndex);  
 }
 
 MuonExtractor::~MuonExtractor()
@@ -105,6 +159,15 @@ void MuonExtractor::writeInfo(const edm::Event *event,MCExtractor* m_MC)
   }
 
   MuonExtractor::fillTree();
+}
+
+//
+// Method getting the info from an input file
+//
+
+void MuonExtractor::getInfo(int ievt) 
+{
+  m_tree_muon->GetEntry(ievt); 
 }
 
 void MuonExtractor::writeInfo(const pat::Muon *part, int index) 

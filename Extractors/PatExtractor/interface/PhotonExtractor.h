@@ -32,12 +32,14 @@ class PhotonExtractor
  public:
 
   PhotonExtractor(edm::InputTag tag);
+  PhotonExtractor(TFile *a_file);
   ~PhotonExtractor();
 
   void writeInfo(const edm::Event *event,MCExtractor* m_MC); 
   void writeInfo(const edm::Event *event); 
 
   void writeInfo(const pat::Photon *part, int index); 
+  void getInfo(int ievt); 
 
   void reset();
   void fillTree(); 
@@ -45,6 +47,10 @@ class PhotonExtractor
   int  getSize();
   
   int getMatch(const pat::Photon *part, MCExtractor* m_MC);
+
+  // Setters/Getters
+
+  bool isOK() {return m_OK;}
 
  private:
   
@@ -54,6 +60,8 @@ class PhotonExtractor
 
   edm::InputTag m_tag;
   float m_deltaR_cut;
+
+  bool m_OK;
 
   int   m_n_photons;
 

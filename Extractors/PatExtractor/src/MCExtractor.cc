@@ -33,8 +33,48 @@ MCExtractor::MCExtractor()
 
   // Set everything to 0
 
+  m_OK = true;
+
   MCExtractor::reset();
 }
+
+MCExtractor::MCExtractor(TFile *a_file)
+{
+  std::cout << "MCExtractor object is retrieved" << std::endl;
+
+  // Tree definition
+  m_OK = false;
+
+  m_tree_MC = dynamic_cast<TTree*>(a_file->Get("MC"));
+
+  if (!m_tree_MC)
+  {
+    std::cout << "This tree doesn't exist!!!" << std::endl;
+    return;
+  }
+  
+  m_OK = true;
+
+  m_MC_lorentzvector = new TClonesArray("TLorentzVector");
+  
+  m_tree_MC->SetBranchAddress("n_MCs",  &m_n_MCs);
+  m_tree_MC->SetBranchAddress("MC_4vector",&m_MC_lorentzvector);
+  m_tree_MC->SetBranchAddress("MC_index",   &m_MC_index);
+  m_tree_MC->SetBranchAddress("MC_type",    &m_MC_type);
+  m_tree_MC->SetBranchAddress("MC_mot1",    &m_MC_imot1);
+  m_tree_MC->SetBranchAddress("MC_mot2",    &m_MC_imot2);
+  m_tree_MC->SetBranchAddress("MC_generation",   &m_MC_generation);
+  m_tree_MC->SetBranchAddress("MC_e",   &m_MC_E);
+  m_tree_MC->SetBranchAddress("MC_px",  &m_MC_px);
+  m_tree_MC->SetBranchAddress("MC_py",  &m_MC_py);
+  m_tree_MC->SetBranchAddress("MC_pz",  &m_MC_pz);
+  m_tree_MC->SetBranchAddress("MC_vx",  &m_MC_vx);
+  m_tree_MC->SetBranchAddress("MC_vy",  &m_MC_vy);
+  m_tree_MC->SetBranchAddress("MC_vz",  &m_MC_vz);
+  m_tree_MC->SetBranchAddress("MC_eta", &m_MC_eta);
+  m_tree_MC->SetBranchAddress("MC_phi", &m_MC_phi);
+}
+
 
 MCExtractor::~MCExtractor()
 {}
@@ -155,6 +195,15 @@ void MCExtractor::writeInfo(const edm::Event *event)
   
   MCExtractor::fillTree();
  
+}
+
+//
+// Method getting the info from an input file
+//
+
+void MCExtractor::getInfo(int ievt) 
+{
+  m_tree_MC->GetEntry(ievt); 
 }
 
 // Method initializing everything (to do for each event)

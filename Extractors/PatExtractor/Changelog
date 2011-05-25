@@ -1,6 +1,19 @@
+2011-05-25 Seb Viret  <viret@in2p3.fr>
+       * TrackExtractor class added (to get generalTracks info, this is sometime useful)
+       * PAT_extractor_cfi.py was modified: all do_*** parameters were set to false. You
+	have to add what you want in your own python script, this will avoid file content problems
+       * A new parameter was added to the cfi file: 'fillTree' : this tells if you start from a 
+	PATuple (True) or an extracted ROOTuple (False). If set to false you then just rerun the analysis
+	, this is much faster if you just want to redo this step, and avoid double coding...
+       * In the test directory a small example script was added: Extractor_redo.py, it takes an extracted 
+	rootfile as input, and put the analysis results in another rootfile. 
+  
+       * And yes, we write the dates mirrored...
+
 2011-05-18 viola <sordini@cern.ch>
-	fisrt version of mtt_analysis with skeleton for semie selection (not sure yet wether the chi2 does
+       * Fisrt version of mtt_analysis with skeleton for semie selection (not sure yet wether the chi2 does
 	meaningful stuff for semie)
+
 2011-05-17 viola <sordini@cern.ch>
 	(seriously: we write the dates mirrored??)
 	First commit of mtt_analysis (for event selection) and Chi2 (for chi2 calculation)

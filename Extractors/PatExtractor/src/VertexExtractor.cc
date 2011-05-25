@@ -26,6 +26,33 @@ VertexExtractor::VertexExtractor(edm::InputTag tag)
   VertexExtractor::reset();
 }
 
+
+VertexExtractor::VertexExtractor(TFile *a_file)
+{
+  std::cout << "VertexExtractor objet is retrieved" << std::endl;
+
+  // Tree definition
+  m_OK = false;
+
+  m_tree_vtx = dynamic_cast<TTree*>(a_file->Get("Vertices"));
+
+  if (!m_tree_vtx)
+  {
+    std::cout << "This tree doesn't exist!!!" << std::endl;
+    return;
+  }
+
+  m_OK = true;
+
+  m_tree_vtx->SetBranchAddress("n_vertices",  &m_n_vertices);
+  m_tree_vtx->SetBranchAddress("vertex_vx",  &m_vtx_vx);
+  m_tree_vtx->SetBranchAddress("vertex_vy",  &m_vtx_vy);
+  m_tree_vtx->SetBranchAddress("vertex_vz",  &m_vtx_vz);
+  m_tree_vtx->SetBranchAddress("vertex_isFake",  &m_vtx_isFake);
+  m_tree_vtx->SetBranchAddress("vertex_ndof",  &m_vtx_ndof);
+
+}
+
 VertexExtractor::~VertexExtractor()
 {}
 
@@ -64,6 +91,15 @@ void VertexExtractor::writeInfo(const reco::Vertex *part, int index)
   m_vtx_ndof[index]   = part->ndof();
 }
 
+
+//
+// Method getting the info from an input file
+//
+
+void VertexExtractor::getInfo(int ievt) 
+{
+  m_tree_vtx->GetEntry(ievt); 
+}
 
 // Method initializing everything (to do for each event)
 

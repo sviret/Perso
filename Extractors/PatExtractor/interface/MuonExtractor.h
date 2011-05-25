@@ -32,6 +32,7 @@ class MuonExtractor
  public:
 
   MuonExtractor(edm::InputTag tag);
+  MuonExtractor(TFile *a_file);
   ~MuonExtractor();
 
   void writeInfo(const edm::Event *event,MCExtractor* m_MC); 
@@ -44,8 +45,13 @@ class MuonExtractor
   void fillSize(int size);
   int  getSize();
   void setPF(bool isPF);
-  
+  void getInfo(int ievt); 
+
   int getMatch(const pat::Muon *part, MCExtractor* m_MC);
+
+  // Setters/Getters
+
+  bool isOK() {return m_OK;}
 
   float getMuonpx(int muidx) {return m_muo_px[muidx];}
   float getMuonpy(int muidx) {return m_muo_py[muidx];}
@@ -105,6 +111,8 @@ class MuonExtractor
   int m_muo_MCIndex[m_muons_MAX];
 
   MCExtractor* MC_Coll;
+
+  bool m_OK;
 };
 
 #endif 

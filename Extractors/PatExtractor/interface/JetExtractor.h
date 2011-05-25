@@ -32,6 +32,7 @@ class JetExtractor
  public:
 
   JetExtractor(edm::InputTag tag);
+  JetExtractor(TFile *a_file);
   ~JetExtractor();
 
 
@@ -39,6 +40,7 @@ class JetExtractor
   void writeInfo(const edm::Event *event); 
 
   void writeInfo(const pat::Jet *part, int index); 
+  void getInfo(int ievt); 
 
   void reset();
   void fillTree(); 
@@ -50,6 +52,7 @@ class JetExtractor
   TLorentzVector *getJetLorentzVector(int jetidx) {return (TLorentzVector*)m_jet_lorentzvector->At(jetidx);}
   float getJetBTagProb_SSVHE(int jetidx) {return m_jet_btag_SSVHE[jetidx];}
 
+  bool isOK() {return m_OK;}
  private:
   
   TTree* m_tree_jet;
@@ -59,6 +62,7 @@ class JetExtractor
   edm::InputTag m_tag;
   float m_deltaR_cut;
 
+  bool m_OK;
   int   m_n_jets;
 
   TClonesArray* m_jet_lorentzvector;

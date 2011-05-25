@@ -32,11 +32,13 @@ class METExtractor
  public:
 
   METExtractor(edm::InputTag tag);
+  METExtractor(TFile *a_file);
   ~METExtractor();
 
 
   void writeInfo(const pat::MET *part, int index); 
   void writeInfo(const edm::Event *event); 
+  void getInfo(int ievt); 
 
   void reset();
   void fillTree(); 
@@ -44,6 +46,7 @@ class METExtractor
   int  getSize();
   TLorentzVector *getMETLorentzVector(int metidx) {return (TLorentzVector*)m_met_lorentzvector->At(metidx);}
 
+  bool isOK() {return m_OK;}
  private:
   
   TTree* m_tree_met;
@@ -52,6 +55,7 @@ class METExtractor
 
   edm::InputTag m_tag;
 
+  bool m_OK;
   int   m_n_mets;
 
   TClonesArray* m_met_lorentzvector;
