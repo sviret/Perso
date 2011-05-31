@@ -5,6 +5,9 @@
         * chi2 working for both semimu and semie channel
         * kinematic fit working for both semimu and semie channel
 2011-05-31 Seb Viret  <viret@in2p3.fr>
+       * Added a /batch/ directory containing a script to produce PATuples from ReReco AODs
+
+2011-05-31 Seb Viret  <viret@in2p3.fr>
        * AnalysisSettings class has been added in order to easily add user-defined cuts into the analysis.
        * To see it in action, a small example class (dimuon_analysis.cc) has been added. 
        * This dimuon analysis is launched using the python script DiMuExample.py 
