@@ -1,3 +1,11 @@
+2011-05-31 Seb Viret  <viret@in2p3.fr>
+       * AnalysisSettings class has been added in order to easily add user-defined cuts into the analysis.
+       * To see it in action, a small example class (dimuon_analysis.cc) has been added. 
+       * This dimuon analysis is launched using the python script DiMuExample.py 
+       * Those modifications have been tested and have no effect on other classes
+
+       * VertexExtractor has been upgraded, new params were added to the base tree. 
+
 2011-05-25 Seb Viret  <viret@in2p3.fr>
        * TrackExtractor class added (to get generalTracks info, this is sometime useful)
        * PAT_extractor_cfi.py was modified: all do_*** parameters were set to false. You

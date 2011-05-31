@@ -72,6 +72,21 @@ PATextraction = cms.EDAnalyzer("PatExtractor",
 
    doMtt         = cms.untracked.bool(False),
    doSemiMu      = cms.untracked.bool(False),
-   doChi2        = cms.untracked.bool(False)
+   doChi2        = cms.untracked.bool(False),
+                               
+   doDimuon      = cms.untracked.bool(False),
 
+
+   n_events = cms.untracked.int32(10000),  # How many events you want to analyze (only if fillTree=False)
+
+   # The analysis settings could be whatever you want
+   # 
+   # Format is "STRING VALUE" where STRING is the name of the cut, and VALUE the value of the cut
+
+   # Here we define for example the cuts for the dimuon analysis
+                               
+   analysisSettings = cms.untracked.vstring(
+    "pTmu_min 2.",
+    "nmu_min 2"
+   )
 )

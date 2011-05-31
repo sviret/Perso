@@ -41,11 +41,20 @@ class VertexExtractor
   void reset();
   void fillTree(); 
   void fillSize(int size);
-  int  getSize();
-  float getVtxNdof(int vtxidx) {return m_vtx_ndof[vtxidx];}
-  bool getVtxIsFake(int vtxidx) {return m_vtx_isFake[vtxidx];}
+  float dist_to_vtx(int vtxidx, float x, float y, float z);
+
+  int   getSize();
+
+  float vx(int vtxidx)           {return m_vtx_vx[vtxidx];}
+  float vy(int vtxidx)           {return m_vtx_vy[vtxidx];}
+  float vz(int vtxidx)           {return m_vtx_vz[vtxidx];}
+  float getVtxNdof(int vtxidx)   {return m_vtx_ndof[vtxidx];}
+  bool  getVtxIsFake(int vtxidx) {return m_vtx_isFake[vtxidx];}
+  int   getNtracks(int vtxidx)   {return m_vtx_ntracks[vtxidx];}
+  float getNormChi2(int vtxidx)  {return m_vtx_normChi2[vtxidx];}
 
   bool isOK() {return m_OK;}
+
  private:
   
   TTree* m_tree_vtx;
@@ -60,8 +69,9 @@ class VertexExtractor
   float	m_vtx_vy[m_vertices_MAX];
   float	m_vtx_vz[m_vertices_MAX];
   bool  m_vtx_isFake[m_vertices_MAX];
-  float  m_vtx_ndof[m_vertices_MAX];
-
+  float m_vtx_ndof[m_vertices_MAX];
+  float m_vtx_normChi2[m_vertices_MAX];
+  int   m_vtx_ntracks[m_vertices_MAX];
 };
 
 #endif 

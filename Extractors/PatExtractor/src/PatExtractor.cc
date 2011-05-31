@@ -9,15 +9,16 @@ PatExtractor::PatExtractor(const edm::ParameterSet& config) :
   do_HLT_        (config.getUntrackedParameter<bool>("doHLT", false)),
   do_MC_         (config.getUntrackedParameter<bool>("doMC", false)),
   do_Photon_     (config.getUntrackedParameter<bool>("doPhoton", false)),
-  do_Electron_   (config.getUntrackedParameter<bool>("doElectron", true)),
-  do_Jet_        (config.getUntrackedParameter<bool>("doJet", true)),
-  do_Muon_       (config.getUntrackedParameter<bool>("doMuon", true)),
-  do_MET_        (config.getUntrackedParameter<bool>("doMET", true)),
-  do_Vertex_     (config.getUntrackedParameter<bool>("doVertex", true)),
-  do_Mtt_        (config.getUntrackedParameter<bool>("doMtt", true)),
-  do_SemiMu_     (config.getUntrackedParameter<bool>("doSemiMu", true)),
-  do_Chi2_       (config.getUntrackedParameter<bool>("doChi2", true)),
+  do_Electron_   (config.getUntrackedParameter<bool>("doElectron", false)),
+  do_Jet_        (config.getUntrackedParameter<bool>("doJet", false)),
+  do_Muon_       (config.getUntrackedParameter<bool>("doMuon", false)),
+  do_MET_        (config.getUntrackedParameter<bool>("doMET", false)),
+  do_Vertex_     (config.getUntrackedParameter<bool>("doVertex", false)),
   do_Trk_        (config.getUntrackedParameter<bool>("doTrack", false)),
+  do_Mtt_        (config.getUntrackedParameter<bool>("doMtt", false)),
+  do_SemiMu_     (config.getUntrackedParameter<bool>("doSemiMu", false)),
+  do_Chi2_       (config.getUntrackedParameter<bool>("doChi2", false)),
+  do_dimu_       (config.getUntrackedParameter<bool>("doDimuon", false)),
 
   photon_tag_    (config.getParameter<edm::InputTag>("photon_tag")),
   electron_tag_  (config.getParameter<edm::InputTag>("electron_tag")),
@@ -28,10 +29,16 @@ PatExtractor::PatExtractor(const edm::ParameterSet& config) :
   vtx_tag_       (config.getParameter<edm::InputTag>("vtx_tag")),
   trk_tag_       (config.getParameter<edm::InputTag>("trk_tag")),
   outFilename_   (config.getParameter<std::string>("extractedRootFile")),
-  inFilename_    (config.getParameter<std::string>("inputRootFile"))
+  inFilename_    (config.getParameter<std::string>("inputRootFile")),
+  nevts_         (config.getUntrackedParameter<int>("n_events", 10000)),
 
+  m_settings_    (config.getUntrackedParameter<std::vector<std::string> >("analysisSettings"))
 {
   LogDebug("") << "Using the " << photon_tag_ << " photon collection";
+
+  // We parse the analysis settings
+  m_ana_settings = new AnalysisSettings(&m_settings_);
+  m_ana_settings->parseSettings();
 }
 
 
@@ -58,6 +65,10 @@ void PatExtractor::beginJob()
 				      m_muon,m_electron,m_jet,m_MET,m_vertex,
 				      do_Chi2_);
 
+  // Here is the small example analysis (dimuon mass spectra)
+
+  if (do_dimu_ && do_Muon_)      
+    m_dimuon_analysis = new dimuon_analysis(m_ana_settings);
 }
 
 
@@ -70,10 +81,20 @@ void PatExtractor::beginRun(Run const& run, EventSetup const& setup)
   // If we start from existing file we don't have to loop over events
   if (!do_fill_ && m_event->n_events()) 
   {    
-    for (int i=0;i<m_event->n_events();++i) 
+    // If you start from an extracted file, the number of events you want to loop on
+    // is defined as an option, not in CMSSW...
+
+    nevent = min(nevts_,m_event->n_events()); 
+
+    for (int i=0;i<nevent;++i) 
     {
+      if (i%1000 == 0)
+	std::cout << "Processing " << i << "th event" << std::endl;
+
       PatExtractor::getInfo(i);// Retrieve the info from an existing ROOTuple      
-      PatExtractor::doAna();   // Then do the analysis on request   
+      PatExtractor::doAna();   // Then do the analysis on request  
+
+      ++nevent_tot; 
     }
   }
 }
@@ -237,6 +258,9 @@ void PatExtractor::retrieve()
 
 
 // Here we define all things which are post event extraction
+//
+// In other words this is where the analysis is done
+//
 
 void PatExtractor::doAna() 
 {
@@ -257,5 +281,13 @@ void PatExtractor::doAna()
     
     if(do_MC_)
       m_Mtt_analysis->MCidentification(m_MC);
+  }
+
+
+  // Our example analyisis
+
+  if (do_dimu_&& do_Muon_) 
+  {
+    m_dimuon_analysis->dimuon_Sel(m_muon,nevent_tot);
   }
 }
