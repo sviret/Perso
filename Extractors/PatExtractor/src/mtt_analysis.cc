@@ -669,8 +669,6 @@ void mtt_analysis::MCidentification(MCExtractor * m_MC)
 	                        m_MC->getPz(m_MC->getMom1Index(m_MC->getMom1Index(mcpart_i))),
 	                        m_MC->getE(m_MC->getMom1Index(m_MC->getMom1Index(mcpart_i))));
           
-	  cout<<"mtop = "<<TL_Top.M()<<endl;
-	  cout<<"top index = "<<m_MC->getMom1Index(m_MC->getMom1Index(mcpart_i))<<endl;
 	
 	  Top.push_back(TL_Top);
 	  nTop++;
@@ -684,31 +682,20 @@ void mtt_analysis::MCidentification(MCExtractor * m_MC)
     
   }
   
-  cout<<"nEle    = "<<nEle   <<endl;
-  cout<<"nMu     = "<<nMu    <<endl;
-  cout<<"nTau    = "<<nTau   <<endl;
-  cout<<"nNuEle  = "<<nNuEle <<endl;
-  cout<<"nNuMu   = "<<nNuMu  <<endl;
-  cout<<"nNuTau  = "<<nNuTau <<endl;
-  cout<<"nQuarkb = "<<nQuarkb<<endl;
-  cout<<"nW      = "<<nW     <<endl;
-  cout<<"nTop    = "<<nTop   <<endl;
+  if(nEle==1 && nNuEle==1 && nMu==0 && nNuMu==0 && nTau==0 && nNuTau==0 && nQuarkb>1 && nW==2 && nTop==2){m_MC_channel=1;}
+  if(nEle==0 && nNuEle==0 && nMu==1 && nNuMu==1 && nTau==0 && nNuTau==0 && nQuarkb>1 && nW==2 && nTop==2){m_MC_channel=2;}
+  if(nEle==0 && nNuEle==0 && nMu==0 && nNuMu==0 && nTau==1 && nNuTau==1 && nQuarkb>1 && nW==2 && nTop==2){m_MC_channel=3;}
   
-  if(nEle==1 && nNuEle==1 && nMu==0 && nNuMu==0 && nTau==0 && nNuTau==0 && nQuarkb>1 && nW==2 && nTop==2){m_MC_channel=1;cout<<"SemiElectronic"<<endl;}
-  if(nEle==0 && nNuEle==0 && nMu==1 && nNuMu==1 && nTau==0 && nNuTau==0 && nQuarkb>1 && nW==2 && nTop==2){m_MC_channel=2;cout<<"SemiMuonic"    <<endl;}
-  if(nEle==0 && nNuEle==0 && nMu==0 && nNuMu==0 && nTau==1 && nNuTau==1 && nQuarkb>1 && nW==2 && nTop==2){m_MC_channel=3;cout<<"SemiTauic"     <<endl;}
+  if(nEle==0 && nNuEle==0 && nMu==0 && nNuMu==0 && nTau==0 && nNuTau==0 && nQuarkb>1 && nW==2 && nTop==2){m_MC_channel=4;}
   
-  if(nEle==0 && nNuEle==0 && nMu==0 && nNuMu==0 && nTau==0 && nNuTau==0 && nQuarkb>1 && nW==2 && nTop==2){m_MC_channel=4;cout<<"FullHadronic"<<endl;}
+  if(nEle==2 && nNuEle==2 && nMu==0 && nNuMu==0 && nTau==0 && nNuTau==0 && nQuarkb>1 && nW==2 && nTop==2){m_MC_channel=5;}
+  if(nEle==0 && nNuEle==0 && nMu==2 && nNuMu==2 && nTau==0 && nNuTau==0 && nQuarkb>1 && nW==2 && nTop==2){m_MC_channel=6;}
+  if(nEle==0 && nNuEle==0 && nMu==0 && nNuMu==0 && nTau==2 && nNuTau==2 && nQuarkb>1 && nW==2 && nTop==2){m_MC_channel=7;}
   
-  if(nEle==2 && nNuEle==2 && nMu==0 && nNuMu==0 && nTau==0 && nNuTau==0 && nQuarkb>1 && nW==2 && nTop==2){m_MC_channel=5;cout<<"DiElectronic"<<endl;}
-  if(nEle==0 && nNuEle==0 && nMu==2 && nNuMu==2 && nTau==0 && nNuTau==0 && nQuarkb>1 && nW==2 && nTop==2){m_MC_channel=6;cout<<"DiMuonic"    <<endl;}
-  if(nEle==0 && nNuEle==0 && nMu==0 && nNuMu==0 && nTau==2 && nNuTau==2 && nQuarkb>1 && nW==2 && nTop==2){m_MC_channel=7;cout<<"DiTauic"     <<endl;}
-  
-  if(nEle==1 && nNuEle==1 && nMu==1 && nNuMu==1 && nTau==0 && nNuTau==0 && nQuarkb==2 && nW==2 && nTop==2){m_MC_channel=8 ;cout<<"ElectroMuonic"<<endl;}
-  if(nEle==1 && nNuEle==1 && nMu==0 && nNuMu==0 && nTau==1 && nNuTau==1 && nQuarkb==2 && nW==2 && nTop==2){m_MC_channel=9 ;cout<<"ElectroTauic" <<endl;}
-  if(nEle==0 && nNuEle==0 && nMu==1 && nNuMu==1 && nTau==1 && nNuTau==1 && nQuarkb==2 && nW==2 && nTop==2){m_MC_channel=10;cout<<"MuoTaunic"    <<endl;}
+  if(nEle==1 && nNuEle==1 && nMu==1 && nNuMu==1 && nTau==0 && nNuTau==0 && nQuarkb==2 && nW==2 && nTop==2){m_MC_channel=8 ;}
+  if(nEle==1 && nNuEle==1 && nMu==0 && nNuMu==0 && nTau==1 && nNuTau==1 && nQuarkb==2 && nW==2 && nTop==2){m_MC_channel=9 ;}
+  if(nEle==0 && nNuEle==0 && nMu==1 && nNuMu==1 && nTau==1 && nNuTau==1 && nQuarkb==2 && nW==2 && nTop==2){m_MC_channel=10;}
  
-  cout<<"Mass invariante ttbar = "<<(Top[0]+Top[1]).M()<<endl;
   m_MC_mtt = (Top[0]+Top[1]).M();
   
   mtt_analysis::fillTree();
