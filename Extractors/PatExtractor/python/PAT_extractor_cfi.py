@@ -73,7 +73,9 @@ PATextraction = cms.EDAnalyzer("PatExtractor",
    doMtt         = cms.untracked.bool(False),
    doSemiMu      = cms.untracked.bool(False),
    doChi2        = cms.untracked.bool(False),
-                               
+   doUseBTaginChi2      = cms.untracked.bool(True),
+   doKF      = cms.untracked.bool(True),
+                      
    doDimuon      = cms.untracked.bool(False),
 
 

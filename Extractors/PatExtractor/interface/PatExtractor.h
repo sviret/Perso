@@ -72,8 +72,8 @@ class PatExtractor : public edm::EDAnalyzer {
   bool do_SemiMu_;  
   bool do_Chi2_;
   bool do_dimu_;
-
-
+  bool do_usebtaginchi2_;
+  bool do_KF_;
 
   edm::InputTag photon_tag_;   // 
   edm::InputTag electron_tag_; // 
@@ -111,6 +111,8 @@ class PatExtractor : public edm::EDAnalyzer {
 
   mtt_analysis*      m_Mtt_analysis;
   dimuon_analysis*   m_dimuon_analysis;
+
+  int iseventselected;
 
 };
 

@@ -51,6 +51,9 @@ class JetExtractor
 
   TLorentzVector *getJetLorentzVector(int jetidx) {return (TLorentzVector*)m_jet_lorentzvector->At(jetidx);}
   float getJetBTagProb_SSVHE(int jetidx) {return m_jet_btag_SSVHE[jetidx];}
+  float getJetBTagProb_SSVHP(int jetidx) {return m_jet_btag_SSVHP[jetidx];}
+  float getJetBTagProb_TCHE(int jetidx) {return m_jet_btag_TCHE[jetidx];}
+  float getJetBTagProb_TCHP(int jetidx) {return m_jet_btag_TCHP[jetidx];}
 
   bool isOK() {return m_OK;}
  private:
@@ -85,6 +88,8 @@ class JetExtractor
   float	m_jet_btag_BjetProb[m_jets_MAX];
   float	m_jet_btag_SSVHE[m_jets_MAX];
   float	m_jet_btag_SSVHP[m_jets_MAX];
+  float	m_jet_btag_TCHE[m_jets_MAX];
+  float	m_jet_btag_TCHP[m_jets_MAX];
   int   m_jet_MCIndex[m_jets_MAX];
 
   MCExtractor* MC_Coll;

@@ -12,7 +12,7 @@
  *                           Diane Cinca diane.cinca@cern.ch            *
  * TODO : parametrization of Neutrino + Muon + electron from .dat file  *
  * internal tracking :                                                  *
- * $Id: AlienKinFit.cc,v 1.1 2011/05/06 13:33:11 beaupere Exp $*
+ * $Id: AlienKinFit.cc,v 1.2 2011/05/15 20:31:27 sperries Exp $*
  ************************************************************************/
 
 #include <TROOT.h>
@@ -20,7 +20,7 @@
 #include <TMinuit.h>
 #include "../interface/AlienKinFit.h"
 #include "../interface/AlienGS.h"
-
+using namespace std;
 
 static void * vdummy = 0;
 
@@ -253,10 +253,10 @@ void AlienKinFit::ReadObjects(TLorentzVector Jet1, TLorentzVector Jet2, TLorentz
    MeasuredBJetL=BJetL;
    MeasuredJet1=Jet1;
    MeasuredJet2=Jet2;
-   
+
    /// We compute Pz of the neutrino
    RecoLeptSide(Muon, Neutrino, BJetL, &MeasuredNeutrino);
-       
+
    MeasPzNu=MeasuredNeutrino.Pz();
      
    MeasEtaJ1=Jet1.Eta();
@@ -377,7 +377,7 @@ void AlienKinFit::Fit(int &status)
    
    vdummy = (void*) this;
 
-   int FitParNber = 16;
+   //   int FitParNber = 16;
 
    MyMinuit->mnrset(1);
    MyMinuit->SetPrintLevel(DEBUG_Level); // debug level
@@ -385,7 +385,7 @@ void AlienKinFit::Fit(int &status)
    
    double arglist[10];
    int ierflg = 0;
-   arglist[0] = 1;
+   arglist[0] = 1.;
    MyMinuit->mnexcm("SET ERR", arglist ,1,ierflg); 
    
    /// Initialize Minuit Parameters
@@ -430,8 +430,8 @@ void AlienKinFit::Fit(int &status)
       }
    }
   
-   arglist[0] = 1000;
-   arglist[1] = 1;
+   arglist[0] = 1000.;
+   arglist[1] = 1.;
    
    /// minimisation
    MyMinuit->mnexcm("MIGRAD", arglist ,2,ierflg);

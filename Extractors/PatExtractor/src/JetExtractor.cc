@@ -37,6 +37,8 @@ JetExtractor::JetExtractor(edm::InputTag tag)
   m_tree_jet->Branch("jet_btag_BjetProb", &m_jet_btag_BjetProb,"jet_btag_BjetProb[n_jets]/F");
   m_tree_jet->Branch("jet_btag_SSVHE",    &m_jet_btag_SSVHE,   "jet_btag_SSVHE[n_jets]/F");
   m_tree_jet->Branch("jet_btag_SSVHP",    &m_jet_btag_SSVHP,   "jet_btag_SSVHP[n_jets]/F");
+  m_tree_jet->Branch("jet_btag_TCHE",    &m_jet_btag_TCHE,   "jet_btag_TCHE[n_jets]/F");
+  m_tree_jet->Branch("jet_btag_TCHP",    &m_jet_btag_TCHP,   "jet_btag_TCHP[n_jets]/F");
   m_tree_jet->Branch("jet_mcParticleIndex",&m_jet_MCIndex,"jet_mcParticleIndex[n_jets]/I");
 
   // Set everything to 0
@@ -86,6 +88,8 @@ JetExtractor::JetExtractor(TFile *a_file)
   m_tree_jet->SetBranchAddress("jet_btag_BjetProb", &m_jet_btag_BjetProb);
   m_tree_jet->SetBranchAddress("jet_btag_SSVHE",    &m_jet_btag_SSVHE);
   m_tree_jet->SetBranchAddress("jet_btag_SSVHP",    &m_jet_btag_SSVHP);
+  m_tree_jet->SetBranchAddress("jet_btag_TCHE",    &m_jet_btag_TCHE);  
+  m_tree_jet->SetBranchAddress("jet_btag_TCHP",    &m_jet_btag_TCHP);
   m_tree_jet->SetBranchAddress("jet_mcParticleIndex",&m_jet_MCIndex);
 
 
@@ -171,6 +175,8 @@ void JetExtractor::writeInfo(const pat::Jet *part, int index)
     m_jet_btag_BjetProb[index] = part->bDiscriminator("jetBProbabilityBJetTags");
     m_jet_btag_SSVHE[index]    = part->bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
     m_jet_btag_SSVHP[index]    = part->bDiscriminator("simpleSecondaryVertexHighPurBJetTags");
+    m_jet_btag_TCHE[index]    = part->bDiscriminator("trackCountingHighEffBJetTags");
+    m_jet_btag_TCHP[index]    = part->bDiscriminator("trackCountingHighPurBJetTags");
   }
 }
 
@@ -213,6 +219,8 @@ void JetExtractor::reset()
     m_jet_btag_BjetProb[i] = 0.;
     m_jet_btag_SSVHE[i] = 0.;
     m_jet_btag_SSVHP[i] = 0.;
+    m_jet_btag_TCHE[i] = 0.;
+    m_jet_btag_TCHP[i] = 0.;
     m_jet_MCIndex[i]    = -1;
   }
   m_jet_lorentzvector->Clear();

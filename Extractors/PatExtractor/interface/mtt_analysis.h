@@ -30,18 +30,22 @@ using namespace std;
 #include "METExtractor.h"
 #include "VertexExtractor.h"
 #include "../interface/Chi2.h"
+#include "../interface/AlienKinFit.h"
 
 class mtt_analysis
 {
  public:
-  mtt_analysis(bool do_MC_,bool do_SemiMu_, MuonExtractor *m_muon, ElectronExtractor *m_electron, JetExtractor *m_jet, METExtractor *m_MET, VertexExtractor *m_vertex, bool do_Chi2_);
+  mtt_analysis(bool do_MC_,bool do_SemiMu_, MuonExtractor *m_muon, ElectronExtractor *m_electron, JetExtractor *m_jet, METExtractor *m_MET, VertexExtractor *m_vertex, bool do_Chi2_, bool do_KF_);
 
   ~mtt_analysis();
   
   //Selection
-  int mtt_Sel(bool do_MC_,bool do_SemiMu_, MuonExtractor *m_muon, ElectronExtractor *m_electron, JetExtractor *m_jet, METExtractor *m_MET, VertexExtractor *m_vertex);
+  int mtt_Sel(bool do_MC_,bool do_SemiMu_, MuonExtractor *m_muon, ElectronExtractor *m_electron, JetExtractor *m_jet, METExtractor *m_MET, VertexExtractor *m_vertex, bool do_Chi2_);
   /// Lepton selection
+
   int LeptonSel(bool do_SemiMu_,MuonExtractor *m_muon, ElectronExtractor *m_electron,JetExtractor *m_jet, int isSel);
+  int MuonSel(MuonExtractor *m_muon, ElectronExtractor *m_electron,JetExtractor *m_jet, int isSel);
+  int ElectronSel(MuonExtractor *m_muon, ElectronExtractor *m_electron,JetExtractor *m_jet, int isSel);
   //makes the 2D cut for a given lepton
   int   Make2DCut(TVector3 lept3P,JetExtractor* m_jet, float cutDR, float cutPtrel);
   /// Lepton selection
@@ -52,7 +56,16 @@ class mtt_analysis
   vector<int> getSelJetsIdx() {return SelJetsIdx;}
   float getAllJetsPt() {return AllJetsPt;}
   int getisSel() {return m_mtt_isSel;}
-  void LoopOverCombinations(JetExtractor *m_jet,vector<int> JetsIdx,int LeptIdx,METExtractor *m_MET, MuonExtractor *m_muon, ElectronExtractor *m_electron, bool do_SemiMu_, float AllJetsPt);
+  void LoopOverCombinations(JetExtractor *m_jet,vector<int> JetsIdx,int LeptIdx,METExtractor *m_MET, MuonExtractor *m_muon, ElectronExtractor *m_electron, bool do_SemiMu_, float AllJetsPt, bool usebtaginfo, bool do_KF_,int iseventselected);
+  float chi2kinfit(const vector<TLorentzVector> MaxPtSelectedJets,
+                     vector<unsigned int> & MaxPtRecoSolution,
+		     TLorentzVector SelMuon,
+		     TLorentzVector vMET,
+		     vector<TLorentzVector>* FittedVectors,
+		     AlienKinFit * myAlienKinFit,
+		     bool compfit);
+
+
 
   /// Lepton veto
   void LeptonVeto();
@@ -66,7 +79,7 @@ class mtt_analysis
  private:
  
   TTree* m_tree_Mtt;
-  TTree* m_tree_Chi2;
+  //  TTree* m_tree_Chi2;
   Chi2* m_Chi2;
 
   //MC stuff
@@ -93,6 +106,9 @@ class mtt_analysis
   int m_mtt_NGoodMuons;
   float m_mtt_MuonPt[20];
   int m_mtt_NLooseGoodMuons;
+  float m_mtt_MuRelIso[20];
+  float m_mtt_2DDrMin;
+  float m_mtt_2DpTrel;
 
   int m_mtt_NGoodElectrons;
   float m_mtt_ElectronPt[20];
@@ -103,9 +119,14 @@ class mtt_analysis
   int m_mtt_NumComb;
   float m_mtt_SolChi2[100];
   float m_mtt_BestSolChi2;
+  float   m_mtt_KFChi2;
 
   //variables for semilept selection
   int isSel;
+  int isVtxSel; 
+  int isMETSel;
+  int isLepSel;
+  int isJetSel;
   int  NGoodVtx;
   float minmet;
   TLorentzVector *metP;
@@ -117,12 +138,14 @@ class mtt_analysis
   float minjetpt2D;
   float DrMin;
   float pTRel;
+  float costheta;
 
     //variables for semimu selection
     float minmupt;
     float maxmueta;
     float minmupt_veto;
     float maxmueta_veto;
+    float MuMinIso;
     TLorentzVector *muP;
     TVector3 mu3P;
     int nGoodMuons;
@@ -144,7 +167,12 @@ class mtt_analysis
     //variables for semie selection
     float minelpt;
     float maxeleta;
-    TLorentzVector *elP;
+    TLorentzVector *firsteP;
+    TLorentzVector *secondeP;
+    float minelpt_Zveto;
+    float maxeleta_Zveto;
+    float ElMinIso;
+    bool itsaZ;
     TVector3 el3P;
     int nGoodElectrons;
     int goodelidx;
@@ -159,25 +187,82 @@ class mtt_analysis
     int  NGoodJets;
     float minjetpt;
     float maxjeteta; 
+    float min_btag_TCHEL;
+    float min_btag_TCHEM;
+    float min_btag_TCHET;
+    float min_btag_TCHPL;
+    float min_btag_TCHPM;
+    float min_btag_TCHPT;
     float min_btag_SSVHEM;
+    float min_btag_SSVHPT;
     TLorentzVector *jetP;
     //variables to loop over combinations
   //how do i define a jet as b-tagged for chi2 calculation
   float min_btag_SSVHEM_chi2; 
+  float min_btag_TCHEL_chi2;
   //jets indices
   unsigned int bjet1idx;
   unsigned int bjet2idx;
   unsigned int jet3idx;
   unsigned int jet4idx;
+  unsigned int bestbjet1idx;
+  unsigned int bestbjet2idx;
+  unsigned int bestjet3idx;
+  unsigned int bestjet4idx;
   //chi2 variables
   float thischi2;
   float minchi2;
+  //
+  TLorentzVector *HadbjetP;
+  TLorentzVector *LepbjetP;
+  TLorentzVector *Lightjet1P;
+  TLorentzVector *Lightjet2P;
+  TLorentzVector *corrMETP;
+  TLorentzVector *LeptonP;
+  //
+  TLorentzVector *bestHadbjetP;
+  TLorentzVector *bestLepbjetP;
+  TLorentzVector *bestLightjet1P;
+  TLorentzVector *bestLightjet2P;
+
   //
   vector<unsigned int> dontdoublecount;
   bool doublecount;
   vector<unsigned int> btaggedjets;
   bool notthisone;
   int numberoflightjets;
+
+  //variables for the kinfit
+  vector<TLorentzVector> ChosenJets;
+  vector<unsigned int> ChosenJetsFlavour;
+  //after kinfit
+  vector<TLorentzVector> RecoFittedVectors;
+  AlienKinFit * myAlienKinFit;
+  TString ParamsFile;
+  float  kinfitchi2;
+  float m_mtt_All[100];
+  float m_mLepTop_All[100];
+  float m_mHadTop_All[100];
+  float m_mtt_AfterChi2;
+  float m_mLepTop_AfterChi2;
+  float m_mHadTop_AfterChi2;
+  float m_mtt_AfterChi2andKF;
+  float m_mLepTop_AfterChi2andKF;
+  float m_mHadTop_AfterChi2andKF;
+  float m_mtt_1stjetpt;
+  float m_mtt_2ndjetpt;
+  float m_mtt_3rdjetpt;
+  float m_mtt_4thjetpt;
+  float m_mtt_MET;
+  int m_mtt_NGoodJets;
+  int m_mtt_NBtaggedJets_TCHEL;
+  int m_mtt_NBtaggedJets_TCHEM;
+  int m_mtt_NBtaggedJets_TCHET;
+  int m_mtt_NBtaggedJets_TCHPL;
+  int m_mtt_NBtaggedJets_TCHPM;
+  int m_mtt_NBtaggedJets_TCHPT;
+  int m_mtt_NBtaggedJets_SSVHEM;
+  int m_mtt_NBtaggedJets_SSVHPT;
 
 };
 

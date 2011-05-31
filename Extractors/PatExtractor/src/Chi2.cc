@@ -7,8 +7,9 @@ Chi2::Chi2()
 }
 
 Chi2::~Chi2(){;}
-
-float Chi2::GlobalSimpleChi2(TLorentzVector Jet1, TLorentzVector Jet2, TLorentzVector JetBH, TLorentzVector JetBL, TLorentzVector SelMuon, TLorentzVector vMET, float TotPt, bool isMuon)
+//viola: i duplicate float Chi2::GlobalSimpleChi2 to have a second implementation of the method 
+//that modifies a tlorentzvector for met
+float Chi2::GlobalSimpleChi2(TLorentzVector Jet1, TLorentzVector Jet2, TLorentzVector JetBH, TLorentzVector JetBL, TLorentzVector SelMuon, TLorentzVector vMET, float TotPt, bool isMuon, TLorentzVector *&vMET_corr)
 {
   /// Calcul un chi2 apres reconstruction du Pz du neutrino
 
@@ -16,12 +17,12 @@ float Chi2::GlobalSimpleChi2(TLorentzVector Jet1, TLorentzVector Jet2, TLorentzV
 
   /// Reconstruction du Pz neutrino
   RecoLeptSide(SelMuon, vMET, JetBL, &vMET_Cor);
+  vMET_corr->SetPxPyPzE(vMET_Cor.Px(),vMET_Cor.Py(),vMET_Cor.Pz(),vMET_Cor.E());
 
   float MW=sqrt(max(0.,(Jet1+Jet2).M2()));
   float MtopH=sqrt(max(0.,(Jet1+Jet2+JetBH).M2()));
   float MtopL=sqrt(max(0.,(vMET_Cor+SelMuon+JetBL).M2()));
   float SolPtSystem = (Jet1.Pt()+Jet2.Pt()+JetBL.Pt()+JetBH.Pt())/TotPt;
-
 
   /**********************************************************************************
    * here comes the new (nov 2010) version, aachen-like                             *
@@ -40,7 +41,12 @@ float Chi2::GlobalSimpleChi2(TLorentzVector Jet1, TLorentzVector Jet2, TLorentzV
     chi2 += ((MtopL-168.)*(MtopL-168.)/614.);
   }
   return  chi2;
+}
 
+float Chi2::GlobalSimpleChi2(TLorentzVector Jet1, TLorentzVector Jet2, TLorentzVector JetBH, TLorentzVector JetBL, TLorentzVector SelMuon, TLorentzVector vMET, float TotPt, bool isMuon) 
+{
+  TLorentzVector *dummy;
+  return  GlobalSimpleChi2(Jet1, Jet2, JetBH, JetBL, SelMuon, vMET, TotPt, isMuon, dummy);
 }
 
 

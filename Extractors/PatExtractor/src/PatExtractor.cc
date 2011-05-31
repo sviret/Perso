@@ -18,6 +18,8 @@ PatExtractor::PatExtractor(const edm::ParameterSet& config) :
   do_Mtt_        (config.getUntrackedParameter<bool>("doMtt", false)),
   do_SemiMu_     (config.getUntrackedParameter<bool>("doSemiMu", false)),
   do_Chi2_       (config.getUntrackedParameter<bool>("doChi2", false)),
+  do_usebtaginchi2_      (config.getUntrackedParameter<bool>("doUseBTaginChi2", true)),
+  do_KF_      (config.getUntrackedParameter<bool>("doKF", true)),
   do_dimu_       (config.getUntrackedParameter<bool>("doDimuon", false)),
 
   photon_tag_    (config.getParameter<edm::InputTag>("photon_tag")),
@@ -63,7 +65,7 @@ void PatExtractor::beginJob()
   if (do_Mtt_ && do_Muon_ && do_Electron_ && do_Jet_ && do_MET_ && do_Vertex_)      
     m_Mtt_analysis = new mtt_analysis(do_MC_,do_SemiMu_,
 				      m_muon,m_electron,m_jet,m_MET,m_vertex,
-				      do_Chi2_);
+				      do_Chi2_,do_KF_);
 
   // Here is the small example analysis (dimuon mass spectra)
 
@@ -266,16 +268,11 @@ void PatExtractor::doAna()
 {
   if (do_Mtt_ && do_Muon_ && do_Electron_ && do_Jet_ && do_MET_ && do_Vertex_) 
   {
-    m_Mtt_analysis->mtt_Sel(do_MC_,do_SemiMu_,m_muon,m_electron,m_jet,m_MET,m_vertex);
-    
+    iseventselected=-1;
+    m_Mtt_analysis->mtt_Sel(do_MC_,do_SemiMu_,m_muon,m_electron,m_jet,m_MET,m_vertex,do_Chi2_);
+    iseventselected=m_Mtt_analysis->getisSel();
     //calculate the best jets pairing with a chi2 minimization
-    if (do_Chi2_ && (m_Mtt_analysis->getisSel())==1) 
-      m_Mtt_analysis->LoopOverCombinations(m_jet,
-					   m_Mtt_analysis->getSelJetsIdx(),
-					   m_Mtt_analysis->getSelLeptIdx(),
-					   m_MET,m_muon,m_electron,
-					   do_SemiMu_,
-					   m_Mtt_analysis->getAllJetsPt());
+    if (do_Chi2_) m_Mtt_analysis->LoopOverCombinations(m_jet,m_Mtt_analysis->getSelJetsIdx(),m_Mtt_analysis->getSelLeptIdx(),m_MET,m_muon,m_electron,do_SemiMu_,m_Mtt_analysis->getAllJetsPt(),do_usebtaginchi2_,do_KF_,iseventselected);
     
     m_Mtt_analysis->reset(do_MC_);
     

@@ -22,7 +22,8 @@ process.maxEvents = cms.untracked.PSet(
 
 myfilelist = cms.untracked.vstring()
 myfilelist.extend( [
-    'file:/tmp/sviret/patTuple_PATandPF2PAT_1_2_S3q.root'
+#    'file:/tmp/sviret/patTuple_PATandPF2PAT_1_2_S3q.root'
+    'file:./testTTmc.root'
         ] 
 )
 
@@ -44,6 +45,8 @@ process.PATextraction.doMtt      = True
 #if doSemiMu is false, it means we perform the analysis for the semielectronic channel
 process.PATextraction.doSemiMu   = True
 process.PATextraction.doChi2     = True
+process.PATextraction.doUseBTaginChi2 = True
+process.PATextraction.doKF = True
 process.p = cms.Path(process.PATextraction)
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 100

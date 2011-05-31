@@ -51,7 +51,7 @@ public:
     double Mass(TLorentzVector V1, TLorentzVector V2);
     double Mass(TLorentzVector V1, TLorentzVector V2, TLorentzVector V3);
     double P(double E, double M);
-    
+
 private:    
     TMinuit *MyMinuit;
     

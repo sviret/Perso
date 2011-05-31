@@ -30,6 +30,15 @@ class Chi2
         TLorentzVector vMET,
         float TotPt,
         bool isMuon);
+    float GlobalSimpleChi2(TLorentzVector Jet1,
+			    TLorentzVector Jet2,
+        TLorentzVector JetBH,
+        TLorentzVector JetBL,
+        TLorentzVector SelMuon,
+        TLorentzVector vMET,
+        float TotPt,
+        bool isMuon,
+        TLorentzVector *&vMET_corr);
 
     float AlienChi2GS(std::vector< TLorentzVector > InputJets,
         TLorentzVector SelMuon,

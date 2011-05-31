@@ -52,6 +52,9 @@ class ElectronExtractor
   bool isOK() {return m_OK;}
   TLorentzVector *getEleLorentzVector(int eidx) {return (TLorentzVector*)m_ele_lorentzvector->At(eidx);}
   float getEledB(int eidx) {return m_ele_dB[eidx];}
+  float getElepfChargedHadronIso(int eidx) {return m_ele_pfChargedHadronIso[eidx];}
+  float getElepfNeutralHadronIso(int eidx) {return m_ele_pfNeutralHadronIso[eidx];}
+  float getElepfPhotonIso(int eidx) {return m_ele_pfPhotonIso[eidx];}
 
  private:
   
