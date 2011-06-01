@@ -56,7 +56,21 @@ class mtt_analysis
   vector<int> getSelJetsIdx() {return SelJetsIdx;}
   float getAllJetsPt() {return AllJetsPt;}
   int getisSel() {return m_mtt_isSel;}
-  void LoopOverCombinations(JetExtractor *m_jet,vector<int> JetsIdx,int LeptIdx,METExtractor *m_MET, MuonExtractor *m_muon, ElectronExtractor *m_electron, bool do_SemiMu_, float AllJetsPt, bool usebtaginfo, bool do_KF_,int iseventselected);
+  
+  void LoopOverCombinations(JetExtractor *m_jet,
+                            vector<int> JetsIdx,
+                            int LeptIdx,
+			    METExtractor *m_MET,
+			    MuonExtractor *m_muon,
+                            ElectronExtractor *m_electron,
+			    bool do_SemiMu_,
+			    float AllJetsPt,
+			    bool usebtaginfo,
+			    bool do_KF_,
+			    bool do_MC_,
+			    int iseventselected,
+			    MCExtractor * m_MC);
+			    
   float chi2kinfit(const vector<TLorentzVector> MaxPtSelectedJets,
                      vector<unsigned int> & MaxPtRecoSolution,
 		     TLorentzVector SelMuon,
@@ -65,7 +79,16 @@ class mtt_analysis
 		     AlienKinFit * myAlienKinFit,
 		     bool compfit);
 
-
+  int match_MC(int idxJetbH,
+               int idxJetbL,
+	       int idxJet1,
+	       int idxJet2,
+	       int idxLepton,
+	       bool decayChannel,
+	       MCExtractor * m_MC,
+	       JetExtractor *m_jet,
+	       ElectronExtractor *m_electron,
+	       MuonExtractor *m_muon);
 
   /// Lepton veto
   void LeptonVeto();

@@ -477,7 +477,19 @@ int mtt_analysis::JetsSel(JetExtractor *m_jet, int isSel) {
 }
 
 
-void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,vector<int> JetsIdx,int LeptIdx, METExtractor *m_MET, MuonExtractor *m_muon, ElectronExtractor *m_electron, bool do_SemiMu_, float AllJetsPt, bool usebtaginfo, bool do_KF_,int iseventselected)
+void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
+                                        vector<int> JetsIdx,
+					int LeptIdx,
+					METExtractor *m_MET,
+                                        MuonExtractor *m_muon,
+					ElectronExtractor *m_electron,
+					bool do_SemiMu_,
+					float AllJetsPt,
+					bool usebtaginfo,
+					bool do_KF_,
+					bool do_MC_,
+					int iseventselected,
+					MCExtractor * m_MC)
 {
   //how do i define a jet as b-tagged for chi2 calculation
   min_btag_SSVHEM_chi2=1.74; 
@@ -589,6 +601,9 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,vector<int> JetsIdx,
       }
     }
   }
+  
+  if(do_MC_){match_MC(bestbjet1idx,bestbjet2idx,bestjet3idx,bestjet4idx,LeptIdx,do_SemiMu_,m_MC,m_jet,m_electron,m_muon);}
+
   if (do_KF_ && m_mtt_NumComb>0 && 1.*bestjet4idx>-1.) {
   //assign TLorentzVectors to chosen jet
   bestHadbjetP   = m_jet->getJetLorentzVector(bestbjet1idx);
@@ -795,6 +810,84 @@ float mtt_analysis::chi2kinfit(const vector<TLorentzVector> MaxPtSelectedJets,
    return Chi2Value;
 }
 
+
+int mtt_analysis::match_MC(int idxJetbH,
+                           int idxJetbL,
+			   int idxJet1,
+			   int idxJet2,
+			   int idxLepton,
+			   bool decayChannel,
+			   MCExtractor * m_MC,
+			   JetExtractor *m_jet,
+	       	           ElectronExtractor *m_electron,
+	                   MuonExtractor *m_muon)
+{
+   /*
+   cout<<"jetbH :"<<endl;
+   cout<<" type de la mere = "      <<m_MC->getType(m_jet->getJetMCIndex(idxJetbH))<<endl;
+   cout<<" type de la grand-mere = "<<m_MC->getType(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJetbH)))<<endl;
+   
+   cout<<"jetbL :"<<endl;
+   cout<<" type de la mere = "      <<m_MC->getType(m_jet->getJetMCIndex(idxJetbL))<<endl;
+   cout<<" type de la grand-mere = "<<m_MC->getType(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJetbL)))<<endl;
+   
+   cout<<"jet1 :"<<endl;
+   cout<<" type de la mere = "  	   <<m_MC->getType(m_jet->getJetMCIndex(idxJet1))<<endl;
+   cout<<" type de la grand-mere = "	   <<m_MC->getType(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJet1)))<<endl;
+   cout<<" type de l'arriere grand-mere = "<<m_MC->getType(m_MC->getMom1Index(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJet1))))<<endl;
+   
+   cout<<"jet2 :"<<endl;
+   cout<<" type de la mere = "  	   <<m_MC->getType(m_jet->getJetMCIndex(idxJet2))<<endl;
+   cout<<" type de la grand-mere = "	   <<m_MC->getType(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJet2)))<<endl;
+   cout<<" type de l'arriere grand-mere = "<<m_MC->getType(m_MC->getMom1Index(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJet2))))<<endl;
+   
+   cout<<"muon : "<<endl;
+   cout<<" type  = "                <<m_MC->getType(m_muon->getMuMCIndex(idxLepton))<<endl;
+   cout<<" type de la mere = "      <<m_MC->getType(m_MC->getMom1Index(m_muon->getMuMCIndex(idxLepton)))<<endl;
+   cout<<" type de la grand-mere = "<<m_MC->getType(m_MC->getMom1Index(m_MC->getMom1Index(m_muon->getMuMCIndex(idxLepton))))<<endl;
+   
+   cout<<"electron : "<<endl;
+   cout<<" type  = "                <<m_MC->getType(m_electron->getEleMCIndex(idxLepton))<<endl;
+   cout<<" type de la mere = "      <<m_MC->getType(m_MC->getMom1Index(m_electron->getEleMCIndex(idxLepton)))<<endl;
+   cout<<" type de la grand-mere = "<<m_MC->getType(m_MC->getMom1Index(m_MC->getMom1Index(m_electron->getEleMCIndex(idxLepton))))<<endl;
+   */   
+   
+   if(
+      /// Ask if Jet b hadronique  come from a b and top
+      fabs(m_MC->getType(m_jet->getJetMCIndex(idxJetbH)))==5 &&
+      fabs(m_MC->getType(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJetbH))))==6 &&
+      
+      /// Ask if Jet b leptonique  come from a b and top
+      fabs(m_MC->getType(m_jet->getJetMCIndex(idxJetbL)))==5 &&
+      fabs(m_MC->getType(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJetbL))))==6 &&
+      
+      /// Ask if jet 1,2 come from light quark and W and top
+      fabs(m_MC->getType(m_jet->getJetMCIndex(idxJet1)))<5 && 
+      fabs(m_MC->getType(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJet1))))==24 &&
+      fabs(m_MC->getType(m_MC->getMom1Index(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJet1)))))==6 &&
+      fabs(m_MC->getType(m_jet->getJetMCIndex(idxJet2)))<5 && 
+      fabs(m_MC->getType(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJet2))))==24 &&
+      fabs(m_MC->getType(m_MC->getMom1Index(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJet2)))))==6 &&
+      
+      /// Ask if lepton come from W and top
+      (
+       (
+        fabs(m_MC->getType(m_muon->getMuMCIndex(idxLepton)))==13 &&
+        fabs(m_MC->getType(m_MC->getMom1Index(m_muon->getMuMCIndex(idxLepton))))==24 &&
+        fabs(m_MC->getType(m_MC->getMom1Index(m_MC->getMom1Index(m_muon->getMuMCIndex(idxLepton)))))==6
+       )
+       || 
+       (
+        fabs(m_MC->getType(m_electron->getEleMCIndex(idxLepton)))==11 &&
+        fabs(m_MC->getType(m_MC->getMom1Index(m_electron->getEleMCIndex(idxLepton))))==24 &&
+        fabs(m_MC->getType(m_MC->getMom1Index(m_MC->getMom1Index(m_electron->getEleMCIndex(idxLepton)))))==6
+       )
+      )
+      
+     )
+    {return 1;}
+    else{return 0;}
+}
 
 
 void mtt_analysis::fillTree()

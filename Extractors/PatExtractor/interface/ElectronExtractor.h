@@ -56,6 +56,8 @@ class ElectronExtractor
   float getElepfNeutralHadronIso(int eidx) {return m_ele_pfNeutralHadronIso[eidx];}
   float getElepfPhotonIso(int eidx) {return m_ele_pfPhotonIso[eidx];}
 
+  int getEleMCIndex(int eidx){return m_ele_MCIndex[eidx];}
+  
  private:
   
   TTree* m_tree_electron;

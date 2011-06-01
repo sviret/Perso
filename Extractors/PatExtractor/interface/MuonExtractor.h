@@ -68,6 +68,7 @@ class MuonExtractor
   float getMupfChargedHadronIso(int muidx) {return m_muo_pfChargedHadronIso[muidx];}
   float getMupfNeutralHadronIso(int muidx) {return m_muo_pfNeutralHadronIso[muidx];}
   float getMupfPhotonIso(int muidx) {return m_muo_pfPhotonIso[muidx];}
+  int getMuMCIndex(int muidx){return m_muo_MCIndex[muidx];}
 
  private:
   

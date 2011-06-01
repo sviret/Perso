@@ -54,7 +54,9 @@ class JetExtractor
   float getJetBTagProb_SSVHP(int jetidx) {return m_jet_btag_SSVHP[jetidx];}
   float getJetBTagProb_TCHE(int jetidx) {return m_jet_btag_TCHE[jetidx];}
   float getJetBTagProb_TCHP(int jetidx) {return m_jet_btag_TCHP[jetidx];}
-
+  
+  int getJetMCIndex(int jetidx){return m_jet_MCIndex[jetidx];}
+  
   bool isOK() {return m_OK;}
  private:
   

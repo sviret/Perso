@@ -1,3 +1,7 @@
+2011-06-01 beaupere <beaupere@ipnl.in2p3.fr>
+        *add methode in mtt_analysis to match selected evts with MC truth
+	*add methode to get jet and lepton MC matching
+
 2011-05-31 viola <sordini@cern.ch>
        * Some changes for the m_tt analysis:
         * selection complete for semimu and semie (apart from vertex cut for leptons and eleID, still missing!)

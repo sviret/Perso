@@ -272,7 +272,19 @@ void PatExtractor::doAna()
     m_Mtt_analysis->mtt_Sel(do_MC_,do_SemiMu_,m_muon,m_electron,m_jet,m_MET,m_vertex,do_Chi2_);
     iseventselected=m_Mtt_analysis->getisSel();
     //calculate the best jets pairing with a chi2 minimization
-    if (do_Chi2_) m_Mtt_analysis->LoopOverCombinations(m_jet,m_Mtt_analysis->getSelJetsIdx(),m_Mtt_analysis->getSelLeptIdx(),m_MET,m_muon,m_electron,do_SemiMu_,m_Mtt_analysis->getAllJetsPt(),do_usebtaginchi2_,do_KF_,iseventselected);
+    if (do_Chi2_) m_Mtt_analysis->LoopOverCombinations(m_jet,
+                                                       m_Mtt_analysis->getSelJetsIdx(),
+						       m_Mtt_analysis->getSelLeptIdx(),
+						       m_MET,
+						       m_muon,
+						       m_electron,
+						       do_SemiMu_,
+						       m_Mtt_analysis->getAllJetsPt(),
+						       do_usebtaginchi2_,
+						       do_KF_,
+						       do_MC_,
+						       iseventselected,
+						       m_MC);
     
     m_Mtt_analysis->reset(do_MC_);
     
