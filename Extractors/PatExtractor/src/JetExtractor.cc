@@ -246,21 +246,23 @@ int JetExtractor::getMatch(const pat::Jet *part, MCExtractor* m_MC)
 {
   float deltaR_min = 1e6;
   int idx_min    = -1;
-      
+  float deltaR;      
+  float deltaP;
+  TLorentzVector TL_genPart;
+  TLorentzVector TL_jet;
+
   for(int mcPart_i=0; mcPart_i<m_MC->getSize(); ++mcPart_i) 
   {
     if (m_MC->getStatus(mcPart_i)!=3) continue;
     if (fabs(m_MC->getType(mcPart_i))>5 && fabs(m_MC->getType(mcPart_i))!=21) continue;
-
-
-    TLorentzVector TL_genPart(m_MC->getPx(mcPart_i),m_MC->getPy(mcPart_i),m_MC->getPz(mcPart_i),m_MC->getE(mcPart_i));
-    TLorentzVector TL_jet(part->px(),part->py(),part->pz(),part->energy());
-    	   
+    TL_genPart.SetPxPyPzE(m_MC->getPx(mcPart_i),m_MC->getPy(mcPart_i),m_MC->getPz(mcPart_i),m_MC->getE(mcPart_i));
+    TL_jet.SetPxPyPzE(part->px(),part->py(),part->pz(),part->energy());
     if(TL_genPart.Pt())
     {
-      float deltaR = TL_genPart.DeltaR(TL_jet);
-      //float deltaP = fabs(TL_genPart.Pt()-TL_jet.Pt());
-
+      deltaR = TL_genPart.DeltaR(TL_jet);
+      deltaP = fabs(TL_genPart.Pt()-TL_jet.Pt())/(TL_jet.Pt());
+      if (deltaP>3.) continue; //min DPrel for jets 3.
+      if (deltaR>0.4) continue; //min DR for jets 0.4
       if(deltaR<deltaR_min)
       {
 	deltaR_min = deltaR;

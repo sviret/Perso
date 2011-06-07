@@ -17,13 +17,13 @@ process.options = cms.untracked.PSet(
 )
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(-1) #-1
 )
 
 myfilelist = cms.untracked.vstring()
 myfilelist.extend( [
-#    'file:/tmp/sviret/patTuple_PATandPF2PAT_1_2_S3q.root'
-    'file:./testTTmc.root'
+#    'file:/scratch/viola/okiwilldeleteit/Zprime750/test0.root'
+    'file:/scratch/viola/okiwilldeleteit/singlee/ex-pattuple.root'
         ] 
 )
 
@@ -44,9 +44,16 @@ process.PATextraction.doMtt      = True
 #id doSemiMu is true, we perform the analysis for the semimuonic channel (you couldnt guess eh!)
 #if doSemiMu is false, it means we perform the analysis for the semielectronic channel
 process.PATextraction.doSemiMu   = True
+#for the moment doChi2 means loop over the combinations, (if you actually calculate a chi2 to
+#choose the best jet pairing or not is decided by doChoiceWKF, see below) i know the names are
+#confusing, i will fix that soon
 process.PATextraction.doChi2     = True
 process.PATextraction.doUseBTaginChi2 = True
 process.PATextraction.doKF = True
+#if doChoiceWKF is true you will use the kinfit also to choose the best jet combination
+#if it is false, you will choose the best combination with the chi2
+process.PATextraction.doChoiceWKF = False
+process.PATextraction.doMC = False
 process.p = cms.Path(process.PATextraction)
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 100

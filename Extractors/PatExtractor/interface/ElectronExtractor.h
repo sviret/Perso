@@ -57,6 +57,8 @@ class ElectronExtractor
   float getElepfPhotonIso(int eidx) {return m_ele_pfPhotonIso[eidx];}
 
   int getEleMCIndex(int eidx){return m_ele_MCIndex[eidx];}
+  int getEleCharge(int eidx) {return m_ele_charge[eidx];}
+
   
  private:
   
@@ -93,6 +95,9 @@ class ElectronExtractor
   int   m_ele_eidTight[m_electrons_MAX]; 
   int   m_ele_eidpf_evspi[m_electrons_MAX]; 
   int   m_ele_eidpf_evsmu[m_electrons_MAX]; 
+  //
+  int eidBit;
+  bool pass ;
   float m_ele_dB[m_electrons_MAX];
   float m_ele_trackIso[m_electrons_MAX];
   float m_ele_ecalIso[m_electrons_MAX];

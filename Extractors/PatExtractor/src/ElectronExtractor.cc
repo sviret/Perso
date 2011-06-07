@@ -191,23 +191,21 @@ void ElectronExtractor::writeInfo(const pat::Electron *part, int index)
   m_ele_trackIso[index]            = part->trackIso() ;
   m_ele_ecalIso[index]             = part->ecalIso() ;
   m_ele_hcalIso[index]             = part->hcalIso() ;
-  
-  if (part->gsfTrack().isNonnull())
-  {
-    m_ele_numberOfMissedInnerLayer[index] = part->gsfTrack()->trackerExpectedHitsInner().numberOfHits();
-  }
-
+ 
+   if (part->gsfTrack().isNonnull())
+    {
+      m_ele_numberOfMissedInnerLayer[index] = part->gsfTrack()->trackerExpectedHitsInner().numberOfHits();
+    }
   if (m_isPF_electron)
-  {
-    m_ele_pfParticleIso[index]      = part->particleIso();
-    m_ele_pfChargedHadronIso[index] = part->chargedHadronIso();
-    m_ele_pfNeutralHadronIso[index] = part->neutralHadronIso();
-    m_ele_pfPhotonIso[index]        = part->photonIso();
-    m_ele_eidpf_evspi[index]         = part->electronID("pf_evspi");
-    m_ele_eidpf_evsmu[index]        = part->electronID("pf_evsmu");
-  }
+    {
+      m_ele_pfParticleIso[index]      = part->particleIso();
+      m_ele_pfChargedHadronIso[index] = part->chargedHadronIso();
+      m_ele_pfNeutralHadronIso[index] = part->neutralHadronIso();
+      m_ele_pfPhotonIso[index]        = part->photonIso();
+      m_ele_eidpf_evspi[index]         = part->electronID("pf_evspi");
+      m_ele_eidpf_evsmu[index]        = part->electronID("pf_evsmu");
+    }
 }
-
 
 //
 // Method getting the info from an input file
@@ -282,21 +280,24 @@ int ElectronExtractor::getMatch(const pat::Electron *part, MCExtractor* m_MC)
 {
   float deltaR_min = 1e6;
   int idx_min    = -1;
-      
+  float deltaR;      
+  float deltaP;
+  TLorentzVector TL_genPart;
+  TLorentzVector TL_electron;
+
   for(int mcPart_i=0; mcPart_i<m_MC->getSize(); ++mcPart_i) 
   {
-    if (m_MC->getStatus(mcPart_i)!=3) continue;
+    if (m_MC->getStatus(mcPart_i)!=3) continue; //according to pat, electrons are matched to particles of status 1, but i have none matched unless is put 3
     if (fabs(m_MC->getType(mcPart_i))!=11) continue;
-
-
-    TLorentzVector TL_genPart(m_MC->getPx(mcPart_i),m_MC->getPy(mcPart_i),m_MC->getPz(mcPart_i),m_MC->getE(mcPart_i));
-    TLorentzVector TL_electron(part->px(),part->py(),part->pz(),part->energy());
-    	   
+    TL_genPart.SetPxPyPzE(m_MC->getPx(mcPart_i),m_MC->getPy(mcPart_i),m_MC->getPz(mcPart_i),m_MC->getE(mcPart_i));
+    TL_electron.SetPxPyPzE(part->px(),part->py(),part->pz(),part->energy());
     if(TL_genPart.Pt())
     {
-      float deltaR = TL_genPart.DeltaR(TL_electron);
-      //float deltaP = fabs(TL_genPart.Pt()-TL_electron.Pt());
-
+      deltaR = TL_genPart.DeltaR(TL_electron);
+      deltaP = fabs(TL_genPart.Pt()-TL_electron.Pt())/(TL_electron.Pt());
+      if (deltaP>0.5) continue; //min DPrel for electrons 0.5
+      if (deltaR>0.5) continue; //min DR for electrons 0.5
+      //      if((m_MC->getType(mcPart_i)*part->charge())<0.) continue;//doesnt work for now (i.e. noone matched) dont know why
       if(deltaR<deltaR_min)
       {
 	deltaR_min = deltaR;

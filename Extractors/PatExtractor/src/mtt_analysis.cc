@@ -1,7 +1,7 @@
 #include "../interface/mtt_analysis.h"
 
 
-mtt_analysis::mtt_analysis(bool do_MC_,bool do_SemiMu_, MuonExtractor *m_muon, ElectronExtractor *m_electron, JetExtractor *m_jet, METExtractor *m_MET, VertexExtractor *m_vertex, bool do_Chi2_, bool do_KF_)
+mtt_analysis::mtt_analysis(bool do_MC_,bool do_SemiMu_, MuonExtractor *m_muon, ElectronExtractor *m_electron, JetExtractor *m_jet, METExtractor *m_MET, VertexExtractor *m_vertex, bool do_Chi2_, bool do_KF_,bool do_ChoiceWKF_)
 {
   /// Tree definition
   m_tree_Mtt = new TTree("Mtt","Analysis info");  
@@ -20,7 +20,7 @@ mtt_analysis::mtt_analysis(bool do_MC_,bool do_SemiMu_, MuonExtractor *m_muon, E
     m_tree_Mtt->Branch("MC_channel",&m_MC_channel,"MC_channel/I");
     m_tree_Mtt->Branch("MC_mtt"    ,&m_MC_mtt    ,"MC_mtt/F");
   }
-  reset(do_MC_);
+  //  reset(do_MC_);
   if (do_SemiMu_){
     m_tree_Mtt->Branch("mtt_NGoodMuons"    ,&m_mtt_NGoodMuons    ,"mtt_NGoodMuons/I");
     m_tree_Mtt->Branch("mtt_NLooseGoodMuons"    ,&m_mtt_NLooseGoodMuons    ,"mtt_NLooseGoodMuons/I");
@@ -38,6 +38,10 @@ mtt_analysis::mtt_analysis(bool do_MC_,bool do_SemiMu_, MuonExtractor *m_muon, E
   m_tree_Mtt->Branch("mtt_3rdjetpt"    ,&m_mtt_3rdjetpt   ,"mtt_3rdjetpt/F");
   m_tree_Mtt->Branch("mtt_4thjetpt"    ,&m_mtt_4thjetpt   ,"mtt_4thjetpt/F");
   m_tree_Mtt->Branch("mtt_NGoodJets"    ,&m_mtt_NGoodJets    ,"mtt_NGoodJets/I");
+  m_tree_Mtt->Branch("mtt_GoodJetEta"    ,&m_mtt_GoodJetEta    ,"mtt_GoodJetEta[mtt_NGoodJets]/F");
+  m_tree_Mtt->Branch("mtt_NJets"    ,&m_mtt_NJets    ,"mtt_NJets/I");
+  m_tree_Mtt->Branch("mtt_JetEta"    ,&m_mtt_JetEta    ,"mtt_JetEta[mtt_NJets]/F");
+  m_tree_Mtt->Branch("mtt_JetPt"    ,&m_mtt_JetPt    ,"mtt_JetPt[mtt_NJets]/F");
   m_tree_Mtt->Branch("mtt_NBtaggedJets_TCHEL"    ,&m_mtt_NBtaggedJets_TCHEL    ,"mtt_NBtaggedJets_TCHEL/I");
   m_tree_Mtt->Branch("mtt_NBtaggedJets_TCHEM"    ,&m_mtt_NBtaggedJets_TCHEM    ,"mtt_NBtaggedJets_TCHEM/I");
   m_tree_Mtt->Branch("mtt_NBtaggedJets_TCHET"    ,&m_mtt_NBtaggedJets_TCHET    ,"mtt_NBtaggedJets_TCHET/I");
@@ -48,6 +52,7 @@ mtt_analysis::mtt_analysis(bool do_MC_,bool do_SemiMu_, MuonExtractor *m_muon, E
   m_tree_Mtt->Branch("mtt_NBtaggedJets_SSVHPT"   ,&m_mtt_NBtaggedJets_SSVHPT    ,"mtt_NBtaggedJets_SSVHPT/I");
   m_tree_Mtt->Branch("mtt_MET"    ,&m_mtt_MET    ,"mtt_MET/F"); 
   if (do_Chi2_) {
+    if (!(do_ChoiceWKF_)){
     m_tree_Mtt->Branch("mtt_NumComb"    ,&m_mtt_NumComb    ,"mtt_NumComb/I");
     m_tree_Mtt->Branch("mtt_SolChi2"    ,&m_mtt_SolChi2    ,"mtt_SolChi2[mtt_NumComb]/F");
     m_tree_Mtt->Branch("mLepTop_All"    ,&m_mLepTop_All    ,"mLepTop_All[mtt_NumComb]/F");
@@ -57,6 +62,8 @@ mtt_analysis::mtt_analysis(bool do_MC_,bool do_SemiMu_, MuonExtractor *m_muon, E
     m_tree_Mtt->Branch("mLepTop_AfterChi2",&m_mLepTop_AfterChi2,"mLepTop_AfterChi2/F");
     m_tree_Mtt->Branch("mHadTop_AfterChi2",&m_mHadTop_AfterChi2,"mHadTop_AfterChi2/F");
     m_tree_Mtt->Branch("mtt_AfterChi2",&m_mtt_AfterChi2,"mtt_AfterChi2/F");
+    }
+    m_tree_Mtt->Branch("mtt_IsBestSolMatched",&m_mtt_IsBestSolMatched,"mtt_IsBestSolMatched/I");
     if (do_KF_) {
     m_tree_Mtt->Branch("mLepTop_AfterChi2andKF",&m_mLepTop_AfterChi2andKF,"mLepTop_AfterChi2andKF/F");
     m_tree_Mtt->Branch("mHadTop_AfterChi2andKF",&m_mHadTop_AfterChi2andKF,"mHadTop_AfterChi2andKF/F");
@@ -73,6 +80,7 @@ void mtt_analysis::reset(bool do_MC_)
   m_mtt_NGoodMuons=0;
   m_mtt_NLooseGoodMuons=0;
   m_mtt_isSel=0;
+  m_mtt_IsBestSolMatched=999;
   m_mtt_NGoodElectrons=0;
   SelJetsIdx.clear();
   SelLeptIdx=-1;
@@ -119,6 +127,7 @@ void mtt_analysis::reset(bool do_MC_)
   m_mtt_4thjetpt=0.;
   m_mtt_MET=0.;
   m_mtt_NGoodJets=0;
+  m_mtt_NJets=0;
   m_mtt_2DDrMin=999.;
   m_mtt_2DpTrel=999.;
   //ok, i know it's ugly, i will define a method resetvector promised!!
@@ -132,6 +141,9 @@ void mtt_analysis::reset(bool do_MC_)
     m_mtt_All[tmp]=999.;
     m_mLepTop_All[tmp]=999.;
     m_mHadTop_All[tmp]=999.;
+    m_mtt_GoodJetEta[tmp]=999.;
+    m_mtt_JetEta[tmp]=999.;
+    m_mtt_JetPt[tmp]=999.;
   }
 
   if(do_MC_)
@@ -190,7 +202,6 @@ int mtt_analysis::mtt_Sel(bool do_MC_,bool do_SemiMu_, MuonExtractor *m_muon, El
   if(isVtxSel==1 && isMETSel==1 && isLepSel==1 && isJetSel==1 ) isSel=1;
 
   m_mtt_isSel = isSel;
-  if (!do_Chi2_)  mtt_analysis::fillTree(); //because if i calculate the chi2 i fill the tree AFTER i've done it (and with more variables)
   return isSel;
 }
 
@@ -427,6 +438,7 @@ int mtt_analysis::Make2DCut(TVector3 lept3P,JetExtractor* m_jet, float cutDR, fl
 
 int mtt_analysis::JetsSel(JetExtractor *m_jet, int isSel) {
   NGoodJets=0;
+  m_mtt_NJets=0;
   minjetpt=30.;
   maxjeteta=2.4; 
   min_btag_TCHEL=1.7;
@@ -450,7 +462,13 @@ int mtt_analysis::JetsSel(JetExtractor *m_jet, int isSel) {
   isSel=0;
   for(int ij=0; ij<m_jet->getSize(); ij++) {
     jetP = m_jet->getJetLorentzVector(ij);
+    if(fabs(jetP->Pt())<minjetpt) continue;
+    m_mtt_JetEta[m_mtt_NJets]=jetP->Eta();
+    m_mtt_JetPt[m_mtt_NJets]=jetP->Pt();
+    m_mtt_NJets++;
     if(fabs(jetP->Pt())<minjetpt || fabs(jetP->Eta())>maxjeteta) continue;
+    //JETID already applied at pat level
+    m_mtt_GoodJetEta[NGoodJets]=jetP->Eta();
     NGoodJets++;
     if((m_jet->getJetBTagProb_TCHE(ij))>min_btag_TCHEL) m_mtt_NBtaggedJets_TCHEL++;
     if((m_jet->getJetBTagProb_TCHE(ij))>min_btag_TCHEM) m_mtt_NBtaggedJets_TCHEM++;
@@ -489,11 +507,12 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
 					bool do_KF_,
 					bool do_MC_,
 					int iseventselected,
-					MCExtractor * m_MC)
+					MCExtractor * m_MC,bool do_ChoiceWKF_)
 {
   //how do i define a jet as b-tagged for chi2 calculation
   min_btag_SSVHEM_chi2=1.74; 
   min_btag_TCHEL_chi2=1.7; 
+  min_btag_TCHET_chi2=10.2; 
   //jets indices
   bjet1idx=-1;
   bjet2idx=-1;
@@ -507,17 +526,16 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
 
   //chi2 variables
   minchi2=9999.;
+  minkinfitchi2=9999.;
   thischi2=999.;
   m_mtt_NumComb=0;
   kinfitchi2=999.;
   if (iseventselected!=1) {
-    mtt_analysis::fillTree();
   } else {
   //count the b-tagged jets in the selected jets sample
   if (usebtaginfo) {
     for (unsigned int i=0; i<JetsIdx.size(); i++) {
-      //      if(m_jet->getJetBTagProb_SSVHE(i)>min_btag_SSVHEM_chi2) {
-      if(m_jet->getJetBTagProb_TCHE(i)>min_btag_TCHEL_chi2) {
+      if(m_jet->getJetBTagProb_TCHE(i)>min_btag_TCHET_chi2) {
 	btaggedjets.push_back(i);
       }
     }
@@ -532,8 +550,10 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
   if(numberoflightjets<2) {
     //if we dont have at least 2 non b-tagged jets, chi2 is -1
     minchi2=9999.;
+    minkinfitchi2=9999.;
   } else {
     minchi2=9999.;
+    minkinfitchi2=9999.;
     for (unsigned int bj1=0; bj1<JetsIdx.size(); bj1++) {
       bjet1idx=bj1;
       for (unsigned int bj2=0; bj2<JetsIdx.size(); bj2++) {
@@ -546,7 +566,7 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
 	  //i dont want a b-tagged jet to be considered as a light jet in my combinations
 	  notthisone=false;
 	  for (unsigned int nob=0; nob<btaggedjets.size(); nob++) {
-	    if (j3==nob) notthisone=true;
+	    if (j3==(btaggedjets.at(nob))) notthisone=true;
 	  }
 	  if (notthisone) continue;
 	  jet3idx=j3;
@@ -560,7 +580,7 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
 	    //i dont want a b-tagged jet to be considered as a light jet in my combinations
 	    notthisone=false;
 	    for (unsigned int nob=0; nob<btaggedjets.size(); nob++) {
-	      if (j4==nob) notthisone=true;
+	      if (j4==(btaggedjets.at(nob))) notthisone=true;
 	    }
 	    if (notthisone) continue;
 	    //loop over the indices already used for jet3 not do double count
@@ -576,6 +596,54 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
 	    } else {
 	      LeptonP=m_electron->getEleLorentzVector(LeptIdx);
 	    }
+
+	    if (do_ChoiceWKF_) {//use the kinfit to choose the best jet pairing
+	      if (do_KF_ && 1.*jet4idx>-1.) {
+		ChosenJets.clear();
+		ChosenJetsFlavour.clear();	
+		//assign TLorentzVectors to chosen jet
+		bestHadbjetP   = m_jet->getJetLorentzVector(bjet1idx);
+		bestLepbjetP   = m_jet->getJetLorentzVector(bjet2idx);
+		bestLightjet1P = m_jet->getJetLorentzVector(jet3idx);
+		bestLightjet2P = m_jet->getJetLorentzVector(jet4idx);
+		ChosenJets.push_back(*bestLightjet1P);
+		ChosenJetsFlavour.push_back(1);
+		ChosenJets.push_back(*bestLightjet2P);
+		ChosenJetsFlavour.push_back(1);
+		ChosenJets.push_back(*bestLepbjetP);
+		ChosenJetsFlavour.push_back(2);
+		ChosenJets.push_back(*bestHadbjetP);
+		ChosenJetsFlavour.push_back(3);
+		if(do_SemiMu_) {
+		  kinfitchi2=chi2kinfit(ChosenJets,ChosenJetsFlavour,*(m_muon->getMuLorentzVector(LeptIdx)),*(m_MET->getMETLorentzVector(0)),&RecoFittedVectors,myAlienKinFit,true); 
+		} else {
+		  kinfitchi2=chi2kinfit(ChosenJets,ChosenJetsFlavour,*(m_electron->getEleLorentzVector(LeptIdx)),*(m_MET->getMETLorentzVector(0)),&RecoFittedVectors,myAlienKinFit,true); 
+		}
+		if(kinfitchi2<minkinfitchi2) {
+		  minkinfitchi2=kinfitchi2;
+		  bestbjet1idx=bjet1idx;
+		  bestbjet2idx=bjet2idx;
+		  bestjet3idx= jet3idx;
+		  bestjet4idx= jet4idx;
+		  if(RecoFittedVectors.size()!=0) {
+		    //RecoFittedVectors contains
+		    //index 0 leptonic b
+		    //index 1 hadronic b
+		    //index 2 j1
+		    //index3 j2
+		    //index 4 charged lepton
+		    //index 5 neutrino
+		    m_mLepTop_AfterChi2andKF = (RecoFittedVectors[0]+RecoFittedVectors[4]+RecoFittedVectors[5]).M();
+		    m_mHadTop_AfterChi2andKF = (RecoFittedVectors[1]+RecoFittedVectors[2]+RecoFittedVectors[3]).M();
+		    m_mtt_AfterChi2andKF = (RecoFittedVectors[0]+RecoFittedVectors[4]+RecoFittedVectors[5]+RecoFittedVectors[1]+RecoFittedVectors[2]+RecoFittedVectors[3]).M();
+		  } else {
+		    m_mLepTop_AfterChi2andKF = 1e6;
+		    m_mHadTop_AfterChi2andKF = 1e6;
+		    m_mtt_AfterChi2andKF     = 1e6;
+		  }
+		}
+	      }
+	    } else {//else use the chi2 to chose the best combination and apply the kinfit only to this latter
 	    thischi2=m_Chi2->GlobalSimpleChi2(*(m_jet->getJetLorentzVector(jet3idx)),*(m_jet->getJetLorentzVector(jet4idx)),*(m_jet->getJetLorentzVector(bjet1idx)),*(m_jet->getJetLorentzVector(bjet2idx)), *LeptonP, *(m_MET->getMETLorentzVector(0)),AllJetsPt,do_SemiMu_,corrMETP); 
 	    HadbjetP   = m_jet->getJetLorentzVector(bjet1idx);
 	    LepbjetP   = m_jet->getJetLorentzVector(bjet2idx);
@@ -596,49 +664,59 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
 	      m_mtt_AfterChi2=(*LepbjetP+*LeptonP+*corrMETP+*HadbjetP+*Lightjet1P+*Lightjet2P).M();
 	    }
 	    m_mtt_NumComb++;
+	    }//close else use the chi2 to chose the best combination and apply the kinfit only to this latter
 	  }
 	}
       }
+    } // we out of the loop over jet pairings
+    if ( !(do_ChoiceWKF_) &&  do_KF_ && m_mtt_NumComb>0 && 1.*bestjet4idx>-1.) {
+      ChosenJets.clear();
+      ChosenJetsFlavour.clear();	
+      //assign TLorentzVectors to chosen jet
+      bestHadbjetP   = m_jet->getJetLorentzVector(bestbjet1idx);
+      bestLepbjetP   = m_jet->getJetLorentzVector(bestbjet2idx);
+      bestLightjet1P = m_jet->getJetLorentzVector(bestjet3idx);
+      bestLightjet2P = m_jet->getJetLorentzVector(bestjet4idx);
+      ChosenJets.push_back(*bestLightjet1P);
+      ChosenJetsFlavour.push_back(1);
+      ChosenJets.push_back(*bestLightjet2P);
+      ChosenJetsFlavour.push_back(1);
+      ChosenJets.push_back(*bestLepbjetP);
+      ChosenJetsFlavour.push_back(2);
+      ChosenJets.push_back(*bestHadbjetP);
+      ChosenJetsFlavour.push_back(3);
+      if(do_SemiMu_) {
+	kinfitchi2=chi2kinfit(ChosenJets,ChosenJetsFlavour,*(m_muon->getMuLorentzVector(LeptIdx)),*(m_MET->getMETLorentzVector(0)),&RecoFittedVectors,myAlienKinFit,true); 
+      } else {
+	kinfitchi2=chi2kinfit(ChosenJets,ChosenJetsFlavour,*(m_electron->getEleLorentzVector(LeptIdx)),*(m_MET->getMETLorentzVector(0)),&RecoFittedVectors,myAlienKinFit,true); 
+      }
+    }
+  }
+
+  if(do_MC_){m_mtt_IsBestSolMatched=match_MC(bestbjet1idx,bestbjet2idx,bestjet3idx,bestjet4idx,LeptIdx,do_SemiMu_,m_MC,m_jet,m_electron,m_muon);}
+  if(do_ChoiceWKF_){  
+    m_mtt_KFChi2=minkinfitchi2; 
+  } else {
+    m_mtt_BestSolChi2=minchi2;
+    m_mtt_KFChi2=kinfitchi2;   
+    if(RecoFittedVectors.size()!=0) {
+      //RecoFittedVectors contains
+      //index 0 leptonic b
+      //index 1 hadronic b
+      //index 2 j1
+      //index3 j2
+      //index 4 charged lepton
+      //index 5 neutrino
+      m_mLepTop_AfterChi2andKF = (RecoFittedVectors[0]+RecoFittedVectors[4]+RecoFittedVectors[5]).M();
+      m_mHadTop_AfterChi2andKF = (RecoFittedVectors[1]+RecoFittedVectors[2]+RecoFittedVectors[3]).M();
+      m_mtt_AfterChi2andKF = (RecoFittedVectors[0]+RecoFittedVectors[4]+RecoFittedVectors[5]+RecoFittedVectors[1]+RecoFittedVectors[2]+RecoFittedVectors[3]).M();
+    } else {
+      m_mLepTop_AfterChi2andKF = 1e6;
+      m_mHadTop_AfterChi2andKF = 1e6;
+      m_mtt_AfterChi2andKF     = 1e6;
     }
   }
   
-  if(do_MC_){match_MC(bestbjet1idx,bestbjet2idx,bestjet3idx,bestjet4idx,LeptIdx,do_SemiMu_,m_MC,m_jet,m_electron,m_muon);}
-
-  if (do_KF_ && m_mtt_NumComb>0 && 1.*bestjet4idx>-1.) {
-  //assign TLorentzVectors to chosen jet
-  bestHadbjetP   = m_jet->getJetLorentzVector(bestbjet1idx);
-  bestLepbjetP   = m_jet->getJetLorentzVector(bestbjet2idx);
-  bestLightjet1P = m_jet->getJetLorentzVector(bestjet3idx);
-  bestLightjet2P = m_jet->getJetLorentzVector(bestjet4idx);
-  ChosenJets.push_back(*bestLightjet1P);
-  ChosenJetsFlavour.push_back(1);
-  ChosenJets.push_back(*bestLightjet2P);
-  ChosenJetsFlavour.push_back(1);
-  ChosenJets.push_back(*bestLepbjetP);
-  ChosenJetsFlavour.push_back(2);
-  ChosenJets.push_back(*bestHadbjetP);
-  ChosenJetsFlavour.push_back(3);
-  if(do_SemiMu_) {
-    kinfitchi2=chi2kinfit(ChosenJets,ChosenJetsFlavour,*(m_muon->getMuLorentzVector(LeptIdx)),*(m_MET->getMETLorentzVector(0)),&RecoFittedVectors,myAlienKinFit,true); 
-  } else {
-    kinfitchi2=chi2kinfit(ChosenJets,ChosenJetsFlavour,*(m_electron->getEleLorentzVector(LeptIdx)),*(m_MET->getMETLorentzVector(0)),&RecoFittedVectors,myAlienKinFit,true); 
-  }
-  //RecoFittedVectors contains
-  //index 0 leptonic b
-  //index 1 hadronic b
-  //index 2 j1
-  //index3 j2
-  //index 4 charged lepton
-  //index 5 neutrino
-  m_mLepTop_AfterChi2andKF = (RecoFittedVectors[0]+RecoFittedVectors[4]+RecoFittedVectors[5]).M();
-  m_mHadTop_AfterChi2andKF = (RecoFittedVectors[1]+RecoFittedVectors[2]+RecoFittedVectors[3]).M();
-  m_mtt_AfterChi2andKF = (RecoFittedVectors[0]+RecoFittedVectors[4]+RecoFittedVectors[5]+RecoFittedVectors[1]+RecoFittedVectors[2]+RecoFittedVectors[3]).M();
-  ChosenJets.clear();
-  ChosenJetsFlavour.clear();
-  }
-  m_mtt_BestSolChi2=minchi2;
-  m_mtt_KFChi2=kinfitchi2;
-  mtt_analysis::fillTree();
   btaggedjets.clear();
   dontdoublecount.clear();
   }
@@ -650,17 +728,17 @@ void mtt_analysis::MCidentification(MCExtractor * m_MC)
   
   for(int mcpart_i=0 ; mcpart_i<m_MC->getSize() ; mcpart_i++)
   {
-    if(abs(m_MC->getType(m_MC->getMom1Index(m_MC->getMom1Index(mcpart_i))))==6)
+    if(fabs(m_MC->getType(m_MC->getMom1Index(m_MC->getMom1Index(mcpart_i))))==6)
     {
-      if(abs(m_MC->getType(m_MC->getMom1Index(mcpart_i)))==24)
+      if(fabs(m_MC->getType(m_MC->getMom1Index(mcpart_i)))==24)
       {
         /// Count the number of leptons and neutrinos from Top->W
-        if(abs(m_MC->getType(mcpart_i))==11){nEle++  ;}//Electron from WTop
-	if(abs(m_MC->getType(mcpart_i))==13){nMu++   ;}//Muon	  from WTop
-        if(abs(m_MC->getType(mcpart_i))==15){nTau++  ;}//Tau	  from WTop
-        if(abs(m_MC->getType(mcpart_i))==12){nNuEle++;}//NuEle    from WTop
-        if(abs(m_MC->getType(mcpart_i))==14){nNuMu++ ;}//NuMu	  from WTop
-        if(abs(m_MC->getType(mcpart_i))==16){nNuTau++;}//NuTau    from WTop
+        if(fabs(m_MC->getType(mcpart_i))==11){nEle++  ;}//Electron from WTop
+	if(fabs(m_MC->getType(mcpart_i))==13){nMu++   ;}//Muon	  from WTop
+        if(fabs(m_MC->getType(mcpart_i))==15){nTau++  ;}//Tau	  from WTop
+        if(fabs(m_MC->getType(mcpart_i))==12){nNuEle++;}//NuEle    from WTop
+        if(fabs(m_MC->getType(mcpart_i))==14){nNuMu++ ;}//NuMu	  from WTop
+        if(fabs(m_MC->getType(mcpart_i))==16){nNuTau++;}//NuTau    from WTop
 	
         /// Count the number of W (with no double counting) from Top
 	for(unsigned int j=0 ; j<idxW.size() ; j++)
@@ -693,7 +771,7 @@ void mtt_analysis::MCidentification(MCExtractor * m_MC)
     }
     
     /// Count the number of b quark from Top
-    if(abs(m_MC->getType(mcpart_i))==5 && abs(m_MC->getType(m_MC->getMom1Index(mcpart_i)))==6){nQuarkb++;}//Quark b from Top
+    if(fabs(m_MC->getType(mcpart_i))==5 && fabs(m_MC->getType(m_MC->getMom1Index(mcpart_i)))==6){nQuarkb++;}//Quark b from Top
     
   }
   
@@ -712,11 +790,9 @@ void mtt_analysis::MCidentification(MCExtractor * m_MC)
   if(nEle==0 && nNuEle==0 && nMu==1 && nNuMu==1 && nTau==1 && nNuTau==1 && nQuarkb==2 && nW==2 && nTop==2){m_MC_channel=10;}
  
   m_MC_mtt = (Top[0]+Top[1]).M();
-  
-  mtt_analysis::fillTree();
 }
 
-//try to copy it from Nicola's global_selection (formerly a code by Djamel)
+//try to copy it from Nicola's global_selection (formerly a code by Djamel..rabbrividiamo..)
 
 float mtt_analysis::chi2kinfit(const vector<TLorentzVector> MaxPtSelectedJets,
                                     vector<unsigned int> & MaxPtRecoSolution,
@@ -822,36 +898,6 @@ int mtt_analysis::match_MC(int idxJetbH,
 	       	           ElectronExtractor *m_electron,
 	                   MuonExtractor *m_muon)
 {
-   /*
-   cout<<"jetbH :"<<endl;
-   cout<<" type de la mere = "      <<m_MC->getType(m_jet->getJetMCIndex(idxJetbH))<<endl;
-   cout<<" type de la grand-mere = "<<m_MC->getType(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJetbH)))<<endl;
-   
-   cout<<"jetbL :"<<endl;
-   cout<<" type de la mere = "      <<m_MC->getType(m_jet->getJetMCIndex(idxJetbL))<<endl;
-   cout<<" type de la grand-mere = "<<m_MC->getType(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJetbL)))<<endl;
-   
-   cout<<"jet1 :"<<endl;
-   cout<<" type de la mere = "  	   <<m_MC->getType(m_jet->getJetMCIndex(idxJet1))<<endl;
-   cout<<" type de la grand-mere = "	   <<m_MC->getType(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJet1)))<<endl;
-   cout<<" type de l'arriere grand-mere = "<<m_MC->getType(m_MC->getMom1Index(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJet1))))<<endl;
-   
-   cout<<"jet2 :"<<endl;
-   cout<<" type de la mere = "  	   <<m_MC->getType(m_jet->getJetMCIndex(idxJet2))<<endl;
-   cout<<" type de la grand-mere = "	   <<m_MC->getType(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJet2)))<<endl;
-   cout<<" type de l'arriere grand-mere = "<<m_MC->getType(m_MC->getMom1Index(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJet2))))<<endl;
-   
-   cout<<"muon : "<<endl;
-   cout<<" type  = "                <<m_MC->getType(m_muon->getMuMCIndex(idxLepton))<<endl;
-   cout<<" type de la mere = "      <<m_MC->getType(m_MC->getMom1Index(m_muon->getMuMCIndex(idxLepton)))<<endl;
-   cout<<" type de la grand-mere = "<<m_MC->getType(m_MC->getMom1Index(m_MC->getMom1Index(m_muon->getMuMCIndex(idxLepton))))<<endl;
-   
-   cout<<"electron : "<<endl;
-   cout<<" type  = "                <<m_MC->getType(m_electron->getEleMCIndex(idxLepton))<<endl;
-   cout<<" type de la mere = "      <<m_MC->getType(m_MC->getMom1Index(m_electron->getEleMCIndex(idxLepton)))<<endl;
-   cout<<" type de la grand-mere = "<<m_MC->getType(m_MC->getMom1Index(m_MC->getMom1Index(m_electron->getEleMCIndex(idxLepton))))<<endl;
-   */   
-   
    if(
       /// Ask if Jet b hadronique  come from a b and top
       fabs(m_MC->getType(m_jet->getJetMCIndex(idxJetbH)))==5 &&
@@ -867,9 +913,8 @@ int mtt_analysis::match_MC(int idxJetbH,
       fabs(m_MC->getType(m_MC->getMom1Index(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJet1)))))==6 &&
       fabs(m_MC->getType(m_jet->getJetMCIndex(idxJet2)))<5 && 
       fabs(m_MC->getType(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJet2))))==24 &&
-      fabs(m_MC->getType(m_MC->getMom1Index(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJet2)))))==6 &&
-      
-      /// Ask if lepton come from W and top
+      fabs(m_MC->getType(m_MC->getMom1Index(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJet2)))))==6 /*&&
+           /// Ask if lepton come from W and top
       (
        (
         fabs(m_MC->getType(m_muon->getMuMCIndex(idxLepton)))==13 &&
@@ -882,17 +927,16 @@ int mtt_analysis::match_MC(int idxJetbH,
         fabs(m_MC->getType(m_MC->getMom1Index(m_electron->getEleMCIndex(idxLepton))))==24 &&
         fabs(m_MC->getType(m_MC->getMom1Index(m_MC->getMom1Index(m_electron->getEleMCIndex(idxLepton)))))==6
        )
+      )*/
       )
-      
-     )
     {return 1;}
     else{return 0;}
 }
 
 
 void mtt_analysis::fillTree()
-{
-  m_tree_Mtt->Fill(); 
+{  
+m_tree_Mtt->Fill(); 
 }
 
 

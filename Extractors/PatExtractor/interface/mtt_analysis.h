@@ -35,7 +35,7 @@ using namespace std;
 class mtt_analysis
 {
  public:
-  mtt_analysis(bool do_MC_,bool do_SemiMu_, MuonExtractor *m_muon, ElectronExtractor *m_electron, JetExtractor *m_jet, METExtractor *m_MET, VertexExtractor *m_vertex, bool do_Chi2_, bool do_KF_);
+  mtt_analysis(bool do_MC_,bool do_SemiMu_, MuonExtractor *m_muon, ElectronExtractor *m_electron, JetExtractor *m_jet, METExtractor *m_MET, VertexExtractor *m_vertex, bool do_Chi2_, bool do_KF_,bool do_ChoiceWKF_);
 
   ~mtt_analysis();
   
@@ -69,7 +69,7 @@ class mtt_analysis
 			    bool do_KF_,
 			    bool do_MC_,
 			    int iseventselected,
-			    MCExtractor * m_MC);
+			    MCExtractor * m_MC, bool do_ChoiceWKF_);
 			    
   float chi2kinfit(const vector<TLorentzVector> MaxPtSelectedJets,
                      vector<unsigned int> & MaxPtRecoSolution,
@@ -126,6 +126,7 @@ class mtt_analysis
 
   //Reco stuff
   int m_mtt_isSel;
+  int m_mtt_IsBestSolMatched;
   int m_mtt_NGoodMuons;
   float m_mtt_MuonPt[20];
   int m_mtt_NLooseGoodMuons;
@@ -223,6 +224,7 @@ class mtt_analysis
   //how do i define a jet as b-tagged for chi2 calculation
   float min_btag_SSVHEM_chi2; 
   float min_btag_TCHEL_chi2;
+  float min_btag_TCHET_chi2;
   //jets indices
   unsigned int bjet1idx;
   unsigned int bjet2idx;
@@ -235,6 +237,7 @@ class mtt_analysis
   //chi2 variables
   float thischi2;
   float minchi2;
+  float minkinfitchi2;
   //
   TLorentzVector *HadbjetP;
   TLorentzVector *LepbjetP;
@@ -286,6 +289,10 @@ class mtt_analysis
   int m_mtt_NBtaggedJets_TCHPT;
   int m_mtt_NBtaggedJets_SSVHEM;
   int m_mtt_NBtaggedJets_SSVHPT;
+  int m_mtt_NJets;
+  float m_mtt_GoodJetEta[100];
+  float m_mtt_JetEta[100];
+  float m_mtt_JetPt[100];
 
 };
 
