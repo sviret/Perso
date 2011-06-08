@@ -226,14 +226,14 @@ class mtt_analysis
   float min_btag_TCHEL_chi2;
   float min_btag_TCHET_chi2;
   //jets indices
-  unsigned int bjet1idx;
-  unsigned int bjet2idx;
-  unsigned int jet3idx;
-  unsigned int jet4idx;
-  unsigned int bestbjet1idx;
-  unsigned int bestbjet2idx;
-  unsigned int bestjet3idx;
-  unsigned int bestjet4idx;
+  int bjet1idx;
+  int bjet2idx;
+  int jet3idx;
+  int jet4idx;
+  int bestbjet1idx;
+  int bestbjet2idx;
+  int bestjet3idx;
+  int bestjet4idx;
   //chi2 variables
   float thischi2;
   float minchi2;
@@ -252,9 +252,9 @@ class mtt_analysis
   TLorentzVector *bestLightjet2P;
 
   //
-  vector<unsigned int> dontdoublecount;
+  vector<int> dontdoublecount;
   bool doublecount;
-  vector<unsigned int> btaggedjets;
+  vector<int> btaggedjets;
   bool notthisone;
   int numberoflightjets;
 

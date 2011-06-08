@@ -524,17 +524,19 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
   bestjet3idx=-1;
   bestjet4idx=-1;
 
-  //chi2 variables
+  btaggedjets.clear();
+  dontdoublecount.clear();
+  
+ //chi2 variables
   minchi2=9999.;
   minkinfitchi2=9999.;
   thischi2=999.;
   m_mtt_NumComb=0;
   kinfitchi2=999.;
-  if (iseventselected!=1) {
-  } else {
+  if (iseventselected==1) {
   //count the b-tagged jets in the selected jets sample
   if (usebtaginfo) {
-    for (unsigned int i=0; i<JetsIdx.size(); i++) {
+    for (int i=0; i<(int)JetsIdx.size(); i++) {
       if(m_jet->getJetBTagProb_TCHE(i)>min_btag_TCHET_chi2) {
 	btaggedjets.push_back(i);
       }
@@ -554,18 +556,18 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
   } else {
     minchi2=9999.;
     minkinfitchi2=9999.;
-    for (unsigned int bj1=0; bj1<JetsIdx.size(); bj1++) {
+    for (int bj1=0; bj1<(int)JetsIdx.size(); bj1++) {
       bjet1idx=bj1;
-      for (unsigned int bj2=0; bj2<JetsIdx.size(); bj2++) {
+      for (int bj2=0; bj2<(int)JetsIdx.size(); bj2++) {
 	//dont pick the one you already used
 	if (bj2 == bjet1idx) continue;
 	bjet2idx=bj2;
-	for (unsigned int j3=0; j3<JetsIdx.size(); j3++) {
+	for (int j3=0; j3<(int)JetsIdx.size(); j3++) {
 	  //dont pick the two jets you already used for bjets
 	  if(j3==bjet1idx || j3==bjet2idx) continue;
 	  //i dont want a b-tagged jet to be considered as a light jet in my combinations
 	  notthisone=false;
-	  for (unsigned int nob=0; nob<btaggedjets.size(); nob++) {
+	  for (int nob=0; nob<(int)btaggedjets.size(); nob++) {
 	    if (j3==(btaggedjets.at(nob))) notthisone=true;
 	  }
 	  if (notthisone) continue;
@@ -574,21 +576,22 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
 	  //was used a jet3 so i dont count it as jet4, not to consider 
 	  //twice the same combination
 	  dontdoublecount.push_back(j3);
-	  for (unsigned int j4=0; j4<JetsIdx.size(); j4++) {
+	  for (int j4=0; j4<(int)JetsIdx.size(); j4++) {
 	    //dont pick the two jets you already used for bjets
 	    if(j4==bjet1idx || j4==bjet2idx) continue;
 	    //i dont want a b-tagged jet to be considered as a light jet in my combinations
 	    notthisone=false;
-	    for (unsigned int nob=0; nob<btaggedjets.size(); nob++) {
+	    for (int nob=0; nob<(int)btaggedjets.size(); nob++) {
 	      if (j4==(btaggedjets.at(nob))) notthisone=true;
 	    }
 	    if (notthisone) continue;
 	    //loop over the indices already used for jet3 not do double count
 	    doublecount=false;
-	    for(unsigned int v=0; v<dontdoublecount.size(); v++) {
+	    for(int v=0; v<(int)dontdoublecount.size(); v++) {
 	      if(j4==dontdoublecount.at(v)) doublecount=true;
 	    }
-	    if (doublecount) continue;
+
+	    if (doublecount){continue;}
 	    jet4idx=j4;
 	    //here we use the method to actually calculate the chi2
 	    if(do_SemiMu_) {
@@ -596,9 +599,8 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
 	    } else {
 	      LeptonP=m_electron->getEleLorentzVector(LeptIdx);
 	    }
-
 	    if (do_ChoiceWKF_) {//use the kinfit to choose the best jet pairing
-	      if (do_KF_ && 1.*jet4idx>-1.) {
+	      if (do_KF_ && jet4idx>=0) {
 		ChosenJets.clear();
 		ChosenJetsFlavour.clear();	
 		//assign TLorentzVectors to chosen jet
@@ -669,7 +671,8 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
 	}
       }
     } // we out of the loop over jet pairings
-    if ( !(do_ChoiceWKF_) &&  do_KF_ && m_mtt_NumComb>0 && 1.*bestjet4idx>-1.) {
+
+    if ( !(do_ChoiceWKF_) &&  do_KF_ && m_mtt_NumComb>0 && bestjet4idx>=0) {
       ChosenJets.clear();
       ChosenJetsFlavour.clear();	
       //assign TLorentzVectors to chosen jet
@@ -691,7 +694,6 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
 	kinfitchi2=chi2kinfit(ChosenJets,ChosenJetsFlavour,*(m_electron->getEleLorentzVector(LeptIdx)),*(m_MET->getMETLorentzVector(0)),&RecoFittedVectors,myAlienKinFit,true); 
       }
     }
-  }
 
   if(do_MC_){m_mtt_IsBestSolMatched=match_MC(bestbjet1idx,bestbjet2idx,bestjet3idx,bestjet4idx,LeptIdx,do_SemiMu_,m_MC,m_jet,m_electron,m_muon);}
   if(do_ChoiceWKF_){  
@@ -716,9 +718,8 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
       m_mtt_AfterChi2andKF     = 1e6;
     }
   }
+  }
   
-  btaggedjets.clear();
-  dontdoublecount.clear();
   }
 }
 
