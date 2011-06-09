@@ -10,7 +10,11 @@ mtt_analysis::mtt_analysis(bool do_MC_,bool do_SemiMu_, MuonExtractor *m_muon, E
     m_Chi2 = new Chi2();
   }
   if (do_KF_) {
-  ParamsFile="/gridgroup/cms/viola/releases/CMSSW_4_1_3_patch2/src/Extractors/PatExtractor/kfparams.dat";
+    if(do_SemiMu_) {
+      ParamsFile="/gridgroup/cms/viola/releases/CMSSW_4_1_3_patch2/src/Extractors/PatExtractor/kfparams_semimu.dat";
+    } else {
+      ParamsFile="/gridgroup/cms/viola/releases/CMSSW_4_1_3_patch2/src/Extractors/PatExtractor/kfparams_semie.dat";
+    }
   myAlienKinFit = new AlienKinFit(ParamsFile);
   myAlienKinFit->SetDebugMode(-1);
   }

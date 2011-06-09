@@ -1,3 +1,5 @@
+2011-06-09 viola <sordini@cern.ch>
+       * added kfparams_semie.dat and kfparams_semimu.dat: KF resolutions different for semie and semimu channels
 2011-06-07 viola <sordini@cern.ch>
        * added and index in the mtt tree that tells if the best chosen solution is matched to mc 
          (using nicola's method see below)
