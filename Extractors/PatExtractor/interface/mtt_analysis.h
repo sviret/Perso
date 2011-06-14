@@ -142,6 +142,7 @@ class mtt_analysis
   vector<int> SelJetsIdx;
   int SelLeptIdx;
   float AllJetsPt;
+  int m_mtt_OneMatchedCombi;
   int m_mtt_NumComb;
   float m_mtt_SolChi2[100];
   float m_mtt_BestSolChi2;

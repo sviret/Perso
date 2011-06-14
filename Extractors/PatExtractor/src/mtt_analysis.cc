@@ -57,6 +57,7 @@ mtt_analysis::mtt_analysis(bool do_MC_,bool do_SemiMu_, MuonExtractor *m_muon, E
   m_tree_Mtt->Branch("mtt_NBtaggedJets_SSVHPT"   ,&m_mtt_NBtaggedJets_SSVHPT    ,"mtt_NBtaggedJets_SSVHPT/I");
   m_tree_Mtt->Branch("mtt_MET"    ,&m_mtt_MET    ,"mtt_MET/F"); 
   if (do_Chi2_) {
+    m_tree_Mtt->Branch("mtt_OneMatchedCombi",&m_mtt_OneMatchedCombi,"mtt_OneMatchedCombi/I");
     if (!(do_ChoiceWKF_)){
     m_tree_Mtt->Branch("mtt_NumComb"    ,&m_mtt_NumComb    ,"mtt_NumComb/I");
     m_tree_Mtt->Branch("mtt_SolChi2"    ,&m_mtt_SolChi2    ,"mtt_SolChi2[mtt_NumComb]/F");
@@ -91,6 +92,7 @@ void mtt_analysis::reset(bool do_MC_)
   SelLeptIdx=-1;
   AllJetsPt=0.;
   m_mtt_NumComb=0;
+  m_mtt_OneMatchedCombi=0;
   m_mtt_BestSolChi2=999.;
   m_mtt_KFChi2=999.;
   m_mtt_AfterChi2=999.;
@@ -599,6 +601,10 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
 
 	    if (doublecount){continue;}
 	    jet4idx=j4;
+	    
+	    /// Try to find a matching solution
+	    if(do_MC_ && match_MC(bjet1idx,bjet2idx,jet3idx,jet4idx,LeptIdx,do_SemiMu_,m_MC,m_jet,m_electron,m_muon)){m_mtt_OneMatchedCombi = 1;}
+	      
 	    //here we use the method to actually calculate the chi2
 	    if(do_SemiMu_) {
 	      LeptonP=m_muon->getMuLorentzVector(LeptIdx);
