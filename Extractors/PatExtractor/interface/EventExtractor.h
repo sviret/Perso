@@ -7,6 +7,9 @@
  */
 
 #include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/ESHandle.h"
+#include "FWCore/Utilities/interface/InputTag.h"
+#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 
 //Include std C++
 #include <iostream>
@@ -27,7 +30,7 @@ class EventExtractor
   ~EventExtractor();
 
 
-  void writeInfo(const edm::Event *event); 
+  void writeInfo(const edm::Event *event, bool doMC); 
   void getInfo(int ievt); 
   void reset();
   void print();
@@ -40,6 +43,7 @@ class EventExtractor
   int lumi() {return m_lumi;}
   int run() {return m_run;}
   int n_events() {return m_n_events;}
+  int nPU() {return m_nPU;}
  private:
   
   TTree* m_tree_event;
@@ -50,7 +54,7 @@ class EventExtractor
   int   m_lumi;
   int   m_run; 
   int   m_n_events;
-
+  int   m_nPU;
 };
 
 #endif 

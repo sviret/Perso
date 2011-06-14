@@ -23,6 +23,7 @@ mtt_analysis::mtt_analysis(bool do_MC_,bool do_SemiMu_, MuonExtractor *m_muon, E
   {
     m_tree_Mtt->Branch("MC_channel",&m_MC_channel,"MC_channel/I");
     m_tree_Mtt->Branch("MC_mtt"    ,&m_MC_mtt    ,"MC_mtt/F");
+    m_tree_Mtt->Branch("m_nPU"    ,&m_nPU    ,"m_nPU/I");
   }
   //  reset(do_MC_);
   if (do_SemiMu_){
@@ -154,6 +155,7 @@ void mtt_analysis::reset(bool do_MC_)
   {
     m_MC_channel = 0;
     m_MC_mtt     = 0;
+    m_nPU        = 0;
     nEle    = 0;
     nMu     = 0;
     nTau    = 0;
@@ -728,7 +730,7 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
 }
 
 
-void mtt_analysis::MCidentification(MCExtractor * m_MC)
+void mtt_analysis::MCidentification(MCExtractor * m_MC, EventExtractor * m_Event)
 {
   
   for(int mcpart_i=0 ; mcpart_i<m_MC->getSize() ; mcpart_i++)
@@ -795,6 +797,7 @@ void mtt_analysis::MCidentification(MCExtractor * m_MC)
   if(nEle==0 && nNuEle==0 && nMu==1 && nNuMu==1 && nTau==1 && nNuTau==1 && nQuarkb==2 && nW==2 && nTop==2){m_MC_channel=10;}
  
   m_MC_mtt = (Top[0]+Top[1]).M();
+  m_nPU = m_Event->nPU();
 }
 
 //try to copy it from Nicola's global_selection (formerly a code by Djamel..rabbrividiamo..)

@@ -31,6 +31,7 @@ using namespace std;
 #include "VertexExtractor.h"
 #include "../interface/Chi2.h"
 #include "../interface/AlienKinFit.h"
+#include "../interface/EventExtractor.h"
 
 class mtt_analysis
 {
@@ -94,7 +95,7 @@ class mtt_analysis
   void LeptonVeto();
   
   /// MC event channel identification
-  void MCidentification(MCExtractor * m_MC);
+  void MCidentification(MCExtractor * m_MC, EventExtractor* m_Event);
 
   void reset(bool do_MC_);
   void fillTree();
@@ -108,6 +109,7 @@ class mtt_analysis
   //MC stuff
   int m_MC_channel;
   float m_MC_mtt;
+  int m_nPU; // number of interactions
   /// Number of lepton/neutrino from Top->W and quark b from Top
   int nEle;
   int nMu;

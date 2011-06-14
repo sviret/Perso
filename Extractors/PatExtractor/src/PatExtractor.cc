@@ -146,7 +146,7 @@ void PatExtractor::endJob() {
 
 void PatExtractor::fillInfo(const edm::Event *event) 
 {
-  m_event->writeInfo(event);
+  m_event->writeInfo(event,do_MC_);
 
   if (do_HLT_)      m_HLT->writeInfo(event);
   if (do_MET_)      m_MET->writeInfo(event);
@@ -288,7 +288,7 @@ void PatExtractor::doAna()
 						       iseventselected,
 						       m_MC,do_ChoiceWKF_);
     
-    if (do_MC_) m_Mtt_analysis->MCidentification(m_MC);
+    if (do_MC_) m_Mtt_analysis->MCidentification(m_MC,m_event);
     m_Mtt_analysis->fillTree();
   }
 

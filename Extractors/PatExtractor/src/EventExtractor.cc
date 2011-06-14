@@ -1,6 +1,5 @@
 #include "../interface/EventExtractor.h"
 
-
 EventExtractor::EventExtractor()
 {
   //std::cout << "EventExtractor objet is created" << std::endl;
@@ -17,6 +16,7 @@ EventExtractor::EventExtractor()
   m_tree_event->Branch("run",    &m_run,"run/I");
   m_tree_event->Branch("BCID",   &m_BCID,"BCID/I");
   m_tree_event->Branch("time",   &m_time,"time/I");
+  m_tree_event->Branch("nPU",    &m_nPU,"nPileUp/I");
 
   // Set everything to 0
 
@@ -48,6 +48,7 @@ EventExtractor::EventExtractor(TFile *a_file)
   m_tree_event->SetBranchAddress("run",    &m_run);
   m_tree_event->SetBranchAddress("BCID",   &m_BCID);
   m_tree_event->SetBranchAddress("time",   &m_time);
+  m_tree_event->SetBranchAddress("nPileUp",   &m_nPU);
 }
 
 EventExtractor::~EventExtractor()
@@ -59,7 +60,7 @@ EventExtractor::~EventExtractor()
 // Method filling the main particle tree
 //
 
-void EventExtractor::writeInfo(const edm::Event *event) 
+void EventExtractor::writeInfo(const edm::Event *event, bool doMC) 
 {
   m_evtID   = static_cast<int>((event->eventAuxiliary()).id().event());
   m_BCID    = (event->eventAuxiliary()).bunchCrossing();
@@ -67,6 +68,22 @@ void EventExtractor::writeInfo(const edm::Event *event)
   m_lumi    = (event->eventAuxiliary()).luminosityBlock();
   m_run     = static_cast<int>((event->eventAuxiliary()).run());
 
+  if (doMC) 
+  {
+    edm::Handle<std::vector< PileupSummaryInfo > >  PupInfo;
+    event->getByLabel(edm::InputTag("addPileupInfo"), PupInfo);
+
+    std::vector<PileupSummaryInfo>::const_iterator PVI;
+
+    m_nPU = -1;
+    for(PVI = PupInfo->begin(); PVI != PupInfo->end(); ++PVI) {
+      int BX = PVI->getBunchCrossing();
+      if(BX == 0) { 
+      m_nPU = PVI->getPU_NumInteractions();
+      continue;
+      }
+    }
+  }
   m_tree_event->Fill(); 
 }
 
@@ -89,6 +106,7 @@ void EventExtractor::reset()
   m_time    =  0;
   m_lumi    =  0;
   m_run     =  0;
+  m_nPU     =  0;
 }
 
 // Method print the event info

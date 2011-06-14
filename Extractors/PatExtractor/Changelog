@@ -1,3 +1,6 @@
+2011-06-14 Stephane <stephane.perries@cern.ch>
+       * added number of pileup interactions for MC events in event tree (a copy is also stored in mtt_analysis)
+
 2011-06-09 viola <sordini@cern.ch>
        * added kfparams_semie.dat and kfparams_semimu.dat: KF resolutions different for semie and semimu channels
 2011-06-07 viola <sordini@cern.ch>
