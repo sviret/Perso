@@ -58,7 +58,14 @@ class ElectronExtractor
 
   int getEleMCIndex(int eidx){return m_ele_MCIndex[eidx];}
   int getEleCharge(int eidx) {return m_ele_charge[eidx];}
-
+  int getEleHyperTight1MC(int eidx){return m_ele_eidHyperTight1MC[eidx];}
+  int getEleLooseMC(int eidx)      {return m_ele_eidLooseMC[eidx];}
+  int getEleMediumMC(int eidx)     {return m_ele_eidMediumMC[eidx];}
+  int getEleSuperTightMC(int eidx) {return m_ele_eidSuperTightMC[eidx];}
+  int getEleTightMC(int eidx)      {return m_ele_eidTightMC[eidx];}
+  int getEleVeryLooseMC(int eidx)  {return m_ele_eidVeryLooseMC[eidx];}
+  int getElepf_evspi(int eidx)     {return m_ele_eidpf_evspi[eidx];}
+  int getElepf_evsmu(int eidx)     {return m_ele_eidpf_evsmu[eidx];}
   
  private:
   
@@ -85,16 +92,28 @@ class ElectronExtractor
   float	m_ele_vz[m_electrons_MAX];
   float	m_ele_eta[m_electrons_MAX];
   float	m_ele_phi[m_electrons_MAX];
-  int	  m_ele_charge[m_electrons_MAX];
+  int	m_ele_charge[m_electrons_MAX];
 
   // electron id's
+  /*
+  /// old one
   int   m_ele_eidLoose[m_electrons_MAX]; 
   int   m_ele_eidRobustHighEnergy[m_electrons_MAX]; 
   int   m_ele_eidRobustLoose[m_electrons_MAX]; 
   int   m_ele_eidRobustTight[m_electrons_MAX]; 
   int   m_ele_eidTight[m_electrons_MAX]; 
   int   m_ele_eidpf_evspi[m_electrons_MAX]; 
-  int   m_ele_eidpf_evsmu[m_electrons_MAX]; 
+  int   m_ele_eidpf_evsmu[m_electrons_MAX];
+  */
+  int m_ele_eidHyperTight1MC[m_electrons_MAX];
+  int m_ele_eidLooseMC[m_electrons_MAX];
+  int m_ele_eidMediumMC[m_electrons_MAX];
+  int m_ele_eidSuperTightMC[m_electrons_MAX];
+  int m_ele_eidTightMC[m_electrons_MAX];
+  int m_ele_eidVeryLooseMC[m_electrons_MAX];
+  int m_ele_eidpf_evspi[m_electrons_MAX];
+  int m_ele_eidpf_evsmu[m_electrons_MAX];
+  
   //
   int eidBit;
   bool pass ;
