@@ -11,9 +11,9 @@ mtt_analysis::mtt_analysis(bool do_MC_,bool do_SemiMu_, MuonExtractor *m_muon, E
   }
   if (do_KF_) {
     if(do_SemiMu_) {
-      ParamsFile="/gridgroup/cms/viola/releases/CMSSW_4_1_3_patch2/src/Extractors/PatExtractor/kfparams_semimu.dat";
+      ParamsFile="../kfparams_semimu.dat";
     } else {
-      ParamsFile="/gridgroup/cms/viola/releases/CMSSW_4_1_3_patch2/src/Extractors/PatExtractor/kfparams_semie.dat";
+      ParamsFile="../kfparams_semie.dat";
     }
   myAlienKinFit = new AlienKinFit(ParamsFile);
   myAlienKinFit->SetDebugMode(-1);
