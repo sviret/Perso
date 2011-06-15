@@ -33,13 +33,13 @@ float Chi2::GlobalSimpleChi2(TLorentzVector Jet1, TLorentzVector Jet2, TLorentzV
 
   float TTbarSystemPt = ((Jet1+Jet2+JetBL+JetBH+SelMuon+vMET).Pt());
 
-  ///i dont divide for sqrt(5) since it will not affect the minimization
-  float chi2 = ((MtopH-164.)*(MtopH-174.7)/400.)+((MW-79.)*(MW-79.)/121.)+((SolPtSystem-1.)*(SolPtSystem-1.)/0.0225)+((TTbarSystemPt-0.)*(TTbarSystemPt-0.)/2500.);
-  if (isMuon) { // lepton dependant part
-    chi2 += ((MtopL-168.)*(MtopL-168.)/221.);
-  }  else {
-    chi2 += ((MtopL-168.)*(MtopL-168.)/614.);
-  }
+  /// I dont divide for sqrt(5) since it will not affect the minimization
+  float chi2 = ((MtopH-168.4)*(MtopH-168.4)/255.)+((MW-80.61)*(MW-80.61)/96.04)+((SolPtSystem-1.)*(SolPtSystem-1.)/0.0228)+((TTbarSystemPt-0.)*(TTbarSystemPt-0.)/3173.1);
+  
+  /// lepton dependant part
+  if(isMuon){chi2 += ((MtopL-168.6)*(MtopL-168.6)/217.6);}
+  else{chi2 += ((MtopL-168.7)*(MtopL-168.7)/199.7);}
+  
   return  chi2;
 }
 
