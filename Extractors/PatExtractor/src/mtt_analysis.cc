@@ -629,9 +629,9 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
 		ChosenJets.push_back(*bestHadbjetP);
 		ChosenJetsFlavour.push_back(3);
 		if(do_SemiMu_) {
-		  kinfitchi2=chi2kinfit(ChosenJets,ChosenJetsFlavour,*(m_muon->getMuLorentzVector(LeptIdx)),*(m_MET->getMETLorentzVector(0)),&RecoFittedVectors,myAlienKinFit,true); 
+		  kinfitchi2=chi2kinfit(ChosenJets,ChosenJetsFlavour,*(m_muon->getMuLorentzVector(LeptIdx)),*(m_MET->getMETLorentzVector(0)),&RecoFittedVectors,myAlienKinFit,true,do_SemiMu_); 
 		} else {
-		  kinfitchi2=chi2kinfit(ChosenJets,ChosenJetsFlavour,*(m_electron->getEleLorentzVector(LeptIdx)),*(m_MET->getMETLorentzVector(0)),&RecoFittedVectors,myAlienKinFit,true); 
+		  kinfitchi2=chi2kinfit(ChosenJets,ChosenJetsFlavour,*(m_electron->getEleLorentzVector(LeptIdx)),*(m_MET->getMETLorentzVector(0)),&RecoFittedVectors,myAlienKinFit,true,do_SemiMu_); 
 		}
 		if(kinfitchi2<minkinfitchi2) {
 		  minkinfitchi2=kinfitchi2;
@@ -701,9 +701,9 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
       ChosenJets.push_back(*bestHadbjetP);
       ChosenJetsFlavour.push_back(3);
       if(do_SemiMu_) {
-	kinfitchi2=chi2kinfit(ChosenJets,ChosenJetsFlavour,*(m_muon->getMuLorentzVector(LeptIdx)),*(m_MET->getMETLorentzVector(0)),&RecoFittedVectors,myAlienKinFit,true); 
+	kinfitchi2=chi2kinfit(ChosenJets,ChosenJetsFlavour,*(m_muon->getMuLorentzVector(LeptIdx)),*(m_MET->getMETLorentzVector(0)),&RecoFittedVectors,myAlienKinFit,true,do_SemiMu_); 
       } else {
-	kinfitchi2=chi2kinfit(ChosenJets,ChosenJetsFlavour,*(m_electron->getEleLorentzVector(LeptIdx)),*(m_MET->getMETLorentzVector(0)),&RecoFittedVectors,myAlienKinFit,true); 
+	kinfitchi2=chi2kinfit(ChosenJets,ChosenJetsFlavour,*(m_electron->getEleLorentzVector(LeptIdx)),*(m_MET->getMETLorentzVector(0)),&RecoFittedVectors,myAlienKinFit,true,do_SemiMu_); 
       }
     }
 
@@ -814,7 +814,8 @@ float mtt_analysis::chi2kinfit(const vector<TLorentzVector> MaxPtSelectedJets,
 				    TLorentzVector TL_MET,
 				    vector <TLorentzVector>* FittedVectors,
 				    AlienKinFit * myAlienKinFit,
-				    bool compfit)
+				    bool compfit,
+				    bool do_SemiMu_)
 {
 
    unsigned int the_bl=99, the_bh=99, jw1=99, jw2=99;
@@ -854,7 +855,7 @@ float mtt_analysis::chi2kinfit(const vector<TLorentzVector> MaxPtSelectedJets,
       return -1;
    }	
 
-   myAlienKinFit->ReadObjects(MaxPtSelectedJets[jw1],MaxPtSelectedJets[jw2],MaxPtSelectedJets[the_bh],TL_SelLepton,TL_MET,MaxPtSelectedJets[the_bl]);
+   myAlienKinFit->ReadObjects(MaxPtSelectedJets[jw1],MaxPtSelectedJets[jw2],MaxPtSelectedJets[the_bh],TL_SelLepton,TL_MET,MaxPtSelectedJets[the_bl],do_SemiMu_);
 
    myAlienKinFit->Fit(State);
 

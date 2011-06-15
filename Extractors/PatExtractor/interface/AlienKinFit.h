@@ -32,7 +32,14 @@ public:
     void Chi2(const int &npar, double &f, double *par, int iflag);
     void printConstTerms();
     
-    void ReadObjects(TLorentzVector Jet1, TLorentzVector Jet2, TLorentzVector BJetH, TLorentzVector Muon, TLorentzVector Neutrino, TLorentzVector BJetL);
+    void ReadObjects(TLorentzVector Jet1,
+                     TLorentzVector Jet2,
+		     TLorentzVector BJetH,
+		     TLorentzVector Muon,
+		     TLorentzVector Neutrino,
+		     TLorentzVector BJetL,
+		     bool isMuon);
+		     
     void Fit(int &status);
     
     double GetKFChi2();

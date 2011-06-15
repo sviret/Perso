@@ -78,7 +78,8 @@ class mtt_analysis
 		     TLorentzVector vMET,
 		     vector<TLorentzVector>* FittedVectors,
 		     AlienKinFit * myAlienKinFit,
-		     bool compfit);
+		     bool compfit,
+		     bool do_SemiMu_);
 
   int match_MC(int idxJetbH,
                int idxJetbL,

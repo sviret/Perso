@@ -12,7 +12,7 @@
  *                           Diane Cinca diane.cinca@cern.ch            *
  * TODO : parametrization of Neutrino + Muon + electron from .dat file  *
  * internal tracking :                                                  *
- * $Id: AlienKinFit.cc,v 1.3 2011/05/31 15:52:12 sordini Exp $*
+ * $Id: AlienKinFit.cc,v 1.4 2011/06/15 14:44:47 beaupere Exp $*
  ************************************************************************/
 
 #include <TROOT.h>
@@ -237,7 +237,13 @@ unsigned int AlienKinFit::ReadAlienErrors(TString ParamsFile)
 }
 
 // ------------------------------------------------------------------------------------------
-void AlienKinFit::ReadObjects(TLorentzVector Jet1, TLorentzVector Jet2, TLorentzVector BJetH, TLorentzVector Muon, TLorentzVector Neutrino, TLorentzVector BJetL)
+void AlienKinFit::ReadObjects(TLorentzVector Jet1,
+                              TLorentzVector Jet2,
+			      TLorentzVector BJetH,
+			      TLorentzVector Muon,
+			      TLorentzVector Neutrino,
+			      TLorentzVector BJetL,
+			      bool isMuon)
 {
    /// measured
    /// -- energies
@@ -311,15 +317,16 @@ void AlienKinFit::ReadObjects(TLorentzVector Jet1, TLorentzVector Jet2, TLorentz
        
        //SigmEMu=0.29743+0.0146581*Muon.E();
 
-       SigmEMu=-0.05832+0.02652*Muon.E();
-   
+       if(isMuon){SigmEMu=2.1+0.0092*Muon.E()+0.00012*Muon.E()*Muon.E();}
+       else{SigmEMu=1.6+0.041*Muon.E();}
+       
        //SigmPxNu=14.2827;
        //SigmPyNu=13.9769;
        //SigmPzNu=26.1467;
        
-       SigmPxNu=12.63;
-       SigmPyNu=13.04;
-       SigmPzNu=25.01;
+       SigmPxNu=14.35;
+       SigmPyNu=15.79;
+       SigmPzNu=21.65;
        
        //SigmMW=7.61678;
        //SigmMT=12.8734;
@@ -353,10 +360,12 @@ void AlienKinFit::ReadObjects(TLorentzVector Jet1, TLorentzVector Jet2, TLorentz
        SigmEtaBJetH=DKFJetResol(BJetH,2,2);
        SigmEtaBJetL=DKFJetResol(BJetL,2,2);
        
-       SigmEMu=-0.05832+0.02652*Muon.E();
-       SigmPxNu=15.63;
-       SigmPyNu=15.04;
-       SigmPzNu=35.01;
+       if(isMuon){SigmEMu=2.1+0.0092*Muon.E()+0.00012*Muon.E()*Muon.E();}
+       else{SigmEMu=1.6+0.041*Muon.E();}
+       
+       SigmPxNu=14.35;
+       SigmPyNu=15.79;
+       SigmPzNu=21.65;
        
        SigmMW=10.;
        SigmMT=15.2;	  
