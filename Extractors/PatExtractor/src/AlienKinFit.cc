@@ -12,7 +12,7 @@
  *                           Diane Cinca diane.cinca@cern.ch            *
  * TODO : parametrization of Neutrino + Muon + electron from .dat file  *
  * internal tracking :                                                  *
- * $Id: AlienKinFit.cc,v 1.2 2011/05/15 20:31:27 sperries Exp $*
+ * $Id: AlienKinFit.cc,v 1.3 2011/05/31 15:52:12 sordini Exp $*
  ************************************************************************/
 
 #include <TROOT.h>
@@ -324,8 +324,8 @@ void AlienKinFit::ReadObjects(TLorentzVector Jet1, TLorentzVector Jet2, TLorentz
        //SigmMW=7.61678;
        //SigmMT=12.8734;
        
-       SigmMW=11.;
-       SigmMT=21.;
+       SigmMW=10.;
+       SigmMT=15.2;
        SigmPTS=33.;	   
 
        
@@ -358,8 +358,8 @@ void AlienKinFit::ReadObjects(TLorentzVector Jet1, TLorentzVector Jet2, TLorentz
        SigmPyNu=15.04;
        SigmPzNu=35.01;
        
-       SigmMW=7.;
-       SigmMT=12.;	  
+       SigmMW=10.;
+       SigmMT=15.2;	  
        SigmPTS=33.;	   
 
    }
