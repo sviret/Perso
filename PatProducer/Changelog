@@ -1,0 +1,7 @@
+2011-06-20  Seb Viret  <viret@in2p3.fr>
+ 
+       	* Adding a first version of the PatProducer package, 
+	whose role is to provide user-friendly tools to produce your 
+        PatTuples via crab. A first tutorial is provided on the following page:
+
+        http://sviret.web.cern.ch/sviret/Welcome.php?n=CMS.PHYTuto
