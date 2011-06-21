@@ -1,5 +1,10 @@
 2011-06-21  Seb Viret  <viret@in2p3.fr>
  
+       	* Modify runPAT_production.sh for easier use
+
+
+2011-06-21  Seb Viret  <viret@in2p3.fr>
+ 
        	* The name and address of the test file should now be 
 	added to runPAT_production.sh, you don't have to change it
 	in the py file anymore.

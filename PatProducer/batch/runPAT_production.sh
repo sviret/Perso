@@ -37,27 +37,33 @@
 #
 #################################################
 
-set DATASET   = "HT"                 # The dataset you want to PATify
-set AODTYPE   = "Reprocessing"       # The type of data you're interested in 
-set RERECO    = "May10ReReco-v1"     # The ReReco stream (find it on the wiki)
+#
+# The lines to adapt for CRAB submission
+#
+
+set DATASET    = "HT"                   # The dataset you want to PATify
+set AODTYPE    = "Reprocessing"         # The type of data you're interested in 
+set RERECO     = "May10ReReco-v1"       # The ReReco stream (find it on the wiki)
+set DATA_STORE = "$CASTOR_HOME/CMS/PAT" # The directory where data is stored
 
 
 # Example lines for prompt reco data 
 #set AODTYPE   = "Prompt"       
 #set RERECO    = "PromptReco-v1"     
 
+#
+# The lines to adapt for TEST AND CRAB submission 
+#
+
 set RDIR      = "CMSSW_4_2_4_patch1" # Your CMSSW version
 set GTAG      = "GR_R_42_V14::All"   # The global TAG 
 
-
-set DATA_STORE        = "$CASTOR_HOME/CMS/PAT"          # The directory where data is stored
+# Define your CMSSW working area
 set WORKDIR           = "$HOME"
 set CMSSW_PROJECT_SRC = "scratch0/testarea/"$RDIR"/src"
-set STEP              = "PatProducer"
 
 # Directory and name of the file you use for testing your python script
 # Adapt it to your situation 
-
 set FROOT             = "/tmp/sviret/F6B7E7B3-577C-E011-9EC8-0030486792BA.root"
 
 ##########################################################
@@ -76,6 +82,7 @@ setenv SCRAM_ARCH slc5_amd64_gcc434
 
 eval `scramv1 runtime -csh`
 
+set STEP = "PatProducer"
 cd $STEP/batch
 
 rm *.cfg
