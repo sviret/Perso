@@ -1,4 +1,9 @@
 2011-06-21 Seb Viret  <viret@in2p3.fr>
+       *Added some new script to run PATextraction on lxbatch
+	Scripts are using the python config file test/PATExtractor_BASE.py
+	More info: http://sviret.web.cern.ch/sviret/Welcome.php?n=CMS.PHYTuto
+
+2011-06-21 Seb Viret  <viret@in2p3.fr>
        *Reintroduced the old Eid variables (along with the new ones) in ElectronExtractor
         The Eid tag is now tested beforehand in order to avoid CMSSW crashes 
 
