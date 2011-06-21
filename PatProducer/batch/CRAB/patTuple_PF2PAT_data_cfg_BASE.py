@@ -4,6 +4,13 @@ runOnMC = False
 
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
+#
+# The first lines concern Jet Energy Corrections. They are extracted from the following
+# wiki page:
+#
+# https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JetEnCor2011
+#
+
 
 # Get a list of good primary vertices, in 42x, these are DAF vertices
 from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
@@ -35,7 +42,6 @@ process.kt6PFJetsPFlow = kt4PFJets.clone(
     src = cms.InputTag('pfNoElectron'+postfix),
     doAreaFastjet = cms.bool(True),
     doRhoFastjet = cms.bool(True),
-    #voronoiRfact = cms.double(0.9)
     )
 process.patJetCorrFactorsPFlow.rho = cms.InputTag("kt6PFJetsPFlow", "rho")
 
@@ -53,6 +59,11 @@ process.patseq = cms.Sequence(
 
 if runOnMC == False:
     removeMCMatchingPF2PAT( process, '' ) 
+
+
+#
+# The following lines concern PAT configuration itself
+#
 
 
 # Apply loose PF jet ID
@@ -143,6 +154,14 @@ process.p = cms.Path(
 )
 
 
+###################################################
+#
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# !!!! DON'T MODIFY ANY OF THE FOLLOWING LINES !!!!
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#
+###################################################
+
 
 
 
@@ -161,9 +180,7 @@ process.GlobalTag.globaltag =  cms.string('GLOBALTAGNAME')
 
 
 process.source.fileNames = [
-    'file:/tmp/sviret/0E35D8C0-BF7C-E011-B46A-003048678FAE.root'
-#   '/store/data/Run2011A/HT/AOD/May10ReReco-v1/0006/F6B7E7B3-577C-E011-9EC8-0030486792BA.root'
-#   '/store/data/Run2011A/DoubleMu/AOD/PromptReco-v2/000/163/763/F87779D4-8075-E011-9C47-001617C3B6CC.root'
+    #'file:THETESTFILENAME'
 ]
 
 process.out.fileName                             = cms.untracked.string('patTuple_PF2PAT_data.root')

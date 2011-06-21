@@ -55,7 +55,10 @@ set WORKDIR           = "$HOME"
 set CMSSW_PROJECT_SRC = "scratch0/testarea/"$RDIR"/src"
 set STEP              = "PatProducer"
 
+# Directory and name of the file you use for testing your python script
+# Adapt it to your situation 
 
+set FROOT             = "/tmp/sviret/F6B7E7B3-577C-E011-9EC8-0030486792BA.root"
 
 ##########################################################
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! # 
@@ -64,7 +67,7 @@ set STEP              = "PatProducer"
 ##########################################################
 
 #
-# STEP 0: look for the latest JSON file
+# STEP 0: setup CMSSW and look for the latest JSON file
 #
 
 cd $WORKDIR/$CMSSW_PROJECT_SRC
@@ -77,21 +80,24 @@ cd $STEP/batch
 
 rm *.cfg
 rm *.py
+rm *.pyc
 
-# Remove the current JSON file and 
+# Remove the current JSON file (only for CRAB)
 
-set currentJSON  = `ls -rt | grep JSON.txt | tail -n 1`
-set latestJSON   = `ls -rt /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions11/7TeV/$AODTYPE | grep JSON.txt | tail -n 1`
+if (${1} == "DO_CRAB") then
+    set currentJSON  = `ls -rt | grep JSON.txt | tail -n 1`
+    set latestJSON   = `ls -rt /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions11/7TeV/$AODTYPE | grep JSON.txt | tail -n 1`
 
-if ($currentJSON == $latestJSON) then
-    echo "JSON file didn't changed, there is nothing to do"
-    exit
+    if ($currentJSON == $latestJSON) then
+	echo "JSON file didn't changed, there is nothing to do"
+	exit
+    endif
+
+    echo "We update the JSON file as it has changed"
+
+    rm $currentJSON
+    cp /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions11/7TeV/$AODTYPE/$latestJSON .
 endif
-
-echo "We update the JSON file as it has changed"
-
-rm $currentJSON
-cp /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions11/7TeV/$AODTYPE/$latestJSON .
 
 
 #
@@ -114,14 +120,16 @@ sed "s%CASTORDIRNAME%/user/s/sviret/CMS/PAT/$DATASET-$RERECO%" -i $crabcfgname
 sed "s%CRABNAME%$crabcfgname%"                                 -i $crabcfgname
 
 rfmkdir $DATA_STORE/$DATASET-$RERECO
-	
+rfchmod 775 $DATA_STORE
+rfchmod 775 $DATA_STORE/$DATASET-$RERECO
+
 sed "s%GLOBALTAGNAME%$GTAG%"                                 -i $pythonfname
 
 if (${1} == "TEST") then
     
     echo 'Doing a small test of the python script on 500 events'
     sed "s%EVENTNUM%500%"                                 -i $pythonfname
-
+    sed "s%#'file:THETESTFILENAME'%'file:$FROOT'%"        -i $pythonfname
     cmsRun $pythonfname
 endif
 
