@@ -95,7 +95,7 @@ class ElectronExtractor
   int	m_ele_charge[m_electrons_MAX];
 
   // electron id's
-  /*
+  
   /// old one
   int   m_ele_eidLoose[m_electrons_MAX]; 
   int   m_ele_eidRobustHighEnergy[m_electrons_MAX]; 
@@ -104,15 +104,15 @@ class ElectronExtractor
   int   m_ele_eidTight[m_electrons_MAX]; 
   int   m_ele_eidpf_evspi[m_electrons_MAX]; 
   int   m_ele_eidpf_evsmu[m_electrons_MAX];
-  */
+  
+  /// new one
   int m_ele_eidHyperTight1MC[m_electrons_MAX];
   int m_ele_eidLooseMC[m_electrons_MAX];
   int m_ele_eidMediumMC[m_electrons_MAX];
   int m_ele_eidSuperTightMC[m_electrons_MAX];
   int m_ele_eidTightMC[m_electrons_MAX];
   int m_ele_eidVeryLooseMC[m_electrons_MAX];
-  int m_ele_eidpf_evspi[m_electrons_MAX];
-  int m_ele_eidpf_evsmu[m_electrons_MAX];
+
   
   //
   int eidBit;

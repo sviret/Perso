@@ -1,4 +1,8 @@
-2011-05-14 Beaupere <beaupere@ipnl.in2p3.fr>
+2011-06-21 Seb Viret  <viret@in2p3.fr>
+       *Reintroduced the old Eid variables (along with the new ones) in ElectronExtractor
+        The Eid tag is now tested beforehand in order to avoid CMSSW crashes 
+
+2011-06-14 Beaupere <beaupere@ipnl.in2p3.fr>
        *Changed default kfparams.dat directory in mtt_analysis.cc
        *Added Eid Variables in ElectronExtractor
        *Added new MC Variable to know if at least one combination of 4 jets in evt is matched with MC truth
@@ -26,7 +30,7 @@
 2011-05-31 Seb Viret  <viret@in2p3.fr>
        * Added a /batch/ directory containing a script to produce PATuples from ReReco AODs
 
-2011-05-31 Seb Viret  <viret@in2p3.fr>
+2011-05-31 
        * AnalysisSettings class has been added in order to easily add user-defined cuts into the analysis.
        * To see it in action, a small example class (dimuon_analysis.cc) has been added. 
        * This dimuon analysis is launched using the python script DiMuExample.py 

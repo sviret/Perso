@@ -29,14 +29,12 @@ ElectronExtractor::ElectronExtractor(edm::InputTag tag)
   m_tree_electron->Branch("electron_eta",                      &m_ele_eta,    "electron_eta[n_electrons]/F");  
   m_tree_electron->Branch("electron_phi",                      &m_ele_phi,    "electron_phi[n_electrons]/F");  
   m_tree_electron->Branch("electron_charge",                   &m_ele_charge,    "electron_charge[n_electrons]/I");  
-  
-  /*
+    
   m_tree_electron->Branch("electron_eidLoose",                 &m_ele_eidLoose,"electron_eidLoose[n_electrons]/I");  
   m_tree_electron->Branch("electron_eidRobustHighEnergy",      &m_ele_eidRobustHighEnergy,"electron_eidRobustHighEnergy[n_electrons]/I");  
   m_tree_electron->Branch("electron_eidRobustLoose",           &m_ele_eidRobustLoose,"electron_eidRobustLoose[n_electrons]/I");  
   m_tree_electron->Branch("electron_eidRobustTight",           &m_ele_eidRobustTight,"electron_eidRobustTight[n_electrons]/I");  
   m_tree_electron->Branch("electron_eidTight",                 &m_ele_eidTight,"electron_eidTight[n_electrons]/I");  
-  */
   
   m_tree_electron->Branch("electron_eidHyperTight1MC",&m_ele_eidHyperTight1MC,"electron_eidHyperTight1MC[n_electrons]/I");
   m_tree_electron->Branch("electron_eidLooseMC",      &m_ele_eidLooseMC,      "electron_eidLooseMC[n_electrons]/I");
@@ -104,13 +102,11 @@ ElectronExtractor::ElectronExtractor(TFile *a_file)
   m_tree_electron->SetBranchAddress("electron_eta",&m_ele_eta);
   m_tree_electron->SetBranchAddress("electron_phi",&m_ele_phi);
   m_tree_electron->SetBranchAddress("electron_charge",&m_ele_charge);
-  /*
   m_tree_electron->SetBranchAddress("electron_eidLoose",&m_ele_eidLoose);
   m_tree_electron->SetBranchAddress("electron_eidRobustHighEnergy",&m_ele_eidRobustHighEnergy);
   m_tree_electron->SetBranchAddress("electron_eidRobustLoose",&m_ele_eidRobustLoose);
   m_tree_electron->SetBranchAddress("electron_eidRobustTight",&m_ele_eidRobustTight);
   m_tree_electron->SetBranchAddress("electron_eidTight",&m_ele_eidTight);
-  */
   m_tree_electron->SetBranchAddress("electron_eidHyperTight1MC",&m_ele_eidHyperTight1MC);
   m_tree_electron->SetBranchAddress("electron_eidLooseMC"      ,&m_ele_eidLooseMC);
   m_tree_electron->SetBranchAddress("electron_eidMediumMC"     ,&m_ele_eidMediumMC);
@@ -200,39 +196,59 @@ void ElectronExtractor::writeInfo(const pat::Electron *part, int index)
   m_ele_phi[index]              = part->phi();
   m_ele_charge[index]           = part->charge();
   
-  /*
-  m_ele_eidLoose[index]            = part->electronID("eidLoose");
-  m_ele_eidRobustHighEnergy[index] = part->electronID("eidRobustHighEnergy");
-  m_ele_eidRobustLoose[index]      = part->electronID("eidRobustLoose");
-  m_ele_eidRobustTight[index]      = part->electronID("eidRobustTight");
-  m_ele_eidTight[index]            = part->electronID("eidTight");
-  */
+  if (part->isElectronIDAvailable("eidLoose"))
+    m_ele_eidLoose[index]            = part->electronID("eidLoose");
+
+  if (part->isElectronIDAvailable("eidRobustHighEnergy"))
+    m_ele_eidRobustHighEnergy[index] = part->electronID("eidRobustHighEnergy");
+
+  if (part->isElectronIDAvailable("eidRobustLoose"))
+    m_ele_eidRobustLoose[index]      = part->electronID("eidRobustLoose");
+
+  if (part->isElectronIDAvailable("eidRobustTight"))
+    m_ele_eidRobustTight[index]      = part->electronID("eidRobustTight");
+
+  if (part->isElectronIDAvailable("eidTight"))
+    m_ele_eidTight[index]            = part->electronID("eidTight");
   
-  m_ele_eidHyperTight1MC[index] = part->electronID("eidHyperTight1MC");
-  m_ele_eidLooseMC[index]       = part->electronID("eidLooseMC");
-  m_ele_eidMediumMC[index]      = part->electronID("eidMediumMC");
-  m_ele_eidSuperTightMC[index]  = part->electronID("eidSuperTightMC");
-  m_ele_eidTightMC[index]       = part->electronID("eidTightMC");
-  m_ele_eidVeryLooseMC[index]   = part->electronID("eidVeryLooseMC");
+  if (part->isElectronIDAvailable("eidHyperTight1MC"))
+    m_ele_eidHyperTight1MC[index] = part->electronID("eidHyperTight1MC");
+
+  if (part->isElectronIDAvailable("eidLooseMC"))
+    m_ele_eidLooseMC[index]       = part->electronID("eidLooseMC");
+
+  if (part->isElectronIDAvailable("eidMediumMC"))
+    m_ele_eidMediumMC[index]      = part->electronID("eidMediumMC");
+
+  if (part->isElectronIDAvailable("eidSuperTightMC"))
+    m_ele_eidSuperTightMC[index]  = part->electronID("eidSuperTightMC");
+
+  if (part->isElectronIDAvailable("eidTightMC"))
+    m_ele_eidTightMC[index]       = part->electronID("eidTightMC");
+
+  if (part->isElectronIDAvailable("eidVeryLooseMC"))
+    m_ele_eidVeryLooseMC[index]   = part->electronID("eidVeryLooseMC");
   
   m_ele_dB[index]               = part->dB() ;
   m_ele_trackIso[index]         = part->trackIso() ;
   m_ele_ecalIso[index]          = part->ecalIso() ;
   m_ele_hcalIso[index]          = part->hcalIso() ;
  
+
   if (part->gsfTrack().isNonnull())
-    {
-      m_ele_numberOfMissedInnerLayer[index] = part->gsfTrack()->trackerExpectedHitsInner().numberOfHits();
-    }
+  {
+    m_ele_numberOfMissedInnerLayer[index] = part->gsfTrack()->trackerExpectedHitsInner().numberOfHits();
+  }
+
   if (m_isPF_electron)
-    {
-      m_ele_pfParticleIso[index]      = part->particleIso();
-      m_ele_pfChargedHadronIso[index] = part->chargedHadronIso();
-      m_ele_pfNeutralHadronIso[index] = part->neutralHadronIso();
-      m_ele_pfPhotonIso[index]        = part->photonIso();
-      m_ele_eidpf_evspi[index]        = part->electronID("pf_evspi");
-      m_ele_eidpf_evsmu[index]        = part->electronID("pf_evsmu");
-    }
+  {
+    m_ele_pfParticleIso[index]      = part->particleIso();
+    m_ele_pfChargedHadronIso[index] = part->chargedHadronIso();
+    m_ele_pfNeutralHadronIso[index] = part->neutralHadronIso();
+    m_ele_pfPhotonIso[index]        = part->photonIso();
+    m_ele_eidpf_evspi[index]        = part->electronID("pf_evspi");
+    m_ele_eidpf_evsmu[index]        = part->electronID("pf_evsmu");
+  }
 }
 
 //
@@ -262,20 +278,18 @@ void ElectronExtractor::reset()
     m_ele_eta[i] = 0.;
     m_ele_phi[i] = 0.;
     m_ele_charge[i] = 0;
-    /*
-    m_ele_eidLoose[i]=0; 
-    m_ele_eidRobustHighEnergy[i]=0; 
-    m_ele_eidRobustLoose[i]=0; 
-    m_ele_eidRobustTight[i]=0; 
-    m_ele_eidTight[i]=0;
-    */
     
-    m_ele_eidHyperTight1MC[i] = 0;
-    m_ele_eidLooseMC[i]       = 0;
-    m_ele_eidMediumMC[i]      = 0;
-    m_ele_eidSuperTightMC[i]  = 0;
-    m_ele_eidTightMC[i]       = 0;
-    m_ele_eidVeryLooseMC[i]   = 0;
+    m_ele_eidLoose[i]            = -1; 
+    m_ele_eidRobustHighEnergy[i] = -1; 
+    m_ele_eidRobustLoose[i]      = -1; 
+    m_ele_eidRobustTight[i]      = -1; 
+    m_ele_eidTight[i]            = -1; 
+    m_ele_eidHyperTight1MC[i]    = -1;
+    m_ele_eidLooseMC[i]          = -1;
+    m_ele_eidMediumMC[i]         = -1;
+    m_ele_eidSuperTightMC[i]     = -1;
+    m_ele_eidTightMC[i]          = -1;
+    m_ele_eidVeryLooseMC[i]      = -1;
     
     m_ele_eidpf_evspi[i]=0; 
     m_ele_eidpf_evsmu[i]=0; 
