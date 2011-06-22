@@ -1,0 +1,9 @@
+2011-06-22  Seb Viret  <viret@in2p3.fr>
+ 
+       	* Adding a first version of the RecoExtractor package, 
+	whose role is to extractor info from RECO file. This is 
+	the base code for the MIB monitoring:
+
+        http://sviret.web.cern.ch/sviret/Welcome.php?n=CMS.MIB
+
+	This version has been tested against CMSSW_4_2_4_patch1
