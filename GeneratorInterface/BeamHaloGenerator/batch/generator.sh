@@ -9,7 +9,7 @@
 # First set some environment variables
 #
 
-CMSSW_PROJECT_SRC=testarea/${10}
+CMSSW_PROJECT_SRC=scratch0/testarea/${10}/src
 STEP=GeneratorInterface/BeamHaloGenerator
 TOP=$PWD
 
@@ -88,6 +88,6 @@ cmsRun BH_dummy.py
 #
 
 ls -l
-
+rfmkdir $CASTOR_HOME/CMS/MIB/GEN/Prod/${6}
 xrdcp BeamHalo_GEN.root root://castorcms/$CASTOR_HOME/CMS/MIB/GEN/Prod/${6}/$DATA_NAME
 #xrdcp HALO_*.root root://castorcms/$CASTOR_HOME/CMS/MIB/GEN/Control/$CONTROL_NAME

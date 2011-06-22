@@ -1,3 +1,8 @@
+2011-05-22  Seb Viret  <viret@in2p3.fr>
+ 
+       	* Batch scripts have been modified in order to be independent from GT, 
+	release numbers,... see launch_GEN.sh first lines for usage
+
 2011-05-19  Seb Viret  <viret@in2p3.fr>
  
        	* Update of the batch scripts to fit with the SIMRECO part

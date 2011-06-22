@@ -5,6 +5,7 @@
 # Script for MIB batch generation (generate 1000 B1 events
 # using either FLUKA or MARS inputs)
 #
+# WARNING: this is a base script, you're not suppose to modify it
 #
 # SV: 20/12/2010
 #
@@ -27,7 +28,7 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('Configuration.EventContent.EventContent_cff')
 
 process.configurationMetadata = cms.untracked.PSet(
-    version = cms.untracked.string('$Revision: 1.168.2.1 $'),
+    version = cms.untracked.string('$Revision: 1.1 $'),
     annotation = cms.untracked.string('Configuration/Generator/python/BeamHalo_cfi.py'),
     name = cms.untracked.string('PyReleaseValidation')
 )
@@ -61,12 +62,8 @@ process.output = cms.OutputModule("PoolOutputModule",
 
 # Other statements
 #
-# !!! Please check that the global tag corresponds to the CMSSW version you're using !!!
-# 
 
 process.GlobalTag.globaltag = 'MYGLOBALTAG'
-
-
 
 # Here we choose the input, look into MIB_generator_cfi for more infos about the inputs
  
