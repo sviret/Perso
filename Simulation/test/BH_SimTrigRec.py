@@ -10,7 +10,8 @@ process = cms.Process('RECO')
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('FWCore.MessageService.MessageLogger_cfi')
-process.load('Configuration.StandardSequences.GeometryIdeal_cff')
+#process.load('Configuration.StandardSequences.GeometryExtended_cff')
+process.load('Configuration.StandardSequences.GeometryExtendedNewPipe_cff')
 process.load('SimGeneral.MixingModule.mixNoPU_cfi')
 process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 process.load('Configuration.StandardSequences.Sim_cff')
@@ -40,7 +41,6 @@ process.options = cms.untracked.PSet(
 process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
-                            #fileNames = cms.untracked.vstring('rfio:/castor/cern.ch/user/s/sviret/CMS/MIB/GEN/Prod/MIB_gen_BEAM_1_E_0.0_PT_0.0_100.root'),
                             fileNames = cms.untracked.vstring('file:BeamHalo_GEN.root'),
                             skipEvents = cms.untracked.uint32(0)
 )
@@ -119,7 +119,7 @@ process.schedule = cms.Schedule(process.simulation_step,
 
 # High level trigger
 
-process.schedule.extend(process.HLTSchedule)
+#process.schedule.extend(process.HLTSchedule)
 
 
 # Reconstruction

@@ -1,3 +1,12 @@
+2011-06-22  Seb Viret  <viret@in2p3.fr>
+ 
+       	* Some adaptation were made in order to command everything from 
+	launch_PROD.sh
+
+	* HLT step has been de-activated from the main chain (crashing...)
+
+	* Tested with CMSSW_4_2_4_patch1 with GT START42_V12
+
 2011-05-19  Seb Viret  <viret@in2p3.fr>
  
        	* Adding a first version of the Simulation package, 

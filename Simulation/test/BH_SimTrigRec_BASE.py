@@ -1,8 +1,15 @@
-# Auto generated configuration file
-# using: 
-# Revision: 1.163 
-# Source: /cvs_server/repositories/CMSSW/CMSSW/Configuration/PyReleaseValidation/python/ConfigBuilder.py,v 
-# with command line options: Configuration/Generator/python/TTbar_cfi.py -s GEN,SIM,DIGI,L1,DIGI2RAW,HLT --eventcontent RAWSIM --datatier GEN-SIM-RAW --conditions FrontierConditions_GlobalTag,IDEAL_V11::All -n 10 --no_exec
+###########################################
+#
+# BH_SimTrigRec_BASE.py
+#
+# Script for MIB batch Sim and Reco 
+# (HLT not done for the moment)
+#
+# WARNING: this is a base script, you're not suppose to modify it
+#
+# SV: 22/06/2011
+#
+##########################################
 import FWCore.ParameterSet.Config as cms
 
 process = cms.Process('RECO')
@@ -10,7 +17,7 @@ process = cms.Process('RECO')
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('FWCore.MessageService.MessageLogger_cfi')
-process.load('Configuration.StandardSequences.GeometryIdeal_cff')
+process.load('Configuration.StandardSequences.MYGEOMETRY_cff')
 process.load('SimGeneral.MixingModule.mixNoPU_cfi')
 process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 process.load('Configuration.StandardSequences.Sim_cff')
@@ -99,7 +106,7 @@ process.out_step          = cms.EndPath(process.output)
 process.schedule = cms.Schedule(process.simulation_step,process.digitisation_step,process.L1simulation_step,process.digi2raw_step)
 
 # High level trigger
-process.schedule.extend(process.HLTSchedule)
+#process.schedule.extend(process.HLTSchedule)
 
 # Reconstruction
 process.schedule.extend([process.raw2digi_step,process.localreco_step,process.bhalo_step])

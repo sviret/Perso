@@ -11,7 +11,7 @@
 #
 
 
-CMSSW_PROJECT_SRC=testarea/${6}
+CMSSW_PROJECT_SRC=scratch0/testarea/${6}/src
 STEP=Simulation
 TOP=$PWD
 
@@ -32,12 +32,12 @@ sed "s/NEVTS/${1}/"          -i BH_dummy.py
 sed "s/NSKIP/${2}/"          -i BH_dummy.py
 sed "s#INPUTFILENAME#${3}#"  -i BH_dummy.py
 sed "s/MYGLOBALTAG/${5}/"    -i BH_dummy.py
-
+sed "s/MYGEOMETRY/${7}/"     -i BH_dummy.py
 
 # Launch the whole thing
 #
 
-#cmsRun BH_dummy.py
+cmsRun BH_dummy.py
 
 
 # Recover the data
