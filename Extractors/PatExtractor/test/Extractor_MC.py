@@ -26,14 +26,17 @@ process.options = cms.untracked.PSet(
 )
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10000)
+    input = cms.untracked.int32(1000)
 )
 
 myfilelist = cms.untracked.vstring()
 myfilelist.extend( [
-        #'file:/gridgroup/cms/stephane/CMSSW/CMSSW_4_1_3_patch2/src/TopProd/PatTopProd/patTuple_PATandPF2PAT_data.root'
-#        'rfio:/castor/cern.ch/user/s/sviret/CMS/patTuple_PATandPF2PAT_1_2_S3q.root'
-    'file:/scratch/viola/okiwilldeleteit/Zprime750/test0.root'
+#    'file:/scratch/viola/okiwilldeleteit/TTbar/patTuple_PF2PAT_MC_10_1_WBP.root'
+#   '/store/user/boudoul/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11_cmssw415_PF2PAT_v1/9609dfcd6d0d7cd6841f2d6bf7c90a9a/patTuple_PF2PAT_MC_10_1_WBP.root'
+#    '/store/user/boudoul/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Spring11_cmssw415_PF2PAT_v1/9609dfcd6d0d7cd6841f2d6bf7c90a9a/patTuple_PF2PAT_MC_89_1_M60.root'
+#'file:/scratch/viola/okiwilldeleteit/testZprime750.root',
+#'file:/scratch/viola/okiwilldeleteit/testZprime750_B.root'
+    'file:/scratch/viola/patTuple_PF2PAT_MC_69_1_DhP.root'
         ] )
 
 process.source = cms.Source("PoolSource",
@@ -56,12 +59,13 @@ process.PATextraction.doMtt      = True
 #if doSemiMu is false, it means we perform the analysis for the semielectronic channel
 process.PATextraction.doSemiMu   = True
 process.PATextraction.doChi2     = True
-process.PATextraction.doUseBTaginChi2 = True
+process.PATextraction.doUseBTaginChi2 = False
 process.PATextraction.doKF = True
 #if doChoiceWKF is true you will use the kinfit also to choose the best jet combination
 #if it is false, you will choose the best combination with the chi2
 process.PATextraction.doChoiceWKF = False
-process.PATextraction.doMC = True
+process.PATextraction.doMC = False
+process.PATextraction.doMCPU = True
 process.p = cms.Path(process.PATextraction)
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 100

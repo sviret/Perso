@@ -1,7 +1,7 @@
 #include "../interface/mtt_analysis.h"
 
 
-mtt_analysis::mtt_analysis(bool do_MC_,bool do_SemiMu_, MuonExtractor *m_muon, ElectronExtractor *m_electron, JetExtractor *m_jet, METExtractor *m_MET, VertexExtractor *m_vertex, bool do_Chi2_, bool do_KF_,bool do_ChoiceWKF_)
+mtt_analysis::mtt_analysis(bool do_MC_,bool do_MCPU_,bool do_SemiMu_,MuonExtractor *m_muon, ElectronExtractor *m_electron, JetExtractor *m_jet, METExtractor *m_MET, VertexExtractor *m_vertex, bool do_Chi2_, bool do_KF_,bool do_ChoiceWKF_)
 {
   /// Tree definition
   m_tree_Mtt = new TTree("Mtt","Analysis info");  
@@ -23,8 +23,8 @@ mtt_analysis::mtt_analysis(bool do_MC_,bool do_SemiMu_, MuonExtractor *m_muon, E
   {
     m_tree_Mtt->Branch("MC_channel",&m_MC_channel,"MC_channel/I");
     m_tree_Mtt->Branch("MC_mtt"    ,&m_MC_mtt    ,"MC_mtt/F");
-    m_tree_Mtt->Branch("m_nPU"    ,&m_nPU    ,"m_nPU/I");
   }
+  if(do_MCPU_)    m_tree_Mtt->Branch("m_nPU"    ,&m_nPU    ,"m_nPU/I");
   //  reset(do_MC_);
   if (do_SemiMu_){
     m_tree_Mtt->Branch("mtt_NGoodMuons"    ,&m_mtt_NGoodMuons    ,"mtt_NGoodMuons/I");
@@ -152,12 +152,11 @@ void mtt_analysis::reset(bool do_MC_)
     m_mtt_JetEta[tmp]=999.;
     m_mtt_JetPt[tmp]=999.;
   }
-
+  m_nPU        = 0.;
   if(do_MC_)
   {
     m_MC_channel = 0;
     m_MC_mtt     = 0;
-    m_nPU        = 0;
     nEle    = 0;
     nMu     = 0;
     nTau    = 0;
@@ -175,7 +174,7 @@ void mtt_analysis::reset(bool do_MC_)
   }
 }
 
-int mtt_analysis::mtt_Sel(bool do_MC_,bool do_SemiMu_, MuonExtractor *m_muon, ElectronExtractor *m_electron, JetExtractor *m_jet, METExtractor *m_MET, VertexExtractor *m_vertex, bool do_Chi2_) {
+int mtt_analysis::mtt_Sel(bool do_MC_,bool do_MCPU_,bool do_SemiMu_, EventExtractor * m_Event,MuonExtractor *m_muon, ElectronExtractor *m_electron, JetExtractor *m_jet, METExtractor *m_MET, VertexExtractor *m_vertex, bool do_Chi2_) {
   //isSel=1 if selected
   //isSel=2 if it fails vtx selection
   //isSel=3 if it fails MET selection
@@ -189,6 +188,7 @@ int mtt_analysis::mtt_Sel(bool do_MC_,bool do_SemiMu_, MuonExtractor *m_muon, El
   isMETSel=-1;
   isLepSel=-1;
   isJetSel=-1;
+  if(do_MCPU_)  m_nPU = m_Event->nPU();
   isVtxSel=VertexSel(m_vertex,isSel);
   if (isVtxSel!=1 && isVtxSel!=-1) {
     isSel  = isVtxSel;
@@ -803,7 +803,6 @@ void mtt_analysis::MCidentification(MCExtractor * m_MC, EventExtractor * m_Event
   if(nEle==0 && nNuEle==0 && nMu==1 && nNuMu==1 && nTau==1 && nNuTau==1 && nQuarkb==2 && nW==2 && nTop==2){m_MC_channel=10;}
  
   m_MC_mtt = (Top[0]+Top[1]).M();
-  m_nPU = m_Event->nPU();
 }
 
 //try to copy it from Nicola's global_selection (formerly a code by Djamel..rabbrividiamo..)

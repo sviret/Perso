@@ -60,6 +60,7 @@ class PatExtractor : public edm::EDAnalyzer {
   bool do_fill_;
   bool do_HLT_;
   bool do_MC_;
+  bool do_MCPU_;
   bool do_Photon_;
   bool do_Electron_;
   bool do_Jet_;

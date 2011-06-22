@@ -1,3 +1,7 @@
+2011-06-22 viola  <sordini@cern.ch>
+       *only relevant for Mtt analysis: added a doMCPU flag. When true, we fill the tree 
+        with the PU info.
+
 2011-06-21 Seb Viret  <viret@in2p3.fr>
        *Added some new script to run PATextraction on lxbatch
 	Scripts are using the python config file test/PATExtractor_BASE.py

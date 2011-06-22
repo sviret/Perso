@@ -8,6 +8,7 @@ PatExtractor::PatExtractor(const edm::ParameterSet& config) :
   do_fill_       (config.getUntrackedParameter<bool>("fillTree", true)),
   do_HLT_        (config.getUntrackedParameter<bool>("doHLT", false)),
   do_MC_         (config.getUntrackedParameter<bool>("doMC", false)),
+  do_MCPU_       (config.getUntrackedParameter<bool>("doMCPU", false)),
   do_Photon_     (config.getUntrackedParameter<bool>("doPhoton", false)),
   do_Electron_   (config.getUntrackedParameter<bool>("doElectron", false)),
   do_Jet_        (config.getUntrackedParameter<bool>("doJet", false)),
@@ -64,7 +65,7 @@ void PatExtractor::beginJob()
   // Analysis is done on request, if the infos are there
 
   if (do_Mtt_ && do_Muon_ && do_Electron_ && do_Jet_ && do_MET_ && do_Vertex_)      
-    m_Mtt_analysis = new mtt_analysis(do_MC_,do_SemiMu_,
+    m_Mtt_analysis = new mtt_analysis(do_MC_,do_MCPU_,do_SemiMu_,
 				      m_muon,m_electron,m_jet,m_MET,m_vertex,
 				      do_Chi2_,do_KF_,do_ChoiceWKF_);
 
@@ -146,7 +147,7 @@ void PatExtractor::endJob() {
 
 void PatExtractor::fillInfo(const edm::Event *event) 
 {
-  m_event->writeInfo(event,do_MC_);
+  m_event->writeInfo(event,do_MCPU_);
 
   if (do_HLT_)      m_HLT->writeInfo(event);
   if (do_MET_)      m_MET->writeInfo(event);
@@ -271,7 +272,7 @@ void PatExtractor::doAna()
   {
     m_Mtt_analysis->reset(do_MC_);
     iseventselected=-1;
-    m_Mtt_analysis->mtt_Sel(do_MC_,do_SemiMu_,m_muon,m_electron,m_jet,m_MET,m_vertex,do_Chi2_);
+    m_Mtt_analysis->mtt_Sel(do_MC_,do_MCPU_,do_SemiMu_,m_event,m_muon,m_electron,m_jet,m_MET,m_vertex,do_Chi2_);
     iseventselected=m_Mtt_analysis->getisSel();
     //calculate the best jets pairing with a chi2 minimization
     if (do_Chi2_) m_Mtt_analysis->LoopOverCombinations(m_jet,
