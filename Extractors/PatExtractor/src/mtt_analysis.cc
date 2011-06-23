@@ -252,7 +252,7 @@ int mtt_analysis::MuonSel(MuonExtractor* m_muon, ElectronExtractor *m_electron, 
   //semimuonic channel
   //muon selection cuts
   minmupt=20.;
-  maxmueta=2.1;
+  maxmueta=2.4;
   
   minmupt_veto=10.;
   maxmueta_veto=2.5;
@@ -355,7 +355,7 @@ int mtt_analysis::ElectronSel(MuonExtractor* m_muon, ElectronExtractor *m_electr
   ElepTrelmin_veto=35.;
   ElMinIso=0.2;
   itsaZ=false;
-  minelpt=30.;
+  minelpt=35.;
   maxeleta=2.5;
   minelpt_Zveto=20.;
   maxeleta_Zveto=2.5; 
@@ -372,7 +372,7 @@ int mtt_analysis::ElectronSel(MuonExtractor* m_muon, ElectronExtractor *m_electr
     for(int ie=0; ie<m_electron->getSize(); ie++) { 
       eP = m_electron->getEleLorentzVector(ie);  
       if(fabs(eP->Pt())<minelpt || fabs(eP->Eta())>maxeleta) continue;
-      if (fabs(m_electron->getEledB(ie))>0.02) continue; 
+      if(fabs(m_electron->getEledB(ie))>0.02) continue; 
       //IMPORTANT MISSING: cut on the electronID!!!
       //      e3P = eP->Vect();
       //      Elepass2Dcut=Make2DCut(e3P,m_jet,EleDRmin,ElepTrelmin);
@@ -533,7 +533,7 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
   bestjet4idx=-1;
 
   btaggedjets.clear();
-  dontdoublecount.clear();
+  //dontdoublecount.clear();
   
  //chi2 variables
   minchi2=9999.;
@@ -570,6 +570,7 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
 	//dont pick the one you already used
 	if (bj2 == bjet1idx) continue;
 	bjet2idx=bj2;
+	dontdoublecount.clear();
 	for (int j3=0; j3<(int)JetsIdx.size(); j3++) {
 	  //dont pick the two jets you already used for bjets
 	  if(j3==bjet1idx || j3==bjet2idx) continue;

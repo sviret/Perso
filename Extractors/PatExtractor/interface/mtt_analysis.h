@@ -145,7 +145,7 @@ class mtt_analysis
   float AllJetsPt;
   int m_mtt_OneMatchedCombi;
   int m_mtt_NumComb;
-  float m_mtt_SolChi2[100];
+  float m_mtt_SolChi2[1000];
   float m_mtt_BestSolChi2;
   float   m_mtt_KFChi2;
 
@@ -270,9 +270,9 @@ class mtt_analysis
   AlienKinFit * myAlienKinFit;
   TString ParamsFile;
   float  kinfitchi2;
-  float m_mtt_All[100];
-  float m_mLepTop_All[100];
-  float m_mHadTop_All[100];
+  float m_mtt_All[1000];
+  float m_mLepTop_All[1000];
+  float m_mHadTop_All[1000];
   float m_mtt_AfterChi2;
   float m_mLepTop_AfterChi2;
   float m_mHadTop_AfterChi2;
@@ -294,9 +294,9 @@ class mtt_analysis
   int m_mtt_NBtaggedJets_SSVHEM;
   int m_mtt_NBtaggedJets_SSVHPT;
   int m_mtt_NJets;
-  float m_mtt_GoodJetEta[100];
-  float m_mtt_JetEta[100];
-  float m_mtt_JetPt[100];
+  float m_mtt_GoodJetEta[1000];
+  float m_mtt_JetEta[1000];
+  float m_mtt_JetPt[1000];
 
 };
 
