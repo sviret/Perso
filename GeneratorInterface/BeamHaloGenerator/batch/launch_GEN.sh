@@ -37,11 +37,11 @@
 # beam-gas_IR5       : BEAM1 beam gas inelastic events
 #
 
-set FILENAME     = "beam-gas_IR5" # Input filename for FLUKA 
-set PARTICLES    = ALL            # Which particles (replace by PDG_ID is necessary)
-set MIN_NRJ      = 0.02           # Minimal energy of generated particles, in GeV
-set MIN_PT       = 0.0            # Minimal transverse mom of gen. particles, in GeV/c
-
+set FILENAME     = "beam-gas_IR5"                # Input filename for FLUKA 
+set PARTICLES    = ALL                           # Which particles (replace by PDG_ID is necessary)
+set MIN_NRJ      = 0.02                          # Minimal energy of generated particles, in GeV
+set MIN_PT       = 0.0                           # Minimal transverse mom of gen. particles, in GeV/c
+set STORAGEDIR   = $CASTOR_HOME/CMS/MIB/GEN/Prod # Where are you storing the generated ROOTuples
 
 ###########################################################
 ###########################################################
@@ -85,11 +85,11 @@ while ($i != $N_RUN)
     echo $i
     @ i++
 
-    set OUTPUT_DIR = $CASTOR_HOME/CMS/MIB/RECO/Prod/$TYPE
-    set OUT_NAME   = "MIB_gen_"$TYPE"_BEAM_"$BEAM"_E_"$MIN_NRJ"_PT_"$MIN_PT"_"$i".root"  
+    set OUTPUTDIR = $STORAGEDIR/$TYPE
+    set OUT_NAME  = "MIB_gen_"$TYPE"_BEAM_"$BEAM"_E_"$MIN_NRJ"_PT_"$MIN_PT"_"$i".root"  
 
     echo "#\!/bin/bash" > gen_job_${TYPE}_${BEAM}_${i}.sh
-    echo "source $PACKDIR/batch/generator.sh $EVTS_PER_RUN $PARTICLES $BEAM $MIN_NRJ $MIN_PT $TYPE $GTAG $FILENAME $i $RELEASEDIR $PACKDIR" >> gen_job_${TYPE}_${BEAM}_${i}.sh
+    echo "source $PACKDIR/batch/generator.sh $EVTS_PER_RUN $PARTICLES $BEAM $MIN_NRJ $MIN_PT $TYPE $GTAG $FILENAME $i $RELEASEDIR $PACKDIR $OUTPUTDIR" >> gen_job_${TYPE}_${BEAM}_${i}.sh
     chmod 755 gen_job_${TYPE}_${BEAM}_${i}.sh
 
     if ($TYPE == "FLUKA") then

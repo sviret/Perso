@@ -1,5 +1,9 @@
 2011-05-23  Seb Viret  <viret@in2p3.fr>
  
+       	* Minor modification of the storage directory, not hardcoded in generator.sh anymore
+
+2011-05-23  Seb Viret  <viret@in2p3.fr>
+ 
        	* Improving the batch scripts, see the wiki for more details:
 	http://sviret.web.cern.ch/sviret/Welcome.php?n=CMS.MIBGen
 

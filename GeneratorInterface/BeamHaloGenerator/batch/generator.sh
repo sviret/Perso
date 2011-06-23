@@ -11,6 +11,7 @@
 
 CMSSW_PROJECT_SRC=${10}
 PACK_DIR=${11}
+STOR_DIR=${12}
 TOP=$PWD
 
 
@@ -89,6 +90,6 @@ cmsRun BH_dummy.py
 #
 
 ls -l
-rfmkdir $CASTOR_HOME/CMS/MIB/GEN/Prod/${6}
-xrdcp BeamHalo_GEN.root root://castorcms/$CASTOR_HOME/CMS/MIB/GEN/Prod/${6}/$DATA_NAME
+rfmkdir ${12}
+xrdcp BeamHalo_GEN.root root://castorcms/${12}/$DATA_NAME
 
