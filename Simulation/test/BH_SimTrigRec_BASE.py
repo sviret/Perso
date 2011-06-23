@@ -105,7 +105,7 @@ process.out_step          = cms.EndPath(process.output)
 # Simulation and L1
 process.schedule = cms.Schedule(process.simulation_step,process.digitisation_step,process.L1simulation_step,process.digi2raw_step)
 
-# High level trigger
+# High level trigger (commented for the moment)
 #process.schedule.extend(process.HLTSchedule)
 
 # Reconstruction

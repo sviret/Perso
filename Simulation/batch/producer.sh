@@ -11,12 +11,11 @@
 #
 
 
-CMSSW_PROJECT_SRC=scratch0/testarea/${6}/src
-STEP=Simulation
+CMSSW_PROJECT_SRC=${6}
 TOP=$PWD
 
 
-cd $HOME/$CMSSW_PROJECT_SRC
+cd $CMSSW_PROJECT_SRC
 export SCRAM_ARCH=slc5_amd64_gcc434
 eval `scramv1 runtime -sh`  
 
@@ -26,7 +25,7 @@ eval `scramv1 runtime -sh`
 
 cd $TOP
 
-cp $HOME/$CMSSW_PROJECT_SRC/$STEP/test/BH_SimTrigRec_BASE.py BH_dummy.py 
+cp ${8}/test/BH_SimTrigRec_BASE.py BH_dummy.py 
 
 sed "s/NEVTS/${1}/"          -i BH_dummy.py
 sed "s/NSKIP/${2}/"          -i BH_dummy.py
