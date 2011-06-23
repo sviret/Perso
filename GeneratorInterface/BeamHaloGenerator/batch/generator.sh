@@ -9,12 +9,12 @@
 # First set some environment variables
 #
 
-CMSSW_PROJECT_SRC=scratch0/testarea/${10}/src
-STEP=GeneratorInterface/BeamHaloGenerator
+CMSSW_PROJECT_SRC=${10}
+PACK_DIR=${11}
 TOP=$PWD
 
 
-cd $HOME/$CMSSW_PROJECT_SRC
+cd $CMSSW_PROJECT_SRC
 export SCRAM_ARCH=slc5_amd64_gcc434
 eval `scramv1 runtime -sh`   
 
@@ -27,7 +27,8 @@ if [ ${6} = "MARS" ]; then
     cd $TOP
     mkdir InputFiles
     cd InputFiles
-    cp $HOME/scratch0/MARS/data_MARS.tar.gz .
+    xrdcp root://castorcms//castor/cern.ch/user/s/sviret/CMS/MIB/Input_MARS/data_MARS.tar.gz .
+    #cp $HOME/scratch0/MARS/data_MARS.tar.gz .
     tar -zxf data_MARS.tar.gz
 fi
 
@@ -47,7 +48,7 @@ fi
 #
 
 cd $TOP
-cp $HOME/$CMSSW_PROJECT_SRC/$STEP/test/BH_generator_BASE.py BH_dummy.py 
+cp $PACK_DIR/test/BH_generator_BASE.py BH_dummy.py 
 
 sed "s/NEVTS/${1}/"       -i BH_dummy.py
 sed "s/NBEAM/${3}/"       -i BH_dummy.py
@@ -90,4 +91,4 @@ cmsRun BH_dummy.py
 ls -l
 rfmkdir $CASTOR_HOME/CMS/MIB/GEN/Prod/${6}
 xrdcp BeamHalo_GEN.root root://castorcms/$CASTOR_HOME/CMS/MIB/GEN/Prod/${6}/$DATA_NAME
-#xrdcp HALO_*.root root://castorcms/$CASTOR_HOME/CMS/MIB/GEN/Control/$CONTROL_NAME
+
