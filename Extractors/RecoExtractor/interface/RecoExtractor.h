@@ -22,6 +22,7 @@
 #include "../interface/HFExtractor.h"
 #include "../interface/TrackExtractor.h"
 #include "../interface/VertexExtractor.h"
+#include "../interface/MCExtractor.h"
 
 
 #include "TFile.h"
@@ -57,6 +58,7 @@ class RecoExtractor : public edm::EDAnalyzer{
   bool do_HF_;
   bool do_TRK_;
   bool do_VTX_;
+  bool do_MC_;
 
 
   edm::InputTag INFO_tag_;  // 
@@ -75,13 +77,14 @@ class RecoExtractor : public edm::EDAnalyzer{
   std::string outFilename_;
   TFile* m_file;
 
-  InfoExtractor*   m_INFO;
+  InfoExtractor*    m_INFO;
   EventExtractor*   m_EVT;
   PixelExtractor*   m_PIX;
   TrackerExtractor* m_SST;
   HFExtractor*      m_HF;
   TrackExtractor*   m_TRK;
   VertexExtractor*  m_VTX;
+  MCExtractor*      m_MC;
 };
 
 

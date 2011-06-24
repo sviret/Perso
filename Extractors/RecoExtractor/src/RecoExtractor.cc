@@ -5,13 +5,13 @@ using namespace edm;
 
 RecoExtractor::RecoExtractor(const edm::ParameterSet& config) :
   do_INFO_       (config.getUntrackedParameter<bool>("doINFO", false)),
-  //do_MC_         (config.getUntrackedParameter<bool>("doMC", false)),
   do_EVT_        (config.getUntrackedParameter<bool>("doEvent", false)),
   do_PIX_        (config.getUntrackedParameter<bool>("doPixel", false)),
   do_SST_        (config.getUntrackedParameter<bool>("doTracker", false)),
   do_HF_         (config.getUntrackedParameter<bool>("doHF", true)),
   do_TRK_        (config.getUntrackedParameter<bool>("doTracks", false)),
   do_VTX_        (config.getUntrackedParameter<bool>("doVertices", false)),
+  do_MC_         (config.getUntrackedParameter<bool>("doMC", false)),
   PIX_tag_       (config.getParameter<edm::InputTag>("pixel_tag")),
   SST_tag_       (config.getParameter<edm::InputTag>("tracker_tag")),
   HF_tag_        (config.getParameter<edm::InputTag>("HF_tag")),
@@ -35,7 +35,7 @@ void RecoExtractor::beginRun(Run const& run, EventSetup const& setup)
   doItOnce     = true;
 
   if (do_INFO_)  m_INFO     = new InfoExtractor(&run,&setup);
-  //if (do_MC_)    m_MC       = new MCExtractor();
+  if (do_MC_)    m_MC       = new MCExtractor(&setup);
   if (do_EVT_)   m_EVT      = new EventExtractor(&setup);
   if (do_PIX_)   m_PIX      = new PixelExtractor(PIX_tag_,&setup);
   if (do_SST_)   m_SST      = new TrackerExtractor(SST_tag_,&setup);
@@ -60,7 +60,7 @@ void RecoExtractor::analyze(const edm::Event& event, const edm::EventSetup& setu
   {
     m_EVT->writeInfo(&event);
 
-    if (!(m_EVT->isSelected()))
+    if (!(m_EVT->isSelected()) && !do_MC_)
       return;
   }
 
@@ -70,6 +70,7 @@ void RecoExtractor::analyze(const edm::Event& event, const edm::EventSetup& setu
     doItOnce = false;
   }
 
+  if (do_MC_)       m_MC->writeInfo(&event);
   if (do_PIX_)      m_PIX->writeInfo(&event);
   if (do_SST_)      m_SST->writeInfo(&event,&setup);
   if (do_HF_)       m_HF->writeInfo(&event);

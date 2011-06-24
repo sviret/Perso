@@ -1,3 +1,14 @@
+2011-06-24  Seb Viret  <viret@in2p3.fr>
+ 
+       	* Adding a new class MCExtractor reading the info from
+	MC events (eg tracking particles)
+
+	* Config files of the /test/ directory were modified. There is 
+	now one file for data, one for MC
+
+	This version has been tested against CMSSW_4_2_4_patch1
+
+
 2011-06-22  Seb Viret  <viret@in2p3.fr>
  
        	* Adding a first version of the RecoExtractor package, 
