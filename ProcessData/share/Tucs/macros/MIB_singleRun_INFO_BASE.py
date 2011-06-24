@@ -33,7 +33,8 @@ inputdir = '/tmp/sviret'
 #
 
 a = Use(run)
-b = ReadMIB(processingDir=inputdir,nfiles=ndat)
+#b = ReadMIB(processingDir=inputdir,nfiles=ndat,techHF=True)
+b = ReadMIB(processingDir=inputdir,nfiles=ndat,techHF=False) # Now we retrieve the HF
 c = WriteMIBSummary(RNum=run)
 d = do_charge_plots(processingDir=inputdir,nfiles=ndat)
 e = do_track_plots(processingDir=inputdir,nfiles=ndat)

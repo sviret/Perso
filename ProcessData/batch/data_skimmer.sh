@@ -10,6 +10,9 @@
 #
 # ${1}: the run number
 # ${2}: the number of files for this run
+# ${3}: the CMSSW base dir
+# ${4}: CASTOR directory where extracted ROOTuples are stored
+# ${5}: Directory where skimmed ROOTuples are stored
 #
 # Author: Seb Viret <viret@in2p3.fr>  (26/11/2010)
 #
@@ -22,11 +25,11 @@
 # First set some environment variables
 #
 
-CMSSW_PROJECT_SRC=testarea/CMSSW_4_1_2_patch1/src
 STEP=ProcessData
 YEAR=2011
+TUCS=Tucs
 
-cd $HOME/$CMSSW_PROJECT_SRC
+cd ${3}
 export SCRAM_ARCH=slc5_amd64_gcc434
 eval `scramv1 runtime -sh`   
 
@@ -41,22 +44,21 @@ runnumber=${1}
 nfiles=${2}
 
 
-echo 'Performing skimmed ROOTUPLE production for run '${runnumber}' containing '${nfiles}' data files'
+echo 'Performing skimmed ROOTUPLE production for run '${1}' containing '${2}' data files'
 
-cp -rf $HOME/$CMSSW_PROJECT_SRC/$STEP/share/Tucs .
+cp -rf ${3}/$STEP/share/$TUCS .
 
-for (( i=0; i<$nfiles; i++ ))
+for (( i=0; i<${2}; i++ ))
 do
   echo $i
-  xrdcp root://castorcms/$CASTOR_HOME/CMS/MIB/DQ/Prod/${runnumber}_${nfiles}/MIB_data_result_${runnumber}_${i}_${nfiles}.root .
+  xrdcp root://castorcms/${4}/${1}_${2}/MIB_data_result_${1}_${i}_${2}.root .
 done
 
-cd Tucs
+cd $TUCS
 
 
-
-sed "s/RUNNUMBER/$runnumber/" -i macros/MIB_singleRun_INFO_BASE.py
-sed "s/NFILES/$nfiles/" -i macros/MIB_singleRun_INFO_BASE.py
+sed "s/RUNNUMBER/${1}/" -i macros/MIB_singleRun_INFO_BASE.py
+sed "s/NFILES/${2}/"    -i macros/MIB_singleRun_INFO_BASE.py
 
 rm out.txt
 python macros/MIB_singleRun_INFO_BASE.py 
@@ -68,12 +70,10 @@ python macros/MIB_singleRun_INFO_BASE.py
 rfproblem=`ls plots/latest/ | wc -l`
 
 if [ $rfproblem != 0 ]; then
-    cp output_${runnumber}.root /afs/cern.ch/user/s/sviret/www/Images/CMS/MIB/Monitor/Rootuples/$YEAR/MIB_summary_run_${runnumber}.root
-    cp BCID_list_${runnumber}.txt /afs/cern.ch/user/s/sviret/www/Images/CMS/MIB/Monitor/Rootuples/$YEAR/BCID_list_${runnumber}.txt
+    cp output_${1}.root ${5}/MIB_summary_run_${1}.root
+    cp BCID_list_${1}.txt ${5}/BCID_list_${1}.txt
     cd plots/latest
     cp *.png /afs/cern.ch/user/s/sviret/scratch0/Monitor/$YEAR/
-    #cp *.eps /afs/cern.ch/user/s/sviret/scratch0/Monitor/$YEAR/
-    cp *.C /afs/cern.ch/user/s/sviret/scratch0/Monitor/$YEAR/
 fi
 
 

@@ -22,12 +22,21 @@
 # First set some environment variables
 #
 
-CMSSW_PROJECT_SRC=testarea/CMSSW_4_1_2_patch1/src
-STEP=ProcessData
-YEAR=2011
+RDIR=${1}
+YEAR=${2}
+BATCH=${3}
+
+WORKDIR="/afs/cern.ch/user/s/sviret"
+CMSSW_PROJECT_SRC="scratch0/testarea/"$RDIR"/src"
+RELDIR=$WORKDIR/$CMSSW_PROJECT_SRC
+STEP="ProcessData"
+STORDIR="/castor/cern.ch/user/s/sviret/CMS/MIB/DQ/Prod/"$YEAR
+FINALSTORDIR="/afs/cern.ch/user/s/sviret/www/Images/CMS/MIB/Monitor/Rootuples/"$YEAR
+FINALDIR="/afs/cern.ch/user/s/sviret/www/Images/CMS/MIB/Monitor/"$YEAR
 TOP=$PWD
 
-cd $HOME/$CMSSW_PROJECT_SRC
+
+cd $RELDIR
 export SCRAM_ARCH=slc5_amd64_gcc434
 eval `scramv1 runtime -sh`   
 
@@ -35,7 +44,7 @@ cd $TOP
 
 
 # List of summary rootuples stored on lxplus
-runlist=`ls $HOME/www/Images/CMS/MIB/Monitor/Rootuples/$YEAR | grep run_1 | grep .root | sed 's/MIB_summary_run_//g;s/.root//g;'`
+runlist=`ls $FINALSTORDIR | grep run_1 | grep .root | sed 's/MIB_summary_run_//g;s/.root//g;'`
 
 
 # Then launch the run-by-run analysis
@@ -45,16 +54,17 @@ runlist=`ls $HOME/www/Images/CMS/MIB/Monitor/Rootuples/$YEAR | grep run_1 | grep
 
 for f in $runlist
 do
-  echo $f
-  rm $HOME/$CMSSW_PROJECT_SRC/$STEP/batch/TMP_FILES/run_${f}_DQ.sh
-
-  is_there=`ls $HOME/www/Images/CMS/MIB/Monitor/$YEAR | grep R$f | wc -l`
-
+  rm $RELDIR/$STEP/batch/TMP_FILES/run_${f}_DQ.sh
+  is_there=`ls $FINALDIR | grep R$f | wc -l`
+  
   if [ $is_there = 0 ]; then
-      echo "#\!/bin/bash" > $HOME/$CMSSW_PROJECT_SRC/$STEP/batch/TMP_FILES/run_${f}_DQ.sh
-      echo "source $HOME/$CMSSW_PROJECT_SRC/$STEP/batch/data_run_monitor.sh $f" >> $HOME/$CMSSW_PROJECT_SRC/$STEP/batch/TMP_FILES/run_${f}_DQ.sh
-      chmod 755 $HOME/$CMSSW_PROJECT_SRC/$STEP/batch/TMP_FILES/run_${f}_DQ.sh
-      bsub -q 1nh -e /dev/null -o /tmp/${LOGNAME}_out.txt $HOME/$CMSSW_PROJECT_SRC/$STEP/batch/TMP_FILES/run_${f}_DQ.sh
+      echo $f
+      echo "#\!/bin/bash" > $RELDIR/$STEP/batch/TMP_FILES/run_${f}_DQ.sh
+      echo "source $RELDIR/$STEP/batch/data_run_monitor.sh $f $RELDIR $FINALDIR" >> $RELDIR/$STEP/batch/TMP_FILES/run_${f}_DQ.sh
+      chmod 755 $RELDIR/$STEP/batch/TMP_FILES/run_${f}_DQ.sh
+      if [ "$BATCH" = "BATCH" ]; then      
+	  bsub -q 1nh -e /dev/null -o /tmp/${LOGNAME}_out.txt $RELDIR/$STEP/batch/TMP_FILES/run_${f}_DQ.sh
+      fi
   fi
 done
 
@@ -63,14 +73,15 @@ done
 #
 # Done via the script data_trend_monitor.sh
 
-runlist2=`ls $HOME/www/Images/CMS/MIB/Monitor/Rootuples/$YEAR | grep run_1 | grep .root | sed ':start /^.*$/N;s/\n/','/g; t start' | sed 's/MIB_summary_run_//g;s/.root//g;'`
+runlist2=`ls $FINALSTORDIR | grep run_1 | grep .root | sed ':start /^.*$/N;s/\n/','/g; t start' | sed 's/MIB_summary_run_//g;s/.root//g;'`
 
 echo $runlist2
 
-rm $HOME/$CMSSW_PROJECT_SRC/$STEP/batch/TMP_FILES/trend_DQ.sh
-echo "#\!/bin/bash" > $HOME/$CMSSW_PROJECT_SRC/$STEP/batch/TMP_FILES/trend_DQ.sh
-echo "source $HOME/$CMSSW_PROJECT_SRC/$STEP/batch/data_trend_monitor.sh $runlist2" >> $HOME/$CMSSW_PROJECT_SRC/$STEP/batch/TMP_FILES/trend_DQ.sh
-chmod 755 $HOME/$CMSSW_PROJECT_SRC/$STEP/batch/TMP_FILES/trend_DQ.sh
-bsub -q 1nh -e /dev/null -o /tmp/${LOGNAME}_out.txt $HOME/$CMSSW_PROJECT_SRC/$STEP/batch/TMP_FILES/trend_DQ.sh
-
+rm $RELDIR/$STEP/batch/TMP_FILES/trend_DQ.sh
+echo "#\!/bin/bash" > $RELDIR/$STEP/batch/TMP_FILES/trend_DQ.sh
+echo "source $RELDIR/$STEP/batch/data_trend_monitor.sh $runlist2 $RELDIR $FINALDIR" >> $RELDIR/$STEP/batch/TMP_FILES/trend_DQ.sh
+chmod 755 $RELDIR/$STEP/batch/TMP_FILES/trend_DQ.sh
+if [ "$BATCH" = "BATCH" ]; then      
+    bsub -q 1nh -e /dev/null -o /tmp/${LOGNAME}_out.txt $RELDIR/$STEP/batch/TMP_FILES/trend_DQ.sh
+fi
 

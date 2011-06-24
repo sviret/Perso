@@ -27,6 +27,8 @@
 # -> timespan: the length of the time slices, in seconds
 #          DEFAULT VAL = 600
 #
+# -> techHF: use technical bit 8 nested in Algo 4 for HF rate estimation
+#          DEFAULT VAL = false (use algo 5)
 #
 # For more info on the LASER system : http://atlas-tile-laser.web.cern.ch
 #
@@ -46,7 +48,7 @@ class ReadMIB(ReadGenericCalibration):
     numberEventCut = None
     ftDict         = None
 
-    def __init__(self, processingDir='/tmp/sviret',nevtCut=100,evtperTSCut=10,timespan=600,nfiles=1):
+    def __init__(self, processingDir='/tmp/sviret',nevtCut=100,evtperTSCut=10,timespan=600,nfiles=1,techHF=False):
         self.processingDir  = processingDir
         self.numberEventCut = nevtCut
         self.ftDict         = {}
@@ -56,6 +58,7 @@ class ReadMIB(ReadGenericCalibration):
         self.black_list     = set()
         self.npTSmin        = evtperTSCut
         self.tspan          = timespan
+        self.techHF         = techHF
         self.nevts3         = 0
         self.nevts4         = 0
         self.nevts5         = 0
@@ -91,16 +94,10 @@ class ReadMIB(ReadGenericCalibration):
                     if not self.ftDict.has_key(ii):
                     
                         f, t1, t2 = self.getFileTrees('MIB_data_result_%d_%d_%d.root'%(event.runNumber,ii,self.nfiles)\
-                                                      , 'MIB_info','MIB')
+                                                       , 'MIB_info','event')
 
                         if [f, t1, t2] != [None, None, None]:
 
-                            '''
-                            if t2.GetEntries()<self.numberEventCut: # Not enough events
-                            self.black_list.add(event.runNumber)    
-                            continue
-                            else:
-                            '''
                             self.run_list.add(event.runNumber)                    
                             
                         elif [f, t1, t2] == [None, None, None]:
@@ -180,7 +177,7 @@ class ReadMIB(ReadGenericCalibration):
             f,t1,t2 = self.ftDict[0]
             t1.GetEntry(0)  
 
-            totSize = 6*2*5 # nbit/nbeam/pixcuts
+            totSize = 6*2*5 # nbit/nbeam/pixcut
 
             m_rate  = [0 for x in range(n_tspan*totSize)]
             m_trate = [0 for x in range(totSize)]
@@ -198,12 +195,29 @@ class ReadMIB(ReadGenericCalibration):
                 
             # We are OK, we can compute the rates
 
-            m_algo_pre[3] = t1.HLT_3_pres*t1.L1_algo_pres[3]
-            m_algo_pre[4] = t1.HLT_4_pres*t1.L1_algo_pres[4]
-            m_algo_pre[5] = t1.HLT_5_pres*t1.L1_algo_pres[5]            
-            m_algo_pre[6] = t1.HLT_6_pres*t1.L1_algo_pres[6]
-            m_algo_pre[8] = t1.HLT_8_pres*t1.L1_algo_pres[8]
+            #print len(t1.HLT_vector)
+        
+            for ii in range(len(t1.HLT_vector)):
 
+                if 'PreCollisions' in t1.HLT_vector[ii]:
+                    m_algo_pre[3] = t1.HLT_pscale[ii]*t1.L1_algo_pres[3]
+             
+                if 'BeamGas_BSC' in t1.HLT_vector[ii]:
+                    m_algo_pre[4] = t1.HLT_pscale[ii]*t1.L1_algo_pres[4]
+
+                if 'BeamGas_HF' in t1.HLT_vector[ii]:
+                    m_algo_pre[5] = t1.HLT_pscale[ii]*t1.L1_algo_pres[5]
+                        
+                if 'Interbunch_BSC' in t1.HLT_vector[ii]:
+                    m_algo_pre[6] = t1.HLT_pscale[ii]*t1.L1_algo_pres[6]
+
+                if 'BeamHalo' in t1.HLT_vector[ii]:
+                    m_algo_pre[8] = t1.HLT_pscale[ii]*t1.L1_algo_pres[8]
+        
+
+            if self.techHF:
+                m_algo_pre[5] = m_algo_pre[4]
+            
             #print t1.L1_algo_pres[3],t1.L1_algo_pres[4],t1.L1_algo_pres[5]   
                                                                
             norm = 1.
@@ -226,18 +240,11 @@ class ReadMIB(ReadGenericCalibration):
                 if i==0:
                     continue
 
+                if t1.B1_bx_Imax[i]>IB1_max:
+                    IB1_max = t1.B1_bx_Imax[i]
 
-                if t1.B1_bx_Istart[i]>IB1_max:
-                    IB1_max = t1.B1_bx_Istart[i]
-
-                if t1.B2_bx_Istart[i]>IB2_max:
-                    IB2_max = t1.B2_bx_Istart[i]
-
-                if t1.B1_bx_Iend[i]>IB1_max:
-                    IB1_max = t1.B1_bx_Iend[i]
-
-                if t1.B2_bx_Iend[i]>IB2_max:
-                    IB2_max = t1.B2_bx_Iend[i]
+                if t1.B2_bx_Imax[i]>IB2_max:
+                    IB2_max = t1.B2_bx_Imax[i]
 
             #print IB1_max,IB2_max
 
@@ -252,15 +259,13 @@ class ReadMIB(ReadGenericCalibration):
                 is_B1=0
                 is_B2=0
                 
-                if (t1.B1_bx_Istart[i]>IB1_max/5. or t1.B1_bx_Iend[i]>IB1_max/5.) and t1.B1_bx_map[i]>0 :
+                if t1.B1_bx_Imax[i]>IB1_max/5.:
                     BCID_B1 += 1
                     is_B1    = 1
-                    #print 'B1',i,t1.B1_bx_map[i],t1.B1_bx_Iend[i]
 
-                if (t1.B2_bx_Istart[i]>IB2_max/5. or t1.B2_bx_Iend[i]>IB2_max/5.) and t1.B2_bx_map[i]>0 :
+                if t1.B2_bx_Imax[i]>IB2_max/5.:
                     BCID_B2 += 1
                     is_B2    = 1
-                    #print 'B2',i,t1.B2_bx_map[i],t1.B2_bx_Iend[i]
 
                 if is_B1 and is_B2:
                     BCID_coll+=1 
@@ -333,11 +338,11 @@ class ReadMIB(ReadGenericCalibration):
             self.file.write("\n")
 
 
-            print "We will use only BCID ",self.sbeam1_good_bx[0], " for B1 beam gas rate"
+            #print "We will use only BCID ",self.sbeam1_good_bx[0], " for B1 beam gas rate"
             text = "BEAM1 REFERENCE BCID:\n%d\n"%(self.sbeam1_good_bx[0])
             self.file.write(text)
             
-            print "We will use only BCID ",self.sbeam2_good_bx[0], " for B2 beam gas rate"
+            #print "We will use only BCID ",self.sbeam2_good_bx[0], " for B2 beam gas rate"
             text = "BEAM2 REFERENCE BCID:\n%d\n"%(self.sbeam2_good_bx[0])
             self.file.write(text)
             
@@ -350,19 +355,14 @@ class ReadMIB(ReadGenericCalibration):
             if BCID_B1==0 and BCID_B2==0:
                 continue
 
-            
-
             m_occurences = [0 for x in range(5*3564)]
             m_ntracks    = [0 for x in range(3564)]
             m_nvertices  = [0 for x in range(3564)]
             
             # Finally loop on the events
 
-
-            self.crossing_bx = self.BBTool.GetCollidingBCIDs(run)
-            #print self.BBTool.GetUnpairedBCIDs(1,run)
+            self.crossing_bx   = self.BBTool.GetCollidingBCIDs(run)
             self.sbeam1_ref_bx = self.BBTool.GetREFBCIDs(1,run)
-            #print self.BBTool.GetUnpairedBCIDs(2,run)
             self.sbeam2_ref_bx = self.BBTool.GetREFBCIDs(2,run)
 
             self.maxdist = self.get_max_dist()
@@ -373,20 +373,25 @@ class ReadMIB(ReadGenericCalibration):
 
                 f,t1,t2 = self.ftDict[k]
 
-                ntrigs = t2.GetEntries()
+                t3 = f.Get("Pixels")
+                t4 = f.Get("Track")
+                t5 = f.Get("Vertices")
 
+                ntrigs = t2.GetEntries()
+                
                 t_bit = []
                 for k in range(6):
                     t_bit.append(0)
 
-                #for ii in range(1000):
                 for ii in range(ntrigs):
 
                     if ii%1000==0:
                         print ii
                                         
                     t2.GetEntry(ii)
+                    t3.GetEntry(ii)
 
+                    
                     if not t2.L1_algo_bits[3] and not t2.L1_algo_bits[4] and \
                        not t2.L1_algo_bits[5] and not t2.L1_algo_bits[6] and \
                        not t2.L1_algo_bits[8]:
@@ -394,36 +399,36 @@ class ReadMIB(ReadGenericCalibration):
 
                     if t2.PHYS==0:
                         continue
-
                         
-
                     for k in range(6):
                         t_bit[k]=t2.L1_algo_bits[3+k]
-
-                    #t_bit[2]=t2.L1_tech_bits[8]                        
                                      
                     m_lumi  = t2.lumi # lumi block number
                     m_time  = t2.time
                     t_index = int((m_time-self.t_start)/self.tspan)
                     m_BCID  = t2.BCID 
-                    m_pixn  = t2.PIX_n
+                    m_pixn  = t3.PIX_n
 
-                    m_pixa  = t2.PIX_asym
-                    m_hfa   = t2.HF_asym
-                    
+                                        
                     pix_i      = 0
                     asy_bsc    = 0
                     asy_hf     = 0
                     asy_ibunch = 0
-
                     
-                    if  m_pixa>0.1 and m_pixa<0.9 and (t2.L1_algo_bits[3] or t2.L1_algo_bits[4]):                    
+                    if t2.L1_algo_bits[3] or t2.L1_algo_bits[4]:                    
                         asy_bsc = 1
 
-                    if  m_hfa>0.5 and t2.L1_algo_bits[5]:
-                    #if  t2.L1_tech_bits[8]:
+                        if self.techHF and t2.L1_algo_bits[4]:
+                            if t2.L1_tech_bits[8]:
+                                asy_hf = 1  
+                                t_bit[2]= 1
+                            else:
+                                t_bit[2]= 0
+                            
+                            
+                    if  t2.L1_algo_bits[5] and not self.techHF:
                         asy_hf = 1                        
-
+                        
                     if  t2.L1_algo_bits[6]:
                         asy_ibunch = 1
                         
@@ -440,13 +445,7 @@ class ReadMIB(ReadGenericCalibration):
                         pix_i = 4
 
 
-
-                    if t2.IB1>self.IB1_max:
-                        self.IB1_max = t2.IB1
                     
-                    if t2.IB2>self.IB2_max:
-                        self.IB2_max = t2.IB2
-                        
                     if t_index==n_tspan:
                         t_index-=1
                     
@@ -461,69 +460,73 @@ class ReadMIB(ReadGenericCalibration):
                     norm = 0.
 
                     # Normalization is now made on the fly
-                    
+                
                     if is_B1 and t2.IB1>0:
-                        norm = 10./float(t2.IB1)
+                        norm = 10./float(t2.IB1)*len(self.sbeam1_good_bx)
                         indB = 0
                         
-                    if is_B2 and t2.IB2>0:                        
-                        norm = 10./float(t2.IB2)                    
+                    if is_B2 and t2.IB2>0:
+                        norm = 10./float(t2.IB2)*len(self.sbeam2_good_bx)                    
                         indB = 1
 
-
+                    
                     if asy_ibunch and is_B1==0 and is_B2==0:
+                        t4.GetEntry(ii)
+                        t5.GetEntry(ii)
+
                         for j in range(pix_i+1): 
                             m_occurences[j*3564+self.get_dist(t2.BCID)]+=1
 
-                        if t2.n_tracks>0:
+                        if t4.n_tracks>0:
                             m_ntracks[self.get_dist(t2.BCID)]+=1
 
-                        if t2.vertex_chi2[0]>0:
+                        if t5.vertex_chi2[0]>0:
                             m_nvertices[self.get_dist(t2.BCID)]+=1
                             
                         continue
 
-                    '''
-                    if is_B1 and t2.BCID!=self.sbeam1_good_bx[0]:
+                    
+                    if is_B1 and t2.BCID not in self.sbeam1_good_bx:
                         continue
 
-                    if is_B2 and t2.BCID!=self.sbeam2_good_bx[0]:                    
+                    if is_B2 and t2.BCID not in self.sbeam2_good_bx:                    
                         continue
-                    '''
                     
+                    '''
                     if is_B1 and t2.BCID!=self.sbeam1_ref_bx:
                         continue
 
                     if is_B2 and t2.BCID!=self.sbeam2_ref_bx:                    
                         continue
-
+                    '''
                             
                     if indB==-1 or norm==0.:
                         continue
 
-                    if t2.L1_algo_bits[4]:
+                    if t2.L1_algo_bits[4]:                        
                         self.nevts4 += 1
 
-                    if t2.L1_algo_bits[5]:
+                        if self.techHF and t2.L1_tech_bits[8]:
+                            self.nevts5 += 1
+                            
+                    if t2.L1_algo_bits[5] and not self.techHF:
                         self.nevts5 += 1
                         
                     for i in range(6): 
                         if t_bit[i]==1:
 
-                            if i==0 and pix_i!=0 and not asy_bsc:
+                            if i<2 and not asy_bsc:
                                 continue
                             
-                            if i==1 and pix_i!=0 and not asy_bsc:
+                            if i==2 and not asy_hf:
                                 continue
 
-                            if i==2 and pix_i!=0 and not asy_hf:
-                                continue
-
-                            if i==3 and pix_i!=0 and not asy_ibunch:
+                            if i==3 and not asy_ibunch:
                                 continue
                             
                             for j in range(pix_i+1): 
-                                m_rate[totSize*t_index+10*i+5*indB+j]+=m_algo_pre[i+3]/norm
+                                m_rate[totSize*t_index+10*i+5*indB+j]+=float(m_algo_pre[i+3])/norm
+                                #print totSize*t_index+10*i+5*indB+j,float(m_algo_pre[i+3])/norm
 
             # Event loop is complete, now get the final rate
 
@@ -542,7 +545,7 @@ class ReadMIB(ReadGenericCalibration):
                         m_trate[10*j+5*k+l]/=float(norm_t)
 
                         if j==1 or j==2:
-                            print  "Total. Rate for algo bit ",j+3 \
+                            print  "Total. Rate for algo bit ",j+3,k,l \
                                   ," is equal to ",m_trate[10*j+5*k+l], \
                                   "Hz/10^11p"
 

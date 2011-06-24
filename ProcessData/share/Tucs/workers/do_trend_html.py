@@ -104,6 +104,7 @@ class do_trend_html(GenericWorker):
                 continue
     
             if event.runNumber not in self.run_list:
+                print event.runNumber,event.data['fillnum']
                 self.run_list.append(event.runNumber)
                 self.fill_list.append(event.data['fillnum'])
 
@@ -234,6 +235,9 @@ class do_trend_html(GenericWorker):
 
         
         text="<ul><li>Algo bit %s rate<br /></li></ul>\n"%(bitname)
+
+        if "5" in bitname:
+            text="<ul><li>Algo bit %s rate (for the moment based on Algo.4 events passing Tech. bit 8 (HF) )<br /></li></ul>\n"%(bitname)
         
         self.htm.write(text)
 

@@ -69,7 +69,7 @@ class do_charge_plots(ReadGenericCalibration):
                     if not self.ftDict.has_key(ii):                    
                         f, t1, t2 = self.getFileTrees('MIB_data_result_%d_%d_%d.root'\
                                                       %(event.runNumber,ii,self.nfiles)\
-                                                      , 'MIB_info','MIB')
+                                                      , 'MIB_info','event')
 
                         if [f, t1, t2] != [None, None, None]:
                             self.run_list.add(event.runNumber)                    
@@ -111,9 +111,12 @@ class do_charge_plots(ReadGenericCalibration):
             
             # Get the numbers of the reference bunch crossings information
 
-            self.sbeam1_ref_bx = self.BBTool.GetREFBCIDs(1,run)
-            self.sbeam2_ref_bx = self.BBTool.GetREFBCIDs(2,run)
+            #self.sbeam1_ref_bx = self.BBTool.GetREFBCIDs(1,run)
+            #self.sbeam2_ref_bx = self.BBTool.GetREFBCIDs(2,run)
 
+            self.sbeam1_ref_bx = self.BBTool.GetUnpairedBCIDs(1,run)
+            self.sbeam2_ref_bx = self.BBTool.GetUnpairedBCIDs(2,run)
+            
             # Finally loop on the events
 
             for k in range(self.nfiles): 
@@ -121,6 +124,11 @@ class do_charge_plots(ReadGenericCalibration):
                 f,t1,t2 = self.ftDict[k]
 
                 ntrigs = t2.GetEntries()
+
+                t3 = f.Get("Pixels")                
+                t4 = f.Get("Tracker")
+                t5 = f.Get("HF")
+
 
                 print "This file contains ", ntrigs, " events..." 
 
@@ -145,19 +153,37 @@ class do_charge_plots(ReadGenericCalibration):
                     if (is_B1 and is_B2) or (not is_B1 and not is_B2):
                         continue
                     
-                    if is_B1 and t2.BCID!=self.sbeam1_ref_bx:
+                    if is_B1 and t2.BCID not in self.sbeam1_ref_bx:
                         continue
 
-                    if is_B2 and t2.BCID!=self.sbeam2_ref_bx:                    
+                    if is_B2 and t2.BCID not in self.sbeam2_ref_bx:                    
                         continue
+
+                    t3.GetEntry(ii)
+                    t4.GetEntry(ii)
+                    t5.GetEntry(ii)
                     
-                    m_pixn   = t2.PIX_n
-                    m_sstn   = t2.SST_n
-                    m_hfn    = t2.HF_n                    
+                    m_pixn   = t3.PIX_n
+                    m_sstn   = t4.SST_n
+                    m_hfn    = t5.HF_n
+                    
+                    asym_hf  = -1.
+                    asym_pix = -1.
+                    
+                    if t3.PIX_mcharge_FM+t3.PIX_mcharge_FP != 0.:
+                        if is_B1:                            
+                            asym_pix = t3.PIX_mcharge_FM/(t3.PIX_mcharge_FM+t3.PIX_mcharge_FP)
+                        else:
+                            asym_pix = t3.PIX_mcharge_FP/(t3.PIX_mcharge_FM+t3.PIX_mcharge_FP)
 
-                    asym_hf  = t2.HF_asym      
-                    asym_pix = t2.PIX_asym                    
-                    m_ch_PIX = t2.PIX_mcharge_B 
+ 
+                    if t5.HF_mcharge_M+t5.HF_mcharge_P != 0.:
+                        if is_B1:                            
+                            asym_hf = t5.HF_mcharge_M/(t5.HF_mcharge_M+t5.HF_mcharge_P)
+                        else:
+                            asym_hf = t5.HF_mcharge_P/(t5.HF_mcharge_M+t5.HF_mcharge_P)
+
+                    m_ch_PIX = t3.PIX_mcharge_B 
 
                     # Compute SST mean charge                                           
 
@@ -165,10 +191,10 @@ class do_charge_plots(ReadGenericCalibration):
                     m_n_SST  = 0.
                     
                     for i in range(m_sstn):
-                        rad = math.sqrt(t2.SST_x[i]*t2.SST_x[i]+t2.SST_y[i]*t2.SST_y[i])
+                        rad = math.sqrt(t4.SST_x[i]*t4.SST_x[i]+t4.SST_y[i]*t4.SST_y[i])
                         if rad<560.:
-                            if math.fabs(t2.SST_z[i])<700.:
-                                m_ch_SST += t2.SST_charge[i]
+                            if math.fabs(t4.SST_z[i])<700.:
+                                m_ch_SST += t4.SST_charge[i]
                                 m_n_SST+=1.
                             
                     if m_n_SST!=0:

@@ -23,7 +23,7 @@ execfile('src/load.py', globals()) # don't remove this!
 # where **** is the run number
 
 
-run  = 160873  # Run number
+run  = 162924  # Run number
 ndat = 1       # Number of files on CASTOR for this run
 
 #
@@ -33,7 +33,7 @@ ndat = 1       # Number of files on CASTOR for this run
 
 
 a = Use(run)
-b = ReadMIB(processingDir='/tmp/sviret',nfiles=ndat)
+b = ReadMIB(processingDir='/tmp/sviret',nfiles=ndat,techHF=True)
 c = WriteMIBSummary(RNum=run)
 e = do_charge_plots(processingDir='/tmp/sviret',nfiles=ndat)
 f = do_track_plots(processingDir='/tmp/sviret',nfiles=ndat)
@@ -45,8 +45,8 @@ j = do_dedx_plots(processingDir='/tmp/sviret',bitnumber=6,nfiles=ndat,delay=2)
 # Launch the analysis
 
 #processors = [a,b,c,f,g]
-#processors = [a,b,e,f,g,h,i]
-processors = [a,b,i,j]
+#processors = [a,b,c,e,f,g,h,i]
+processors = [a,b]
 
 
 #

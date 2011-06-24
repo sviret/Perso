@@ -27,7 +27,7 @@ from src.ReadGenericCalibration import *
 import random
 import time
 import src.MakeCanvas
-import scipy
+#import scipy
 
 # For using the MIB tools
 from src.MIB.toolbox import *
@@ -76,7 +76,7 @@ class do_dedx_plots(ReadGenericCalibration):
                     if not self.ftDict.has_key(ii):                    
                         f, t1, t2 = self.getFileTrees('MIB_data_result_%d_%d_%d.root'\
                                                       %(event.runNumber,ii,self.nfiles)\
-                                                      , 'MIB_info','MIB')
+                                                      , 'MIB_info','event')
 
                         if [f, t1, t2] != [None, None, None]:
                             self.run_list.add(event.runNumber)                    
@@ -108,8 +108,10 @@ class do_dedx_plots(ReadGenericCalibration):
              
             # Get the numbers of the reference bunch crossings information
 
-            self.sbeam1_ref_bx = self.BBTool.GetREFBCIDs(1,run)
-            self.sbeam2_ref_bx = self.BBTool.GetREFBCIDs(2,run)
+            self.sbeam1_ref_bx = self.BBTool.GetUnpairedBCIDs(1,run)
+            self.sbeam2_ref_bx = self.BBTool.GetUnpairedBCIDs(2,run)
+            #self.sbeam1_ref_bx = self.BBTool.GetREFBCIDs(1,run)
+            #self.sbeam2_ref_bx = self.BBTool.GetREFBCIDs(2,run)
             self.crossing_bx   = self.BBTool.GetCollidingBCIDs(run)
 
             # Finally loop on the events
@@ -119,7 +121,8 @@ class do_dedx_plots(ReadGenericCalibration):
                 f,t1,t2 = self.ftDict[k]
 
                 ntrigs = t2.GetEntries()
-
+                t3 = f.Get("Track")
+                
                 print "This file contains ", ntrigs, " events..." 
 
                 for ii in range(ntrigs):
@@ -134,38 +137,42 @@ class do_dedx_plots(ReadGenericCalibration):
                     
                     if not t2.L1_algo_bits[self.bit]:
                         continue
-                    
-                    m_trk  = t2.n_tracks
-
-                    if m_trk==0:
-                        continue
-                    
+           
                     is_B1   = t2.L1_tech_bits[5]
                     is_B2   = t2.L1_tech_bits[6]
 
                     if (is_B1 and is_B2):
                         continue
 
-                    if is_B1 and t2.BCID!=self.sbeam1_ref_bx and self.bit!= 6:
+                    if is_B1 and t2.BCID not in self.sbeam1_ref_bx and self.bit!= 6:
                         continue
 
-                    if is_B2 and t2.BCID!=self.sbeam2_ref_bx and self.bit!= 6:  
+                    if is_B2 and t2.BCID not in self.sbeam2_ref_bx and self.bit!= 6:  
                         continue
 
                     if self.bit==6 and self.delay != self.get_dist(t2.BCID):
                         continue
+
+                    t3.GetEntry(ii)
                     
+                    m_trk  = t3.n_tracks
+
+                    if m_trk==0:
+                        continue
+
+                    #print m_trk
+                                        
                     for i in range(m_trk):
 
-                        if (t2.track_dedx_n[i]<2):
+                        if (t3.track_dedx_n[i]<3):
                             continue
 
-                        if (t2.track_chi2[i]>10):
+                        if (t3.track_chi2[i]>10):
                             continue
 
-                        px=t2.track_px[i]
-                        py=t2.track_py[i]
-                        pz=t2.track_pz[i]
+                        px=t3.track_px[i]
+                        py=t3.track_py[i]
+                        pz=t3.track_pz[i]
 
                         mom=math.sqrt(px*px+py*py+pz*pz)
                         momt=math.sqrt(px*px+py*py)
@@ -179,7 +186,7 @@ class do_dedx_plots(ReadGenericCalibration):
 
                         #print eta,phi
 
-                        self.m_dedx.Fill(mom,t2.track_dedx[i])
+                        self.m_dedx.Fill(mom,t3.track_dedx[i])
                         self.m_etaphi.Fill(eta,phi)
 
             print "Now do some plots"

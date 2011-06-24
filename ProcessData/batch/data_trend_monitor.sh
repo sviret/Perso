@@ -9,6 +9,8 @@
 # --> List of inputs:
 #
 # ${1}: the list of runs used for the trend plots 
+# ${2}: the CMSSW base dir
+# ${3}: Directory where final info is stored
 #
 # Author: Seb Viret <viret@in2p3.fr>  (26/11/2010)
 #
@@ -22,40 +24,30 @@
 # First set some environment variables
 #
 
-CMSSW_PROJECT_SRC=testarea/CMSSW_4_1_2_patch1/src
 STEP=ProcessData
 YEAR=2011
 TOP=$PWD
+TUCS=Tucs
 
-cd $HOME/$CMSSW_PROJECT_SRC
-eval `scramv1 runtime -sh`   
 
+cd ${2}
+eval `scramv1 runtime -sh` 
 cd $TOP
-
-# First we get the list of run to work on
-#
 
 runlist=${1}
 
-#echo $runlist
-
-cp -rf $HOME/$CMSSW_PROJECT_SRC/$STEP/share/Tucs .
-cd Tucs
+cp -rf ${2}/$STEP/share/$TUCS .
+cd $TUCS
 
 sed "s/RUNLIST/$runlist/" -i macros/MIB_trend_DQ_BASE.py
-
 rm plots/latest
 
 python macros/MIB_trend_DQ_BASE.py
 
-
-cp MIB_monitor.html /afs/cern.ch/user/s/sviret/www/Images/CMS/MIB/Monitor/$YEAR/Trends
-
+cp MIB_monitor.html ${3}/Trends
 cd plots/latest
-
-cp /afs/cern.ch/user/s/sviret/www/Images/CMS/MIB/Monitor/$YEAR/Trends/*.png /afs/cern.ch/user/s/sviret/www/Images/CMS/MIB/Monitor/$YEAR/Trends/Archive
-
-cp *.png /afs/cern.ch/user/s/sviret/www/Images/CMS/MIB/Monitor/$YEAR/Trends/
+cp ${3}/Trends/*.png ${3}/Trends/Archive
+cp *.png ${3}/Trends/
 
 mutt -s '[MIB TUCS]:New status info was produced with runs '$runlist viret@in2p3.fr < /dev/null
 

@@ -71,7 +71,7 @@ class do_vertex_plots(ReadGenericCalibration):
                     if not self.ftDict.has_key(ii):                    
                         f, t1, t2 = self.getFileTrees('MIB_data_result_%d_%d_%d.root'\
                                                       %(event.runNumber,ii,self.nfiles)\
-                                                      , 'MIB_info','MIB')
+                                                      , 'MIB_info','event')
 
                         if [f, t1, t2] != [None, None, None]:
                             self.run_list.add(event.runNumber)                    
@@ -103,8 +103,10 @@ class do_vertex_plots(ReadGenericCalibration):
                
             # Get the numbers of the reference bunch crossings information
 
-            self.sbeam1_ref_bx = self.BBTool.GetREFBCIDs(1,run)
-            self.sbeam2_ref_bx = self.BBTool.GetREFBCIDs(2,run)
+            self.sbeam1_ref_bx = self.BBTool.GetUnpairedBCIDs(1,run)
+            self.sbeam2_ref_bx = self.BBTool.GetUnpairedBCIDs(2,run)
+            #self.sbeam1_ref_bx = self.BBTool.GetREFBCIDs(1,run)
+            #self.sbeam2_ref_bx = self.BBTool.GetREFBCIDs(2,run)
             
             # Finally loop on the events
 
@@ -113,7 +115,8 @@ class do_vertex_plots(ReadGenericCalibration):
                 f,t1,t2 = self.ftDict[k]
 
                 ntrigs = t2.GetEntries()
-
+                t3 = f.Get("Vertices")
+                
                 print "This file contains ", ntrigs, " events..." 
 
                 for ii in range(ntrigs):
@@ -126,27 +129,33 @@ class do_vertex_plots(ReadGenericCalibration):
                     if t2.PHYS==0:
                         continue
   
-                    if t2.L1_algo_bits[4]==0 or t2.vertex_chi2[0]==0.:
+                    if t2.L1_algo_bits[5]==0:
                         continue
                       
                     is_B1   = t2.L1_tech_bits[5]
                     is_B2   = t2.L1_tech_bits[6]
                     
-                    if is_B1 and t2.BCID!=self.sbeam1_ref_bx:
+                    if is_B1 and t2.BCID not in self.sbeam1_ref_bx:
                         continue
 
-                    if is_B2 and t2.BCID!=self.sbeam2_ref_bx:                    
+                    if is_B2 and t2.BCID not in self.sbeam2_ref_bx:                    
                         continue
 
                     if (is_B1 and is_B2) or (not is_B1 and not is_B2):
                         continue
 
-                    self.vertex_mult.Fill(t2.n_vertices)
+
+                    t3.GetEntry(ii)
+
+                    if t3.vertex_chi2[0]==0.:
+                        continue
+
+                    self.vertex_mult.Fill(t3.n_vertices)
                     
-                    for i in range(t2.n_vertices):
+                    for i in range(t3.n_vertices):
                         
-                        self.vertex_z.Fill(t2.vertex_vz[i])
-                        self.vertex_xy.Fill(t2.vertex_vx[i],t2.vertex_vy[i])
+                        self.vertex_z.Fill(t3.vertex_vz[i])
+                        self.vertex_xy.Fill(t3.vertex_vx[i],t3.vertex_vy[i])
 
       
 
@@ -158,7 +167,7 @@ class do_vertex_plots(ReadGenericCalibration):
 
             self.plot_name = "VtxMult_%d"%(run)
             self.canvases[0].cd()
-            self.vertex_mult.GetXaxis().SetTitle("Vertex multiplicity for event passing bit 4");            
+            self.vertex_mult.GetXaxis().SetTitle("Vertex multiplicity for event passing bit 5");            
             self.vertex_mult.GetXaxis().SetTitleSize(0.05);
             self.vertex_mult.GetXaxis().SetTitleOffset(1.1);
             self.vertex_mult.SetFillColor(1)
@@ -170,7 +179,7 @@ class do_vertex_plots(ReadGenericCalibration):
         
             self.plot_name = "VtxZ_%d"%(run)
             self.canvases[1].cd()
-            self.vertex_z.GetXaxis().SetTitle("Z position of vertices for events passing bit 4");            
+            self.vertex_z.GetXaxis().SetTitle("Z position of vertices for events passing bit 5");            
             self.vertex_z.GetXaxis().SetTitleSize(0.05);
             self.vertex_z.GetXaxis().SetTitleOffset(1.1);
             self.vertex_z.SetFillColor(1)
@@ -182,8 +191,8 @@ class do_vertex_plots(ReadGenericCalibration):
             
             self.plot_name = "VtxXY_%d"%(run)
             self.canvases[2].cd()
-            self.vertex_xy.GetXaxis().SetTitle("X position of vertices for events passing bit 4");
-            self.vertex_xy.GetYaxis().SetTitle("Y position of vertices for events passing bit 4");            
+            self.vertex_xy.GetXaxis().SetTitle("X position of vertices for events passing bit 5");
+            self.vertex_xy.GetYaxis().SetTitle("Y position of vertices for events passing bit 5");            
             self.vertex_xy.GetXaxis().SetTitleSize(0.05);
             self.vertex_xy.GetXaxis().SetTitleOffset(1.1);
             self.vertex_xy.SetMarkerStyle(1)

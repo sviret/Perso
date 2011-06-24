@@ -169,23 +169,26 @@ class do_single_run_html(GenericWorker):
         self.htm.write(text)
         text="<li>Beam 2: <strong>%d</strong></li>\n"%(self.nBx2)
         self.htm.write(text)
-        text="<li>Colliding: <strong>%d</strong></li></ul>\n"%(self.nBxc)
+        text="<li>Colliding: <strong>%d</strong></li>\n"%(self.nBxc)
         self.htm.write(text)
-
+        text="<li><a target='_blank'  class='urllink' href='http://sviret.web.cern.ch/sviret/Images/CMS/MIB/Monitor/Rootuples/2011/BCID_list_%d.txt' title='' rel='nofollow'><strong>Filling scheme info for this run</strong></a></li></ul>\n"%(self.run)
+        self.htm.write(text)
+        
+        self.htm.write("<p>In order to further remove albedo effect, we are only using the bunches which are in front of bunch trains, of far enough from the last colliding bunch crossing (more than 1. microsecond (40 bunch crossings)). Their list is provided in the text file linked previously</p>\n")
         
         self.htm.write("<div class='vspace'></div>\n")
         self.htm.write("<h2>Overall normalized rates (in Hz/10<sup>11</sup>p)</h2>\n")
 
         self.htm.write("<p>Rate calculation is described on <a target='_blank'  class='urllink' href='http://sviret.web.cern.ch/sviret/Welcome.php?n=CMS.MIBMonitorHowTo' title='' rel='nofollow'>this page</a>. To get some info about the technical bits, have a look at the corresponding <a target='_blank'  class='urllink' href='https://twiki.cern.ch/twiki/bin/view/CMS/L1TechnicalTriggerBits' title='' rel='nofollow'>wiki</a>. The bit numbers given here corresponds to algo bits, which are described on <a target='_blank'  class='urllink' https://twiki.cern.ch/twiki/bin/view/CMS/GlobalTriggerAvailableMenus' title='' rel='nofollow'>this page</a>.</p>\n")
-
-        self.htm.write("<p>In order to further remove albedo effect, we are only using the single bunch which are in front of bunch trains, of far enough from the last colliding bunch crossing (more than 1. microsecond (40 bunch crossings)). In order to further reduce contamination effect, if there is a train of single bunches satisfying this conditions, only the first one is selected.</p>\n")
+  
+        self.htm.write("<p>News from 01/06/11: bit 4 is now replaced by bit 5.</p>\n")
         
         self.htm.write("<br>\n")
         self.htm.write("<table align='center' border='1' cellpadding='5' cellspacing='0' >\n")
         self.htm.write("<tr>\n")
         self.htm.write("<td id='GreyCell'  valign='top'> Bit number</td>\n")
         #self.htm.write("<td id='GreyCell'  valign='top'> 3 (PreCollisions)</td>\n")
-        self.htm.write("<td id='GreyCell'  valign='top'> 4 (BGas_BSC)</td>\n")
+        #self.htm.write("<td id='GreyCell'  valign='top'> 4 (BGas_BSC)</td>\n")
         self.htm.write("<td id='GreyCell'  valign='top'> 5 (BGas_HF)</td>\n")
         #self.htm.write("<td id='GreyCell'  valign='top'> 8 (BHalo)</td>\n")
         self.htm.write("</tr>\n")
@@ -195,7 +198,7 @@ class do_single_run_html(GenericWorker):
 
         for i in range(6):
 
-            if i!=1 and i!=2:
+            if i!=2:
                 continue
             
             if self.presc_a[3+i]==1:
@@ -210,7 +213,7 @@ class do_single_run_html(GenericWorker):
 
         for i in range(6):
 
-            if i!=1 and i!=2:
+            if i!=2:
                 continue
             
             self.htm.write("<td id='Code' align='center'  valign='top'> %d</td>\n"%self.nevts[i])
@@ -222,7 +225,7 @@ class do_single_run_html(GenericWorker):
 
         for i in range(6):
 
-            if i!=1 and i!=2:
+            if i!=2:
                 continue
             
             if self.rates_B1[i]>0.1:
@@ -236,7 +239,7 @@ class do_single_run_html(GenericWorker):
 
         for i in range(6):
 
-            if i!=1 and i!=2:
+            if i!=2:
                 continue
 
             if self.rates_B2[i]>0.1:
@@ -263,7 +266,7 @@ class do_single_run_html(GenericWorker):
 
             for i in range(6):
 
-                if i!=1 and i!=2:
+                if i!=2:
                     continue
             
                 bitname = "%d"%(3+i)
@@ -452,63 +455,63 @@ class do_single_run_html(GenericWorker):
 
         self.htm.write("<div class='vspace'></div><h2>PIXEL mean charge versus Strips mean charge for beam gas candidates </h2>\n")
 
-        self.htm.write("<p>The following plots show, for events passing algo bits 4 and 5, the mean charge of the recorded clusters in the pixel barrel (using only clusters having at least 4000e-), either versus the mean charge of the clusters recorded in the tracker inner barrel (TIB) (fig 1 and 2).</p><br>\n")
+        self.htm.write("<p>The following plot shows, for events passing algo bits 5, the mean charge of the recorded clusters in the pixel barrel (using only clusters having at least 4000e-), either versus the mean charge of the clusters recorded in the tracker inner barrel (TIB).</p><br>\n")
 
         self.htm.write("<div id='equation'>\n")
         self.htm.write("<table class='center'>\n")
         self.htm.write("<tbody>\n")
         self.htm.write("<tr>\n")
-        self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='Charge_2D_0_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='Charge_2D_0_%d.png' alt=''></a>\n"%(self.run))
-        self.htm.write("<div id='FigTitle'>1. PIXB vs TIB mean cluster charge, for events passing bit 4.</div>\n")
-        self.htm.write("</td>\n")
+        #self.htm.write("<td>\n")
+        #self.htm.write("<a target='_blank' class='urllink' href='Charge_2D_0_%d.png'>\n"%(self.run))
+        #self.htm.write("<img id='fig3' src='Charge_2D_0_%d.png' alt=''></a>\n"%(self.run))
+        #self.htm.write("<div id='FigTitle'>1. PIXB vs TIB mean cluster charge, for events passing bit 4.</div>\n")
+        #self.htm.write("</td>\n")
         self.htm.write("<td>\n")
         self.htm.write("<a target='_blank' class='urllink' href='Charge_2D_1_%d.png'>\n"%(self.run))
         self.htm.write("<img id='fig3' src='Charge_2D_1_%d.png' alt=''></a>\n"%(self.run))
-        self.htm.write("<div id='FigTitle'>2. PIXB vs TIB mean cluster charge, for events passing bit 5.</div>\n")
+        self.htm.write("<div id='FigTitle'>1. PIXB vs TIB mean cluster charge, for events passing bit 5.</div>\n")
         self.htm.write("</td>\n")
         self.htm.write("</tr>\n")
         self.htm.write("</tbody>\n")
         self.htm.write("</table>\n")
 
 
-        self.htm.write("<p>The three following plots show, for the same configuration the mean charge of the clusters recorded in the pixel barrel (fig 3/4).</p><br>\n")
+        self.htm.write("<p>The following plot shows, for the same configuration the mean charge of the clusters recorded in the pixel barrel.</p><br>\n")
         
         self.htm.write("<div id='equation'>\n")
         self.htm.write("<table class='center'>\n")
         self.htm.write("<tbody>\n")
         self.htm.write("<tr>\n")
-        self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='Charge_1D_0_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='Charge_1D_0_%d.png' alt=''></a>\n"%(self.run))
-        self.htm.write("<div id='FigTitle'>3. PIXB mean cluster charge, for events passing bit 4.</div>\n")
-        self.htm.write("</td>\n")
+        #self.htm.write("<td>\n")
+        #self.htm.write("<a target='_blank' class='urllink' href='Charge_1D_0_%d.png'>\n"%(self.run))
+        #self.htm.write("<img id='fig3' src='Charge_1D_0_%d.png' alt=''></a>\n"%(self.run))
+        #self.htm.write("<div id='FigTitle'>3. PIXB mean cluster charge, for events passing bit 4.</div>\n")
+        #self.htm.write("</td>\n")
         self.htm.write("<td>\n")
         self.htm.write("<a target='_blank' class='urllink' href='Charge_1D_1_%d.png'>\n"%(self.run))
         self.htm.write("<img id='fig3' src='Charge_1D_1_%d.png' alt=''></a>\n"%(self.run))
-        self.htm.write("<div id='FigTitle'>4. PIXB mean cluster charge, for events passing bit 5.</div>\n")
+        self.htm.write("<div id='FigTitle'>2. PIXB mean cluster charge, for events passing bit 5.</div>\n")
         self.htm.write("</td>\n")
         self.htm.write("</tr>\n")
         self.htm.write("</tbody>\n")
         self.htm.write("</table>\n")
 
 
-        self.htm.write("<p>The three last plots show, for the same configuration the pixel vs HF asymmetry (fig 5 to 6).</p><br>\n")
+        self.htm.write("<p>The last plot shows, for the same configuration the pixel vs HF asymmetry.</p><br>\n")
 
         self.htm.write("<div id='equation'>\n")
         self.htm.write("<table class='center'>\n")
         self.htm.write("<tbody>\n")
         self.htm.write("<tr>\n")
-        self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='HF_vs_PIX_0_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='HF_vs_PIX_0_%d.png' alt=''></a>\n"%(self.run))
-        self.htm.write("<div id='FigTitle'>5. HF vs PIX asymetry, for events passing bit 4.</div>\n")
-        self.htm.write("</td>\n")
+        #self.htm.write("<td>\n")
+        #self.htm.write("<a target='_blank' class='urllink' href='HF_vs_PIX_0_%d.png'>\n"%(self.run))
+        #self.htm.write("<img id='fig3' src='HF_vs_PIX_0_%d.png' alt=''></a>\n"%(self.run))
+        #self.htm.write("<div id='FigTitle'>5. HF vs PIX asymetry, for events passing bit 4.</div>\n")
+        #self.htm.write("</td>\n")
         self.htm.write("<td>\n")
         self.htm.write("<a target='_blank' class='urllink' href='HF_vs_PIX_1_%d.png'>\n"%(self.run))
         self.htm.write("<img id='fig3' src='HF_vs_PIX_1_%d.png' alt=''></a>\n"%(self.run))
-        self.htm.write("<div id='FigTitle'>6. HF vs PIX asymetry, for events passing bit 5..</div>\n")
+        self.htm.write("<div id='FigTitle'>3. HF vs PIX asymetry, for events passing bit 5..</div>\n")
         self.htm.write("</td>\n")
         self.htm.write("</tr>\n")
         self.htm.write("</tbody>\n")
@@ -521,7 +524,7 @@ class do_single_run_html(GenericWorker):
 
         self.htm.write("<div class='vspace'></div><h2>Track and vertex properties for beam gas candidates </h2>\n")
 
-        self.htm.write("<p>The following plots are made only with events passing algo bit 4 (beam gas BSC). They show the number of tracks, primary vertices, and some of their basic properties</p><br>\n")
+        self.htm.write("<p>The following plots are made only with events passing algo bit 5 (beam gas HF). They show the number of tracks, primary vertices, and some of their basic properties</p><br>\n")
 
         self.htm.write("<div id='equation'>\n")
         self.htm.write("<table class='center'>\n")

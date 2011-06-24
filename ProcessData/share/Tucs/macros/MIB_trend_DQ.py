@@ -62,6 +62,16 @@ processors = [a,b]
 # Below are some examples (uncomment what you want to try)
 
 # Process all the monitoring plots
+
+
+for i in range(5):
+    for j in range(6):
+
+        #if j==3 or j==4:
+        #    continue
+        
+        processors.append(do_bit_trend_plot(bit=j+3,pixcut=i))
+
 '''
 for i in range(5):
     for j in range(12):

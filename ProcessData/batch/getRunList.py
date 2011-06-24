@@ -80,6 +80,8 @@ def HLTkey_ForRun(dbsession,c,runnum):
         del query_HLTkey
         dbsession.transaction().commit()
 
+        #print runnum,HLTkey
+
         return HLTkey
     except Exception,e:
         print str(e)
@@ -131,6 +133,8 @@ def L1key_ForRun(dbsession,c,runnum):
 
         del query_L1key
         dbsession.transaction().commit()
+
+        #print runnum,L1key
 
         return L1key
     except Exception,e:
@@ -373,7 +377,7 @@ def getRunList(dbsession,c,runnum):
                 if '2760GeV' in HLTkey:
                     continue
                 
-                print run,HLTkey        
+                #print run,HLTkey        
 
                 list_run.append(run)
 
@@ -429,6 +433,8 @@ def main():
         if '1' in line:
             split = line.split(' ')[0:]
             lastrun = split[0] 
+            split2 = lastrun.split('_')[0:]
+            lastrun = split2[0] 
 
     print 'Last run in the current list is',lastrun
     print '...we start from there...'
@@ -451,7 +457,7 @@ def main():
         if FillNum_ForRun(session,c,run) == 'None':
             continue
         
-        f.write("\n%d %s"%(run,FillNum_ForRun(session,c,run)))
+        f.write("\n%d_EXTR0_SKIM0 %s"%(run,FillNum_ForRun(session,c,run)))
     
     del session
     del svc

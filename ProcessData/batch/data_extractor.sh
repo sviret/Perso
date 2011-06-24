@@ -13,6 +13,9 @@
 # ${3}: the full path leading to the datafiles
 # ${4}: the total number of datafiles to process
 # ${5}: the maximum number of files we could treat at once
+# ${6}: the global tag to be used
+# ${7}: the main release directory
+# ${8}: the storage directory
 #
 # Author: Seb Viret <viret@in2p3.fr>  (26/11/2010)
 #
@@ -26,11 +29,12 @@
 # First set some environment variables
 #
 
-CMSSW_PROJECT_SRC=testarea/CMSSW_4_1_2_patch1/src
+CMSSW_PROJECT_SRC=${7}
 STEP=ProcessData
+YEAR=2011
 TOP=$PWD
 
-cd $HOME/$CMSSW_PROJECT_SRC
+cd $CMSSW_PROJECT_SRC
 export SCRAM_ARCH=slc5_amd64_gcc434
 eval `scramv1 runtime -sh` 
 
@@ -48,13 +52,13 @@ fi
 
 echo $nruns,$nrest
   
-rfmkdir /castor/cern.ch/user/s/sviret/CMS/MIB/DQ/Prod/${1}${2}_$nruns
+rfmkdir ${8}/${1}${2}_$nruns
 
 for (( c=0; c<$nruns; c++ ))
 do
 
   # First of all we check that the data hasn't been already extracted
-  is_proc=`nsls /castor/cern.ch/user/s/sviret/CMS/MIB/DQ/Prod/${1}${2}_$nruns | grep ${1}${2}_${c}_${nruns} | wc -l`
+  is_proc=`nsls ${8}/${1}${2}_$nruns | grep ${1}${2}_${c}_${nruns} | wc -l`
 
   if [ $is_proc = 1 ]; then
       echo 'Skip that one because data already extracted'
@@ -67,7 +71,7 @@ do
   echo $nfirst,$nlast
 
   cd $TOP
-  cp $HOME/$CMSSW_PROJECT_SRC/$STEP/test/BH_data_proc_BASE.py BH_dummy.py 
+  cp $CMSSW_PROJECT_SRC/$STEP/test/BH_data_proc_BASE.py BH_dummy.py 
 
   compteur=0
   compteur_real=0
@@ -76,7 +80,7 @@ do
 
   for l in `nsls $rootdir`	    	 
   do
-    is_empty=`nsls -l $rootdir$l | grep ' 0 ' | wc -l`
+    is_empty=`nsls -l $rootdir/$l | grep ' 0 ' | wc -l`
     compteur=$(( $compteur + 1))
     
     if [ $is_empty = 1 ]; then
@@ -86,13 +90,14 @@ do
 
     if (( $nfirst <= $compteur )) && (( $compteur <= $nlast )); then
 	compteur_real=$(( $compteur_real + 1))
-	fname="'rfio:$rootdir$l'"
+	fname="'rfio:$rootdir/$l'"
 	sed "s%INPUTFILENAME%$fname,INPUTFILENAME%" -i BH_dummy.py 
     fi
 
   done
 
-  sed "s%,INPUTFILENAME%%" -i BH_dummy.py 
+  sed "s%,INPUTFILENAME%%"  -i BH_dummy.py 
+  sed "s/MYGLOBALTAG/${6}/" -i BH_dummy.py
 
   OUTPUT_NAME=MIB_data_result_${1}${2}_${c}_${nruns}.root
 
@@ -122,7 +127,7 @@ do
   # If there is no error we store the file, otherwise we send an error email
 
   if [ "$ntots" = "$nprocfiles" ]; then
-      xrdcp output.root root://castorcms//castor/cern.ch/user/s/sviret/CMS/MIB/DQ/Prod/${1}${2}_$nruns/$OUTPUT_NAME
+      xrdcp extracted.root root://castorcms/${8}/${1}${2}_$nruns/$OUTPUT_NAME
   else
       mutt -s '[MIB DQ]:Run '${1}${2}_${c}_${nruns}' problematic: '$nprocfiles'/'$ntots viret@in2p3.fr < /dev/null
   fi

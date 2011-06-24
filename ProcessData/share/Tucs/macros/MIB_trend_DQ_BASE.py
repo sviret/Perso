@@ -52,8 +52,8 @@ processors = [a,b]
 for i in range(5):
     for j in range(6):
 
-        if j==3 or j==4:
-            continue
+        #if j==3 or j==4:
+        #    continue
         
         processors.append(do_bit_trend_plot(bit=j+3,pixcut=i))
 

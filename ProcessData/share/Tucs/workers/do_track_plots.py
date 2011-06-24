@@ -70,7 +70,7 @@ class do_track_plots(ReadGenericCalibration):
                     if not self.ftDict.has_key(ii):                    
                         f, t1, t2 = self.getFileTrees('MIB_data_result_%d_%d_%d.root'\
                                                       %(event.runNumber,ii,self.nfiles)\
-                                                      , 'MIB_info','MIB')
+                                                      , 'MIB_info','event')
 
                         if [f, t1, t2] != [None, None, None]:
                             self.run_list.add(event.runNumber)                    
@@ -105,8 +105,10 @@ class do_track_plots(ReadGenericCalibration):
             
             # Get the numbers of the reference bunch crossings information
 
-            self.sbeam1_ref_bx = self.BBTool.GetREFBCIDs(1,run)
-            self.sbeam2_ref_bx = self.BBTool.GetREFBCIDs(2,run)
+            self.sbeam1_ref_bx = self.BBTool.GetUnpairedBCIDs(1,run)
+            self.sbeam2_ref_bx = self.BBTool.GetUnpairedBCIDs(2,run)
+            #self.sbeam1_ref_bx = self.BBTool.GetREFBCIDs(1,run)
+            #self.sbeam2_ref_bx = self.BBTool.GetREFBCIDs(2,run)
             
         
             # Finally loop on the events
@@ -116,6 +118,7 @@ class do_track_plots(ReadGenericCalibration):
                 f,t1,t2 = self.ftDict[k]
 
                 ntrigs = t2.GetEntries()
+                t3 = f.Get("Track")
 
                 print "This file contains ", ntrigs, " events..." 
 
@@ -129,30 +132,35 @@ class do_track_plots(ReadGenericCalibration):
                     if t2.PHYS==0:
                         continue
                     
-                    if t2.L1_algo_bits[4]==0 or t2.n_tracks==0:
+                    if t2.L1_algo_bits[5]==0:
                         continue
                                           
                     is_B1   = t2.L1_tech_bits[5]
                     is_B2   = t2.L1_tech_bits[6]
 
-                    if is_B1 and t2.BCID!=self.sbeam1_ref_bx:
+                    if is_B1 and t2.BCID not in self.sbeam1_ref_bx:
                         continue
 
-                    if is_B2 and t2.BCID!=self.sbeam2_ref_bx:                    
+                    if is_B2 and t2.BCID not in self.sbeam2_ref_bx:                    
                         continue
                     
                     if (is_B1 and is_B2) or (not is_B1 and not is_B2):
                         continue
 
-                    self.track_mult.Fill(t2.n_tracks)
+                    t3.GetEntry(ii)
+
+                    if t3.n_tracks==0:
+                        continue
+
+                    self.track_mult.Fill(t3.n_tracks)
                     
-                    for i in range(t2.n_tracks):
+                    for i in range(t3.n_tracks):
                         
-                        pz = t2.track_pz[i]
-                        pt = math.sqrt(t2.track_px[i]*t2.track_px[i]+t2.track_py[i]*t2.track_py[i])
+                        pz = t3.track_pz[i]
+                        pt = math.sqrt(t3.track_px[i]*t3.track_px[i]+t3.track_py[i]*t3.track_py[i])
 
                         self.track_pt.Fill(pt)
-                        self.track_chisq.Fill(t2.track_chi2[i])
+                        self.track_chisq.Fill(t3.track_chi2[i])
                         
                         if (pt>0.):
 
@@ -176,7 +184,7 @@ class do_track_plots(ReadGenericCalibration):
             self.plot_name = "TrackMult_%d"%(run)
             self.canvases[0].cd()
             self.canvases[0].SetLogy(1)
-            self.track_mult.GetXaxis().SetTitle("Track multiplicity for event passing bit 4");            
+            self.track_mult.GetXaxis().SetTitle("Track multiplicity for event passing bit 5");            
             self.track_mult.GetXaxis().SetTitleSize(0.05);
             self.track_mult.GetXaxis().SetTitleOffset(1.1);
             self.track_mult.SetFillColor(1)
@@ -189,7 +197,7 @@ class do_track_plots(ReadGenericCalibration):
             self.plot_name = "TrackPt_%d"%(run)
             self.canvases[1].cd()
             self.canvases[1].SetLogy(1)
-            self.track_pt.GetXaxis().SetTitle("Pt of tracks for events passing bit 4");            
+            self.track_pt.GetXaxis().SetTitle("Pt of tracks for events passing bit 5");            
             self.track_pt.GetXaxis().SetTitleSize(0.05);
             self.track_pt.GetXaxis().SetTitleOffset(1.1);
             self.track_pt.SetFillColor(1)
@@ -202,7 +210,7 @@ class do_track_plots(ReadGenericCalibration):
             self.plot_name = "TrackEta1_%d"%(run)
             self.canvases[2].cd()
             #self.canvases[2].SetLogy(1)
-            self.track_eta1.GetXaxis().SetTitle("Eta of tracks for BEAM1 events passing bit 4");            
+            self.track_eta1.GetXaxis().SetTitle("Eta of tracks for BEAM1 events passing bit 5");            
             self.track_eta1.GetXaxis().SetTitleSize(0.05);
             self.track_eta1.GetXaxis().SetTitleOffset(1.1);
             self.track_eta1.SetFillColor(1)
@@ -215,7 +223,7 @@ class do_track_plots(ReadGenericCalibration):
             self.plot_name = "TrackEta2_%d"%(run)
             self.canvases[3].cd()
             #self.canvases[3].SetLogy(1)
-            self.track_eta2.GetXaxis().SetTitle("Eta of tracks for BEAM2 events passing bit 4");            
+            self.track_eta2.GetXaxis().SetTitle("Eta of tracks for BEAM2 events passing bit 5");            
             self.track_eta2.GetXaxis().SetTitleSize(0.05);
             self.track_eta2.GetXaxis().SetTitleOffset(1.1);
             self.track_eta2.SetFillColor(1)

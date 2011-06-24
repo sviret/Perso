@@ -23,13 +23,18 @@ class MIBTools:
         return number
 
     def GetFillNumber(self, run):
-        f=open('/afs/cern.ch/user/s/sviret/testarea/CMSSW_4_1_2_patch1/src/ProcessData/share/Tucs/the_list.txt','r')
+        f=open('/afs/cern.ch/user/s/sviret/scratch0/testarea/CMSSW_4_2_4_patch1/src/ProcessData/share/Tucs/the_list.txt','r')
 
         for line in f:
             if '1' in line:
                 split = line.split(' ')[0:]
-                if int(split[0])==run:
+                lastrun = split[0] 
+                split2 = lastrun.split('_')[0:]
+                        
+                if int(split2[0])==run:
                     #print split[0],'###',split[1]
+
+                    #print int(split[1])
 
                     return int(split[1])
                     

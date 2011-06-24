@@ -263,6 +263,7 @@ class do_bit_trend_plot(GenericWorker):
         for event in self.events1: # fill the histogram            
             self.hhist_1.Fill((event.data['t_start']+event.data['t_stop'])/2.-self.time_min,\
                               event.data['bb_rate'][self.pixc])
+            #print self.bit,self.pixc,event.data['bb_rate'][self.pixc]
         
         for event in self.events2: # fill the histogram                    
             self.hhist_2.Fill((event.data['t_start']+event.data['t_stop'])/2.-self.time_min,\

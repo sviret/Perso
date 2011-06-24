@@ -9,6 +9,8 @@
 # --> List of inputs:
 #
 # ${1}: the run number
+# ${2}: the CMSSW base dir
+# ${3}: Directory where final info is stored
 #
 # Author: Seb Viret <viret@in2p3.fr>  (26/11/2010)
 #
@@ -22,27 +24,22 @@
 # First set some environment variables
 #
 
-CMSSW_PROJECT_SRC=testarea/CMSSW_4_1_2_patch1/src
 STEP=ProcessData
 YEAR=2011
 TOP=$PWD
+TUCS=Tucs
 
-cd $HOME/$CMSSW_PROJECT_SRC
+cd ${2}
 eval `scramv1 runtime -sh`   
 
+
+echo 'Performing analysis for run '${1}
+
 cd $TOP
+cp -rf ${2}/$STEP/share/$TUCS .
+cd $TUCS
 
-# First we get the list of run to work on
-#
-
-runnumber=${1}
-
-echo 'Performing analysis for run '$runnumber
-
-cp -rf $HOME/$CMSSW_PROJECT_SRC/$STEP/share/Tucs .
-cd Tucs
-
-sed "s/RUNNUMBER/$runnumber/" -i macros/MIB_singleRun_DQ_BASE.py
+sed "s/RUNNUMBER/${1}/" -i macros/MIB_singleRun_DQ_BASE.py
 
 rm plots/latest/*.png
 
@@ -51,13 +48,13 @@ python macros/MIB_singleRun_DQ_BASE.py
 nplots=`ls plots/latest/*.png | wc -l`
 
 if [ $nplots != 0 ]; then
-    rm -rf /afs/cern.ch/user/s/sviret/www/Images/CMS/MIB/Monitor/$YEAR/R$runnumber
-    mkdir /afs/cern.ch/user/s/sviret/www/Images/CMS/MIB/Monitor/$YEAR/R$runnumber
+    rm -rf ${3}/R${1}
+    mkdir ${3}/R${1}
 
-    cp Run_${runnumber}_background_DQM.html /afs/cern.ch/user/s/sviret/www/Images/CMS/MIB/Monitor/$YEAR/R$runnumber
+    cp Run_${1}_background_DQM.html ${3}/R${1}
     cd plots/latest
 
-    cp *.png /afs/cern.ch/user/s/sviret/www/Images/CMS/MIB/Monitor/$YEAR/R$runnumber
-    cp /afs/cern.ch/user/s/sviret/scratch0/Monitor/$YEAR/*$runnumber.png /afs/cern.ch/user/s/sviret/www/Images/CMS/MIB/Monitor/$YEAR/R$runnumber
+    cp *.png ${3}/R${1}
+    cp /afs/cern.ch/user/s/sviret/scratch0/Monitor/$YEAR/*${1}.png ${3}/R${1}
 fi
 
