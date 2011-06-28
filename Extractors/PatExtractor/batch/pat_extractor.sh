@@ -66,19 +66,28 @@ for l in `nsls $rootdir`
 do
   is_empty=`nsls -l $rootdir$l | grep ' 0 ' | wc -l`
   compteur=$(( $compteur + 1))
-    
+   
+  if (( $nfirst > $compteur )) || (( $compteur >= $nlast )); then
+      continue
+  fi
+ 
   if [ $is_empty = 1 ]; then
-      echo 'File ',$rootdir$l,' is empty, skip it'
+      #echo 'File ',$rootdir$l,' is empty, skip it'
       continue
   fi
 
-  if (( $nfirst <= $compteur )) && (( $compteur <= $nlast )); then
+  if (( $nfirst <= $compteur )) && (( $compteur < $nlast )); then
       compteur_real=$(( $compteur_real + 1))
       fname="'rfio:$rootdir$l'"
       sed "s%INPUTFILENAME%$fname,INPUTFILENAME%" -i PAT_dummy.py 
   fi
 
 done
+
+if [ $compteur_real = 0 ]; then
+    echo 'No file selected, abort'
+    exit
+fi
 
 sed "s%,INPUTFILENAME%%" -i PAT_dummy.py 
 sed "s%GLOBALTAGNAME%${GTAG}%" -i PAT_dummy.py 

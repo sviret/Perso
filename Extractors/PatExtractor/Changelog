@@ -1,4 +1,7 @@
 2011-06-28 Seb Viret  <viret@in2p3.fr>
+       *BugFix related to the previous update
+
+2011-06-28 Seb Viret  <viret@in2p3.fr>
        *The scripts in the /batch/ directory were modified in order to parallelize the PATextraction
 
 2011-06-22 viola  <sordini@cern.ch>
