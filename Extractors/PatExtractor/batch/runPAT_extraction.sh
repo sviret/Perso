@@ -45,7 +45,7 @@ set n_running     = `bjobs | wc -l` # Number of running jobs
 
 if ($njob >= $njoblimit) then
     echo "Too many jobs are already running, you have to wait a bit..."
-    exit
+    #exit
 endif
 
 
@@ -55,25 +55,29 @@ endif
 
 
 @ ndatafileslimit = 20 # If more than 20 datafiles, the global run is sliced apart              
-
+@ ndatafilestreat = 0 
 
 # How many files on tape
 set nfiles   = `nsls $DATA_STORE/$STREAM | wc -l`
 
 
-# We launch the pat_extraction job only if there are some files present
+# We launch the pat_extraction jobs
 
 if ($nfiles > 0) then
-    @ njob++
-    rm TMP_FILES/pat_extr_$STREAM.sh
-    set rootdir = "$DATA_STORE/$STREAM"	
-    echo "#\!/bin/bash" > TMP_FILES/pat_extr_$STREAM.sh
-    echo "source $WORKDIR/$CMSSW_PROJECT_SRC/$STEP/batch/pat_extractor.sh $DATA_STORE $STREAM $nfiles $ndatafileslimit $WORKDIR/$CMSSW_PROJECT_SRC $GTAG" >> TMP_FILES/pat_extr_$STREAM.sh
-    chmod 755 TMP_FILES/pat_extr_$STREAM.sh
+    while ($nfiles > $ndatafilestreat)
+	echo 'Sending job dealing with '$ndatafileslimit' files starting from run '$ndatafilestreat
+	rm TMP_FILES/pat_extr_${STREAM}_$ndatafilestreat.sh
+	set rootdir = "$DATA_STORE/${STREAM}"	
+	echo "#\!/bin/bash" > TMP_FILES/pat_extr_${STREAM}_$ndatafilestreat.sh
+	echo "source $WORKDIR/$CMSSW_PROJECT_SRC/$STEP/batch/pat_extractor.sh $DATA_STORE $STREAM $ndatafilestreat $ndatafileslimit $WORKDIR/$CMSSW_PROJECT_SRC $GTAG" >> TMP_FILES/pat_extr_${STREAM}_$ndatafilestreat.sh
+	chmod 755 TMP_FILES/pat_extr_${STREAM}_$ndatafilestreat.sh
+	
+	if (${1} == "DO_BATCH") then
+	    bsub -q 1nd -e /dev/null -o /tmp/${LOGNAME}_out.txt $WORKDIR/$CMSSW_PROJECT_SRC/$STEP/batch/TMP_FILES/pat_extr_${STREAM}_$ndatafilestreat.sh
+	endif
 
-    if (${1} == "DO_BATCH") then
-	bsub -q 1nw -e /dev/null -o /tmp/${LOGNAME}_out.txt $WORKDIR/$CMSSW_PROJECT_SRC/$STEP/batch/TMP_FILES/pat_extr_$STREAM.sh
-    endif
+	@ ndatafilestreat = $ndatafilestreat + $ndatafileslimit
+   end
 endif
 	
 
