@@ -36,6 +36,8 @@ mtt_analysis::mtt_analysis(bool do_MC_,bool do_MCPU_,bool do_SemiMu_,MuonExtract
   } else {
     m_tree_Mtt->Branch("mtt_NGoodElectrons"    ,&m_mtt_NGoodElectrons    ,"mtt_NGoodElectrons/I");
     m_tree_Mtt->Branch("mtt_ElectronPt"    ,&m_mtt_ElectronPt ,"mtt_ElectronPt[mtt_NGoodElectrons]/F");
+    m_tree_Mtt->Branch("mtt_ElRelIso"    ,&m_mtt_ElRelIso ,"mtt_ElRelIso[mtt_NGoodElectrons]/F");
+    m_tree_Mtt->Branch("mtt_HyperTight1MC"    ,&m_mtt_HyperTight1MC ,"m_mtt_HyperTight1MC[mtt_NGoodElectrons]/I");
   }
   m_tree_Mtt->Branch("mtt_isSel"    ,&m_mtt_isSel    ,"mtt_isSel/I");    
   m_tree_Mtt->Branch("mtt_1stjetpt"    ,&m_mtt_1stjetpt   ,"mtt_1stjetpt/F");
@@ -141,7 +143,9 @@ void mtt_analysis::reset(bool do_MC_)
   for (int tmp=0;tmp<20; tmp++) {
     m_mtt_MuonPt[tmp]=0.;
     m_mtt_ElectronPt[tmp]=0.;
+    m_mtt_HyperTight1MC[tmp]=-1;
     m_mtt_MuRelIso[tmp]=999.;
+    m_mtt_ElRelIso[tmp]=999.;
   }
   for (int tmp=0;tmp<100; tmp++) {
     m_mtt_SolChi2[tmp]=999.;
@@ -380,6 +384,8 @@ int mtt_analysis::ElectronSel(MuonExtractor* m_muon, ElectronExtractor *m_electr
     //for the moment (EPS 2011) isolation cut and not 2D
       if(((m_electron->getElepfChargedHadronIso(ie)+m_electron->getElepfNeutralHadronIso(ie)+m_electron->getElepfPhotonIso(ie))/eP->Pt()) > ElMinIso) continue;
       m_mtt_ElectronPt[nGoodElectrons]=eP->Pt();
+      m_mtt_ElRelIso[nGoodElectrons] = (m_electron->getElepfChargedHadronIso(ie)+m_electron->getElepfNeutralHadronIso(ie)+m_electron->getElepfPhotonIso(ie))/eP->Pt();
+      ((m_electron->getEleHyperTight1MC(ie)&5)==5) ? m_mtt_HyperTight1MC[nGoodElectrons] = 1 : m_mtt_HyperTight1MC[nGoodElectrons] = 0;
       nGoodElectrons++;
       goodelidx=ie;
     }
