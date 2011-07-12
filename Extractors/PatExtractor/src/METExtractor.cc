@@ -145,3 +145,11 @@ int  METExtractor::getSize()
   return m_n_mets;
 }
 
+void METExtractor::setMETLorentzVector(int idx, float E, float Px, float Py, float Pz)
+{
+  new((*m_met_lorentzvector)[idx]) TLorentzVector(Px,Py,Pz,E);
+  m_met_E[idx]  = E;
+  m_met_px[idx] = Px;
+  m_met_py[idx] = Py;
+  m_met_pz[idx] = Pz;
+}

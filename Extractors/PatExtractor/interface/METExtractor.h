@@ -46,6 +46,8 @@ class METExtractor
   int  getSize();
   TLorentzVector *getMETLorentzVector(int metidx) {return (TLorentzVector*)m_met_lorentzvector->At(metidx);}
 
+  void setMETLorentzVector(int idx, float E, float Px, float Py, float Pz);
+
   bool isOK() {return m_OK;}
  private:
   

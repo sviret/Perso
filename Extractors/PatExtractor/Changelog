@@ -1,3 +1,8 @@
+2011-07-12 viola <sordini@cern.ch>
+       * added in mtt_analysis the possibility of running with systematic 
+         variations for JEC, according to the official recipie for 42x
+         This is customizable from the Extractor*py file using the flag 
+         doSyst (apply variations of not) and systvalue (vary up or down)
 2011-07-03 Stephane <stephane.perries@cern.ch>
        * added HyperTight1MC eid and EleRelIso variable to mtt tree
 

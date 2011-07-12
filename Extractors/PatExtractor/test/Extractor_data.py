@@ -22,8 +22,7 @@ process.maxEvents = cms.untracked.PSet(
 
 myfilelist = cms.untracked.vstring()
 myfilelist.extend( [
-#    'file:/scratch/viola/okiwilldeleteit/Zprime750/test0.root'
-    'file:/scratch/viola/okiwilldeleteit/singlee/ex-pattuple.root'
+    'file:datapattuple.root'
         ] 
 )
 
@@ -54,6 +53,11 @@ process.PATextraction.doKF = True
 #if it is false, you will choose the best combination with the chi2
 process.PATextraction.doChoiceWKF = False
 process.PATextraction.doMC = False
+#if doSyst is true, the jets pT and MET are varied according to
+#the JEC uncertainties (file /gridgroup/cms/Mtt/Jec11_V1_AK5PF_Uncertainty.txt).
+#the variation is up if systvalue=1, down if systvalue=-1
+process.PATextraction.doSyst = False
+process.PATextraction.systvalue = 1
 process.p = cms.Path(process.PATextraction)
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 100

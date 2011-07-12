@@ -58,6 +58,9 @@ class JetExtractor
   int getJetMCIndex(int jetidx){return m_jet_MCIndex[jetidx];}
   
   bool isOK() {return m_OK;}
+
+  void setJetLorentzVector(int jetidx, float E, float Px, float Py, float Pz);
+
  private:
   
   TTree* m_tree_jet;

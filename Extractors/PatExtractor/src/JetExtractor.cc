@@ -278,4 +278,13 @@ int JetExtractor::getMatch(const pat::Jet *part, MCExtractor* m_MC)
   //    std::cout << idx_min << " / " << deltaR_min << " / " << m_MC->getType(idx_min) << std::endl;
 
   return idx_min;
-} 
+}
+void JetExtractor::setJetLorentzVector(int jetidx, float E, float Px, float Py, float Pz)
+{
+  new((*m_jet_lorentzvector)[jetidx]) TLorentzVector(Px,Py,Pz,E);
+  m_jet_E[jetidx]    = E;
+  m_jet_px[jetidx]   = Px;
+  m_jet_py[jetidx]   = Py;
+  m_jet_pz[jetidx]   = Pz;
+
+}

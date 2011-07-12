@@ -77,9 +77,9 @@ PATextraction = cms.EDAnalyzer("PatExtractor",
    doUseBTaginChi2      = cms.untracked.bool(True),
    doKF      = cms.untracked.bool(True),
    doChoiceWKF      = cms.untracked.bool(True),
-
+   doSyst        = cms.untracked.bool(True),
    doDimuon      = cms.untracked.bool(False),
-
+   systvalue= cms.untracked.int32(1),
 
    n_events = cms.untracked.int32(10000),  # How many events you want to analyze (only if fillTree=False)
 

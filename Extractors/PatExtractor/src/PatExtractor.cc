@@ -4,7 +4,6 @@ using namespace std;
 using namespace edm;
 
 PatExtractor::PatExtractor(const edm::ParameterSet& config) :
-
   do_fill_       (config.getUntrackedParameter<bool>("fillTree", true)),
   do_HLT_        (config.getUntrackedParameter<bool>("doHLT", false)),
   do_MC_         (config.getUntrackedParameter<bool>("doMC", false)),
@@ -23,6 +22,9 @@ PatExtractor::PatExtractor(const edm::ParameterSet& config) :
   do_KF_      (config.getUntrackedParameter<bool>("doKF", true)),
   do_ChoiceWKF_      (config.getUntrackedParameter<bool>("doChoiceWKF", true)),
   do_dimu_       (config.getUntrackedParameter<bool>("doDimuon", false)),
+  do_Syst_      (config.getUntrackedParameter<bool>("doSyst", false)),
+  systvalue_     (config.getUntrackedParameter<int>("systvalue",1)),
+  nevts_         (config.getUntrackedParameter<int>("n_events", 10000)),
 
   photon_tag_    (config.getParameter<edm::InputTag>("photon_tag")),
   electron_tag_  (config.getParameter<edm::InputTag>("electron_tag")),
@@ -34,8 +36,6 @@ PatExtractor::PatExtractor(const edm::ParameterSet& config) :
   trk_tag_       (config.getParameter<edm::InputTag>("trk_tag")),
   outFilename_   (config.getParameter<std::string>("extractedRootFile")),
   inFilename_    (config.getParameter<std::string>("inputRootFile")),
-  nevts_         (config.getUntrackedParameter<int>("n_events", 10000)),
-
   m_settings_    (config.getUntrackedParameter<std::vector<std::string> >("analysisSettings"))
 {
   LogDebug("") << "Using the " << photon_tag_ << " photon collection";
@@ -67,7 +67,7 @@ void PatExtractor::beginJob()
   if (do_Mtt_ && do_Muon_ && do_Electron_ && do_Jet_ && do_MET_ && do_Vertex_)      
     m_Mtt_analysis = new mtt_analysis(do_MC_,do_MCPU_,do_SemiMu_,
 				      m_muon,m_electron,m_jet,m_MET,m_vertex,
-				      do_Chi2_,do_KF_,do_ChoiceWKF_);
+				      do_Chi2_,do_KF_,do_ChoiceWKF_, do_Syst_);
 
   // Here is the small example analysis (dimuon mass spectra)
 
@@ -272,7 +272,7 @@ void PatExtractor::doAna()
   {
     m_Mtt_analysis->reset(do_MC_);
     iseventselected=-1;
-    m_Mtt_analysis->mtt_Sel(do_MC_,do_MCPU_,do_SemiMu_,m_event,m_muon,m_electron,m_jet,m_MET,m_vertex,do_Chi2_);
+    m_Mtt_analysis->mtt_Sel(do_MC_,do_MCPU_,do_SemiMu_,m_event,m_muon,m_electron,m_jet,m_MET,m_vertex,do_Chi2_, do_Syst_,systvalue_);
     iseventselected=m_Mtt_analysis->getisSel();
     //calculate the best jets pairing with a chi2 minimization
     if (do_Chi2_) m_Mtt_analysis->LoopOverCombinations(m_jet,

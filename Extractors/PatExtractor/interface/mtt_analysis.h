@@ -21,6 +21,7 @@
 #include <vector>
 using namespace std;
 
+#include "TH2.h"
 #include "TLorentzVector.h"
 #include "TVector3.h"
 #include "MCExtractor.h"
@@ -32,18 +33,18 @@ using namespace std;
 #include "../interface/Chi2.h"
 #include "../interface/AlienKinFit.h"
 #include "../interface/EventExtractor.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
 
 class mtt_analysis
 {
   public:
-    mtt_analysis(bool do_MC_,bool do_MCPU_,bool do_SemiMu_, MuonExtractor *m_muon, ElectronExtractor *m_electron, JetExtractor *m_jet, METExtractor *m_MET, VertexExtractor *m_vertex, bool do_Chi2_, bool do_KF_,bool do_ChoiceWKF_);
+    mtt_analysis(bool do_MC_,bool do_MCPU_,bool do_SemiMu_, MuonExtractor *m_muon, ElectronExtractor *m_electron, JetExtractor *m_jet, METExtractor *m_MET, VertexExtractor *m_vertex, bool do_Chi2_, bool do_KF_,bool do_ChoiceWKF_, bool do_Syst_);
 
     ~mtt_analysis();
 
     //Selection
-    int mtt_Sel(bool do_MC_,bool do_MCPU_,bool do_SemiMu_, EventExtractor* m_Event,MuonExtractor *m_muon, ElectronExtractor *m_electron, JetExtractor *m_jet, METExtractor *m_MET, VertexExtractor *m_vertex, bool do_Chi2_);
+    int mtt_Sel(bool do_MC_,bool do_MCPU_,bool do_SemiMu_, EventExtractor* m_Event,MuonExtractor *m_muon, ElectronExtractor *m_electron, JetExtractor *m_jet, METExtractor *m_MET, VertexExtractor *m_vertex, bool do_Chi2_, bool do_Syst_, int systvalue);
     /// Lepton selection
-
     int LeptonSel(bool do_SemiMu_,MuonExtractor *m_muon, ElectronExtractor *m_electron,JetExtractor *m_jet, int isSel);
     int MuonSel(MuonExtractor *m_muon, ElectronExtractor *m_electron,JetExtractor *m_jet, int isSel);
     int ElectronSel(MuonExtractor *m_muon, ElectronExtractor *m_electron,JetExtractor *m_jet, int isSel);
@@ -100,6 +101,9 @@ class mtt_analysis
 
     void reset(bool do_MC_);
     void fillTree();
+  void SystModifJetsAndMET(JetExtractor *m_jet,METExtractor *m_MET,unsigned int SystType, double SystValue,JetCorrectionUncertainty *jecUnc,double avg_pu);
+  //  TH2D* histo_uncertainty;
+  JetCorrectionUncertainty *jecUnc;
 
   private:
 
@@ -226,6 +230,8 @@ class mtt_analysis
     float min_btag_SSVHEM;
     float min_btag_SSVHPT;
     TLorentzVector *jetP;
+    TLorentzVector *myJet;
+    TLorentzVector *myMET;
     //variables to loop over combinations
     //how do i define a jet as b-tagged for chi2 calculation
     float min_btag_SSVHEM_chi2; 

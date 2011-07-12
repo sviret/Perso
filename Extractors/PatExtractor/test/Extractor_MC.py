@@ -19,24 +19,19 @@ process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 
 #Other statements
-process.GlobalTag.globaltag = 'MC_311_V2::All'
+process.GlobalTag.globaltag = 'MC_42_V12::All'
 
 process.options = cms.untracked.PSet(
     SkipEvent = cms.untracked.vstring('ProductNotFound')
 )
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(5000)
 )
 
 myfilelist = cms.untracked.vstring()
 myfilelist.extend( [
-#    'file:/scratch/viola/okiwilldeleteit/TTbar/patTuple_PF2PAT_MC_10_1_WBP.root'
-#   '/store/user/boudoul/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11_cmssw415_PF2PAT_v1/9609dfcd6d0d7cd6841f2d6bf7c90a9a/patTuple_PF2PAT_MC_10_1_WBP.root'
-#    '/store/user/boudoul/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Spring11_cmssw415_PF2PAT_v1/9609dfcd6d0d7cd6841f2d6bf7c90a9a/patTuple_PF2PAT_MC_89_1_M60.root'
-#'file:/scratch/viola/okiwilldeleteit/testZprime750.root',
-#'file:/scratch/viola/okiwilldeleteit/testZprime750_B.root'
-    'file:/scratch/viola/patTuple_PF2PAT_MC_69_1_DhP.root'
+        'file:/gridgroup/cms/viola/Rootuples/MC_423/Zprime750/patTuple_PF2PAT_data_19_1_Blg.root'
         ] )
 
 process.source = cms.Source("PoolSource",
@@ -66,8 +61,11 @@ process.PATextraction.doKF = True
 process.PATextraction.doChoiceWKF = False
 process.PATextraction.doMC = False
 process.PATextraction.doMCPU = True
+#if doSyst is true, the jets pT and MET are varied according to 
+#the JEC uncertainties (file /gridgroup/cms/Mtt/Jec11_V1_AK5PF_Uncertainty.txt).
+#the variation is up if systvalue=1, down if systvalue=-1
+process.PATextraction.doSyst = False
+process.PATextraction.systvalue = 1
 process.p = cms.Path(process.PATextraction)
-
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
-
 

@@ -39,6 +39,7 @@
 <use   name="L1Trigger/GlobalTriggerAnalyzer"/>
 <use   name="HLTrigger/HLTcore"/>
 <use   name="DataFormats/VertexReco"/>
+<use   name="CondFormats/JetMETObjects"/>
 <lib   name="MathMore"/>
 <flags     EDM_PLUGIN="1"/>
 <export>

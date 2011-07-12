@@ -76,6 +76,8 @@ class PatExtractor : public edm::EDAnalyzer {
   bool do_usebtaginchi2_;
   bool do_KF_;
   bool do_ChoiceWKF_;
+  bool do_Syst_;
+  int systvalue_;
 
   edm::InputTag photon_tag_;   // 
   edm::InputTag electron_tag_; // 

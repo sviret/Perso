@@ -1,13 +1,21 @@
 #include "../interface/mtt_analysis.h"
 
 
-mtt_analysis::mtt_analysis(bool do_MC_,bool do_MCPU_,bool do_SemiMu_,MuonExtractor *m_muon, ElectronExtractor *m_electron, JetExtractor *m_jet, METExtractor *m_MET, VertexExtractor *m_vertex, bool do_Chi2_, bool do_KF_,bool do_ChoiceWKF_)
+mtt_analysis::mtt_analysis(bool do_MC_,bool do_MCPU_,bool do_SemiMu_,MuonExtractor *m_muon, ElectronExtractor *m_electron, JetExtractor *m_jet, METExtractor *m_MET, VertexExtractor *m_vertex, bool do_Chi2_, bool do_KF_,bool do_ChoiceWKF_, bool do_Syst_)
 {
   /// Tree definition
   m_tree_Mtt = new TTree("Mtt","Analysis info");  
   if (do_Chi2_) {
     //    m_tree_Chi2 = new TTree("Chi2","Chi2 info for selected events");  
     m_Chi2 = new Chi2();
+  }
+  if (do_Syst_) {
+    /*    //put the complete path to the JEScorr.root file if you run on lyon tier3
+    //otherwise remember to put it as an "additional_input_files" in your crab.cfg
+    TFile* JES_unc_file = new TFile("/gridgroup/cms/Mtt/JEScorr.root");
+    histo_uncertainty= (TH2D*)JES_unc_file->Get("JESfactorJ");
+    */
+    jecUnc = new JetCorrectionUncertainty("/gridgroup/cms/Mtt/Jec11_V1_AK5PF_Uncertainty.txt");
   }
   if (do_KF_) {
     if(do_SemiMu_) {
@@ -178,7 +186,7 @@ void mtt_analysis::reset(bool do_MC_)
   }
 }
 
-int mtt_analysis::mtt_Sel(bool do_MC_,bool do_MCPU_,bool do_SemiMu_, EventExtractor * m_Event,MuonExtractor *m_muon, ElectronExtractor *m_electron, JetExtractor *m_jet, METExtractor *m_MET, VertexExtractor *m_vertex, bool do_Chi2_) {
+int mtt_analysis::mtt_Sel(bool do_MC_,bool do_MCPU_,bool do_SemiMu_, EventExtractor * m_Event,MuonExtractor *m_muon, ElectronExtractor *m_electron, JetExtractor *m_jet, METExtractor *m_MET, VertexExtractor *m_vertex, bool do_Chi2_, bool do_Syst_,int systvalue_) {
   //isSel=1 if selected
   //isSel=2 if it fails vtx selection
   //isSel=3 if it fails MET selection
@@ -187,6 +195,11 @@ int mtt_analysis::mtt_Sel(bool do_MC_,bool do_MCPU_,bool do_SemiMu_, EventExtrac
   //isSel=6 if it >0 looser muons (electron: Z veto)
   //isSel=7 if it fails electron (muon) veto 
   //isSel=8 if <4 good jets
+
+  if (do_Syst_) {
+    SystModifJetsAndMET(m_jet,m_MET,1,systvalue_,jecUnc,0.);
+  }
+
   isSel=-1;
   isVtxSel=-1;
   isMETSel=-1;
@@ -958,6 +971,34 @@ int mtt_analysis::match_MC(int idxJetbH,
 void mtt_analysis::fillTree()
 {  
 m_tree_Mtt->Fill(); 
+}
+
+void mtt_analysis::SystModifJetsAndMET(JetExtractor *m_jet,METExtractor *m_MET,unsigned int SystType, double SystValue,JetCorrectionUncertainty *jecUnc,double avg_pu)
+{ 
+  double unc;
+  double corr;
+  double met_corr_x=0.;
+  double met_corr_y=0.;
+  unsigned int nJets = (m_jet->getSize());
+  myMET= m_MET->getMETLorentzVector(0);
+  if (SystType==1) { // JES
+    for(unsigned int iJet = 0; iJet<nJets ; iJet++)
+      {
+	myJet = m_jet->getJetLorentzVector(iJet);
+	//	unc=histo_uncertainty->GetBinContent(histo_uncertainty->FindBin(myJet->Pt(),myJet->Eta()))
+	jecUnc->setJetEta(myJet->Eta());
+	jecUnc->setJetPt(myJet->Pt()); // here you must use the CORRECTED jet pt
+	unc = jecUnc->getUncertainty(true);
+	unc=0.1;
+	corr=sqrt(pow(unc,2));
+	//use corrected jet pt for met correction
+	met_corr_x+=myJet->Px()*(SystValue*corr);
+	met_corr_y+=myJet->Py()*(SystValue*corr);
+	//
+	m_jet->setJetLorentzVector(iJet,myJet->E()*(1.+SystValue*corr),myJet->Px()*(1.+SystValue*corr),myJet->Py()*(1.+SystValue*corr),myJet->Pz()*(1.+SystValue*corr));
+      }
+    m_MET->setMETLorentzVector(0,myMET->E(),myMET->Px()-met_corr_x,myMET->Py()-met_corr_y,myMET->Pz());
+  }
 }
 
 
