@@ -653,7 +653,7 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
 		} else {
 		  kinfitchi2=chi2kinfit(ChosenJets,ChosenJetsFlavour,*(m_electron->getEleLorentzVector(LeptIdx)),*(m_MET->getMETLorentzVector(0)),&RecoFittedVectors,myAlienKinFit,true,do_SemiMu_); 
 		}
-		if(kinfitchi2<minkinfitchi2) {
+		if(kinfitchi2<minkinfitchi2 && kinfitchi2>0) {
 		  minkinfitchi2=kinfitchi2;
 		  bestbjet1idx=bjet1idx;
 		  bestbjet2idx=bjet2idx;
