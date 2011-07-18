@@ -282,7 +282,7 @@ int mtt_analysis::MuonSel(MuonExtractor* m_muon, ElectronExtractor *m_electron, 
   Mupass2Dcut=0;  
   MuDRmin=0.4;
   MupTrelmin=35.;
-  MuMinIso=0.1;
+  MuMinIso=0.125;
   //electron veto for semimu channel selection cuts
   minept_veto=15.;
   maxeeta_veto=2.5;
@@ -314,7 +314,8 @@ int mtt_analysis::MuonSel(MuonExtractor* m_muon, ElectronExtractor *m_electron, 
     //looser muon that would make me veto the event
   }
   if (nGoodMuons>0) {
-    for(int ilmu=0; ilmu<m_muon->getSize(); ilmu++) {   
+    for(int ilmu=0; ilmu<m_muon->getSize(); ilmu++) {  
+      if (ilmu==goodmuidx)  continue;
       lmuP = m_muon->getMuLorentzVector(ilmu);
       if (fabs(lmuP->Pt())<minmupt_veto || fabs(lmuP->Eta())>maxmueta_veto) continue;
       if (m_muon->getMuisGlobal(ilmu)!=1) continue;
@@ -332,16 +333,18 @@ int mtt_analysis::MuonSel(MuonExtractor* m_muon, ElectronExtractor *m_electron, 
     nGoodElectrons_veto++;
   }
   if(nGoodMuons==1) {
-    isSel=1;
-    SelLeptIdx=goodmuidx;
+    if (nLooseGoodMuons>0) {
+      isSel=6; 
+    } else if (nGoodElectrons_veto>0) {
+      isSel=7;
+    } else {
+      isSel=1;
+      SelLeptIdx=goodmuidx;
+    }
   } else if (nGoodMuons<1) {
     isSel=4;
   } else if (nGoodMuons>1) {
     isSel=5;
-  } else if (nLooseGoodMuons>0) {
-    isSel=6; 
-  } else if (nGoodElectrons_veto>0) {
-    isSel=7;
   }
   return  isSel;
 }
@@ -370,9 +373,9 @@ int mtt_analysis::ElectronSel(MuonExtractor* m_muon, ElectronExtractor *m_electr
   Elepass2Dcut_veto=0;  
   EleDRmin_veto=0.4;
   ElepTrelmin_veto=35.;
-  ElMinIso=0.2;
+  ElMinIso=0.1;
   itsaZ=false;
-  minelpt=35.;
+  minelpt=30.;
   maxeleta=2.5;
   minelpt_Zveto=20.;
   maxeleta_Zveto=2.5; 
@@ -416,23 +419,26 @@ int mtt_analysis::ElectronSel(MuonExtractor* m_muon, ElectronExtractor *m_electr
     if (nGoodElectrons>0) {
       firsteP = m_electron->getEleLorentzVector(goodelidx);  
       for(int iev=0; iev<m_electron->getSize(); iev++) {
+	if (iev==goodelidx) continue;
 	secondeP = m_electron->getEleLorentzVector(iev);  
-	if (fabs(secondeP->Pt())<minelpt_Zveto || fabs(secondeP->Eta())<maxeleta_Zveto || (fabs(secondeP->Eta())>1.4442&&fabs(secondeP->Eta())<1.5560)) continue;
+	if (fabs(secondeP->Pt())<minelpt_Zveto || fabs(secondeP->Eta())>maxeleta_Zveto || (fabs(secondeP->Eta())>1.4442&&fabs(secondeP->Eta())<1.5560)) continue;
 	if(((m_electron->getElepfChargedHadronIso(iev)+m_electron->getElepfNeutralHadronIso(iev)+m_electron->getElepfPhotonIso(iev))/secondeP->Pt()) > ElMinIso) continue;
 	if (fabs((*firsteP+*secondeP).M()-91.)<15.) itsaZ=true;      
       }
     }
     if (nGoodElectrons==1) {
+      if(itsaZ) {
+	isSel=6;
+      } else if (nGoodMuons_veto>0) {
+	isSel=7;
+      } else {
       isSel=1;
       SelLeptIdx=goodelidx;
+      }
     } else if (nGoodElectrons<1) {
       isSel=4;
     } else if (nGoodElectrons>1) {
       isSel=5;
-    } else if(itsaZ) {
-      isSel=6;
-    } else if (nGoodMuons_veto>0) {
-      isSel=7;
     }
   return  isSel;
 }
