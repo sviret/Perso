@@ -68,6 +68,10 @@ mtt_analysis::mtt_analysis(bool do_MC_,bool do_MCPU_,bool do_SemiMu_,MuonExtract
   m_tree_Mtt->Branch("mtt_MET"    ,&m_mtt_MET    ,"mtt_MET/F"); 
   if (do_Chi2_) {
     m_tree_Mtt->Branch("mtt_OneMatchedCombi",&m_mtt_OneMatchedCombi,"mtt_OneMatchedCombi/I");
+    m_tree_Mtt->Branch("mtt_bestjetbhidx",&m_mtt_bestjetbhidx,"mtt_bestjetbhidx/I");
+    m_tree_Mtt->Branch("mtt_bestjetblidx",&m_mtt_bestjetblidx,"mtt_bestjetblidx/I");
+    m_tree_Mtt->Branch("mtt_bestjetw1idx",&m_mtt_bestjetw1idx,"mtt_bestjetw1idx/I");
+    m_tree_Mtt->Branch("mtt_bestjetw2idx",&m_mtt_bestjetw2idx,"mtt_bestjetw2idx/I");
     if (!(do_ChoiceWKF_)){
     m_tree_Mtt->Branch("mtt_NumComb"    ,&m_mtt_NumComb    ,"mtt_NumComb/I");
     m_tree_Mtt->Branch("mtt_SolChi2"    ,&m_mtt_SolChi2    ,"mtt_SolChi2[mtt_NumComb]/F");
@@ -629,7 +633,7 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
 	    jet4idx=j4;
 	    
 	    /// Try to find a matching solution
-	    if(do_MC_ && match_MC(bjet1idx,bjet2idx,jet3idx,jet4idx,LeptIdx,do_SemiMu_,m_MC,m_jet,m_electron,m_muon)){m_mtt_OneMatchedCombi = 1;}
+	    if(do_MC_ && match_MC(JetsIdx[bjet1idx],JetsIdx[bjet2idx],JetsIdx[jet3idx],JetsIdx[jet4idx],LeptIdx,do_SemiMu_,m_MC,m_jet,m_electron,m_muon)){m_mtt_OneMatchedCombi = 1;}
 	      
 	    //here we use the method to actually calculate the chi2
 	    if(do_SemiMu_) {
@@ -642,10 +646,10 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
 		ChosenJets.clear();
 		ChosenJetsFlavour.clear();	
 		//assign TLorentzVectors to chosen jet
-		bestHadbjetP   = m_jet->getJetLorentzVector(bjet1idx);
-		bestLepbjetP   = m_jet->getJetLorentzVector(bjet2idx);
-		bestLightjet1P = m_jet->getJetLorentzVector(jet3idx);
-		bestLightjet2P = m_jet->getJetLorentzVector(jet4idx);
+		bestHadbjetP   = m_jet->getJetLorentzVector(JetsIdx[bjet1idx]);
+		bestLepbjetP   = m_jet->getJetLorentzVector(JetsIdx[bjet2idx]);
+		bestLightjet1P = m_jet->getJetLorentzVector(JetsIdx[jet3idx]);
+		bestLightjet2P = m_jet->getJetLorentzVector(JetsIdx[jet4idx]);
 		ChosenJets.push_back(*bestLightjet1P);
 		ChosenJetsFlavour.push_back(1);
 		ChosenJets.push_back(*bestLightjet2P);
@@ -684,11 +688,11 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
 		}
 	      }
 	    } else {//else use the chi2 to chose the best combination and apply the kinfit only to this latter
-	    thischi2=m_Chi2->GlobalSimpleChi2(*(m_jet->getJetLorentzVector(jet3idx)),*(m_jet->getJetLorentzVector(jet4idx)),*(m_jet->getJetLorentzVector(bjet1idx)),*(m_jet->getJetLorentzVector(bjet2idx)), *LeptonP, *(m_MET->getMETLorentzVector(0)),AllJetsPt,do_SemiMu_,corrMETP); 
-	    HadbjetP   = m_jet->getJetLorentzVector(bjet1idx);
-	    LepbjetP   = m_jet->getJetLorentzVector(bjet2idx);
-	    Lightjet1P = m_jet->getJetLorentzVector(jet3idx);
-	    Lightjet2P = m_jet->getJetLorentzVector(jet4idx);
+	    thischi2=m_Chi2->GlobalSimpleChi2(*(m_jet->getJetLorentzVector(JetsIdx[jet3idx])),*(m_jet->getJetLorentzVector(JetsIdx[jet4idx])),*(m_jet->getJetLorentzVector(JetsIdx[bjet1idx])),*(m_jet->getJetLorentzVector(JetsIdx[bjet2idx])), *LeptonP, *(m_MET->getMETLorentzVector(0)),AllJetsPt,do_SemiMu_,corrMETP); 
+	    HadbjetP   = m_jet->getJetLorentzVector(JetsIdx[bjet1idx]);
+	    LepbjetP   = m_jet->getJetLorentzVector(JetsIdx[bjet2idx]);
+	    Lightjet1P = m_jet->getJetLorentzVector(JetsIdx[jet3idx]);
+	    Lightjet2P = m_jet->getJetLorentzVector(JetsIdx[jet4idx]);
 	    m_mHadTop_All[m_mtt_NumComb]=(*HadbjetP+*Lightjet1P+*Lightjet2P).M();
 	    m_mLepTop_All[m_mtt_NumComb]=(*LepbjetP+*LeptonP+*corrMETP).M();
 	    m_mtt_All[m_mtt_NumComb]=(*LepbjetP+*LeptonP+*corrMETP+*HadbjetP+*Lightjet1P+*Lightjet2P).M();
@@ -709,15 +713,27 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
 	}
       }
     } // we out of the loop over jet pairings
-
+    
+    m_mtt_bestjetbhidx = JetsIdx[bestbjet1idx];
+    m_mtt_bestjetblidx = JetsIdx[bestbjet2idx];
+    m_mtt_bestjetw1idx = JetsIdx[bestjet3idx];
+    m_mtt_bestjetw2idx = JetsIdx[bestjet4idx];
+    if(m_mtt_bestjetbhidx>10 || m_mtt_bestjetblidx>10 || m_mtt_bestjetw1idx>10 || m_mtt_bestjetw2idx>10)
+    {
+      cout<<"m_mtt_bestjetbhidx = "<<m_mtt_bestjetbhidx<<endl;
+      cout<<"m_mtt_bestjetblidx = "<<m_mtt_bestjetblidx<<endl;
+      cout<<"m_mtt_bestjetw1idx = "<<m_mtt_bestjetw1idx<<endl;
+      cout<<"m_mtt_bestjetw2idx = "<<m_mtt_bestjetw2idx<<endl;
+    }
+    
     if ( !(do_ChoiceWKF_) &&  do_KF_ && m_mtt_NumComb>0 && bestjet4idx>=0) {
       ChosenJets.clear();
       ChosenJetsFlavour.clear();	
       //assign TLorentzVectors to chosen jet
-      bestHadbjetP   = m_jet->getJetLorentzVector(bestbjet1idx);
-      bestLepbjetP   = m_jet->getJetLorentzVector(bestbjet2idx);
-      bestLightjet1P = m_jet->getJetLorentzVector(bestjet3idx);
-      bestLightjet2P = m_jet->getJetLorentzVector(bestjet4idx);
+      bestHadbjetP   = m_jet->getJetLorentzVector(JetsIdx[bestbjet1idx]);
+      bestLepbjetP   = m_jet->getJetLorentzVector(JetsIdx[bestbjet2idx]);
+      bestLightjet1P = m_jet->getJetLorentzVector(JetsIdx[bestjet3idx]);
+      bestLightjet2P = m_jet->getJetLorentzVector(JetsIdx[bestjet4idx]);
       ChosenJets.push_back(*bestLightjet1P);
       ChosenJetsFlavour.push_back(1);
       ChosenJets.push_back(*bestLightjet2P);
@@ -733,7 +749,7 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
       }
     }
 
-  if(do_MC_){m_mtt_IsBestSolMatched=match_MC(bestbjet1idx,bestbjet2idx,bestjet3idx,bestjet4idx,LeptIdx,do_SemiMu_,m_MC,m_jet,m_electron,m_muon);}
+  if(do_MC_){m_mtt_IsBestSolMatched=match_MC(JetsIdx[bestbjet1idx],JetsIdx[bestbjet2idx],JetsIdx[bestjet3idx],JetsIdx[bestjet4idx],LeptIdx,do_SemiMu_,m_MC,m_jet,m_electron,m_muon);}
   if(do_ChoiceWKF_){  
     m_mtt_KFChi2=minkinfitchi2; 
   } else {
