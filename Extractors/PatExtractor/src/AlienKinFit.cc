@@ -12,14 +12,14 @@
  *                           Diane Cinca diane.cinca@cern.ch            *
  * TODO : parametrization of Neutrino + Muon + electron from .dat file  *
  * internal tracking :                                                  *
- * $Id: AlienKinFit.cc,v 1.4 2011/06/15 14:44:47 beaupere Exp $*
+ * $Id: AlienKinFit.cc,v 1.5 2011/06/15 15:51:48 beaupere Exp $*
  ************************************************************************/
 
 #include <TROOT.h>
 #include <TMath.h>
 #include <TMinuit.h>
 #include "../interface/AlienKinFit.h"
-#include "../interface/AlienGS.h"
+#include "../interface/Chi2.h"
 using namespace std;
 
 static void * vdummy = 0;
@@ -261,7 +261,7 @@ void AlienKinFit::ReadObjects(TLorentzVector Jet1,
    MeasuredJet2=Jet2;
 
    /// We compute Pz of the neutrino
-   RecoLeptSide(Muon, Neutrino, BJetL, &MeasuredNeutrino);
+   Chi2::RecoLeptSide(Muon, Neutrino, BJetL, &MeasuredNeutrino);
 
    MeasPzNu=MeasuredNeutrino.Pz();
      

@@ -1,10 +1,10 @@
 #include "../interface/Chi2.h"
 
+static float PDGMW = 80.4;
+static float PDGLEPT = 1;
+
 Chi2::Chi2()
-{
-  PDGMW = 80.4;
-  PDGLEPT = 1;
-}
+{}
 
 Chi2::~Chi2(){;}
 //viola: i duplicate float Chi2::GlobalSimpleChi2 to have a second implementation of the method 
