@@ -114,6 +114,11 @@ class mtt_analysis
     //MC stuff
     int m_MC_channel;
     float m_MC_mtt;
+    int m_mtt_bestjetbhidx;
+    int m_mtt_bestjetblidx;
+    int m_mtt_bestjetw1idx;
+    int m_mtt_bestjetw2idx;
+    
     int m_nPU; // number of interactions
     /// Number of lepton/neutrino from Top->W and quark b from Top
     int nEle;
