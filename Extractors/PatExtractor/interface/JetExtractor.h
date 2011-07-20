@@ -56,6 +56,12 @@ class JetExtractor
   float getJetBTagProb_TCHP(int jetidx) {return m_jet_btag_TCHP[jetidx];}
   
   int getJetMCIndex(int jetidx){return m_jet_MCIndex[jetidx];}
+  int getJetMCPdgId(int jetidx){return m_jet_MCPdgId[jetidx];}
+  int getJetMCPdgIdMother(int jetidx){return m_jet_MCPdgIdMother[jetidx];}
+  int getJetMCPdgIdGdMother(int jetidx){return m_jet_MCPdgIdGdMother[jetidx];}
+  int getJetMCPx(int jetidx){return m_jet_MCPx[jetidx];}
+  int getJetMCPy(int jetidx){return m_jet_MCPy[jetidx];}
+  int getJetMCPz(int jetidx){return m_jet_MCPz[jetidx];}
   
   bool isOK() {return m_OK;}
 
@@ -96,6 +102,13 @@ class JetExtractor
   float	m_jet_btag_TCHE[m_jets_MAX];
   float	m_jet_btag_TCHP[m_jets_MAX];
   int   m_jet_MCIndex[m_jets_MAX];
+  int   m_jet_MCPdgId[m_jets_MAX];
+  int   m_jet_MCPdgIdMother[m_jets_MAX];
+  int   m_jet_MCPdgIdGdMother[m_jets_MAX];
+  float m_jet_MCPx[m_jets_MAX];
+  float m_jet_MCPy[m_jets_MAX];
+  float m_jet_MCPz[m_jets_MAX];
+  float m_jet_MCEn[m_jets_MAX];
 
   MCExtractor* MC_Coll;
 };

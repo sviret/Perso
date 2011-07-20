@@ -40,6 +40,13 @@ JetExtractor::JetExtractor(edm::InputTag tag)
   m_tree_jet->Branch("jet_btag_TCHE",    &m_jet_btag_TCHE,   "jet_btag_TCHE[n_jets]/F");
   m_tree_jet->Branch("jet_btag_TCHP",    &m_jet_btag_TCHP,   "jet_btag_TCHP[n_jets]/F");
   m_tree_jet->Branch("jet_mcParticleIndex",&m_jet_MCIndex,"jet_mcParticleIndex[n_jets]/I");
+  m_tree_jet->Branch("jet_mcPdgId"        ,&m_jet_MCPdgId        ,"jet_mcPdgId[n_jets]/I");
+  m_tree_jet->Branch("jet_mcPdgIdMother"  ,&m_jet_MCPdgIdMother  ,"jet_mcPdgIdMother[n_jets]/I");
+  m_tree_jet->Branch("jet_mcPdgIdGdMother",&m_jet_MCPdgIdGdMother,"jet_mcPdgIdGdMother[n_jets]/I");
+  m_tree_jet->Branch("jet_mcPx"           ,&m_jet_MCPx           ,"jet_mcPx[n_jets]/I");
+  m_tree_jet->Branch("jet_mcPy"           ,&m_jet_MCPy           ,"jet_mcPy[n_jets]/I");
+  m_tree_jet->Branch("jet_mcPz"           ,&m_jet_MCPz           ,"jet_mcPz[n_jets]/I");
+  m_tree_jet->Branch("jet_mcEn"           ,&m_jet_MCEn           ,"jet_mcEn[n_jets]/I");
 
   // Set everything to 0
 
@@ -91,6 +98,13 @@ JetExtractor::JetExtractor(TFile *a_file)
   m_tree_jet->SetBranchAddress("jet_btag_TCHE",    &m_jet_btag_TCHE);  
   m_tree_jet->SetBranchAddress("jet_btag_TCHP",    &m_jet_btag_TCHP);
   m_tree_jet->SetBranchAddress("jet_mcParticleIndex",&m_jet_MCIndex);
+  m_tree_jet->SetBranchAddress("jet_mcPdgId"        ,&m_jet_MCPdgId);
+  m_tree_jet->SetBranchAddress("jet_mcPdgIdMother"  ,&m_jet_MCPdgIdMother);
+  m_tree_jet->SetBranchAddress("jet_mcPdgIdGdMother",&m_jet_MCPdgIdGdMother);
+  m_tree_jet->SetBranchAddress("jet_mcPx"           ,&m_jet_MCPx);
+  m_tree_jet->SetBranchAddress("jet_mcPy"           ,&m_jet_MCPy);
+  m_tree_jet->SetBranchAddress("jet_mcPz"           ,&m_jet_MCPz);
+  m_tree_jet->SetBranchAddress("jet_mcEn"           ,&m_jet_MCEn);
 
 
 }
@@ -138,7 +152,21 @@ void JetExtractor::writeInfo(const edm::Event *event, MCExtractor* m_MC)
     for(int i=0; i<JetExtractor::getSize(); ++i)
     { 
       JetExtractor::writeInfo(&p_jets.at(i),i); 
-
+      
+      /// get pat mc matching to have pdgId
+      const reco::Candidate * jet_genparton = p_jets.at(i).genParton();
+      if(jet_genparton)
+      {
+        m_jet_MCPdgId[i] = jet_genparton->pdgId();
+	m_jet_MCPdgIdMother[i] = jet_genparton->mother()->pdgId();
+	if(jet_genparton->mother()->mother()){m_jet_MCPdgIdGdMother[i] = jet_genparton->mother()->mother()->pdgId();}
+	m_jet_MCPx[i] = jet_genparton->px();
+	m_jet_MCPy[i] = jet_genparton->py();
+	m_jet_MCPz[i] = jet_genparton->pz();
+	m_jet_MCEn[i] = jet_genparton->energy();
+      }
+      
+      /// Lyon's jet matching
       int idx_min = JetExtractor::getMatch(&p_jets.at(i),m_MC); 
       m_jet_MCIndex[i] = idx_min;
     }
@@ -199,13 +227,13 @@ void JetExtractor::reset()
   
   for (int i=0;i<m_jets_MAX;++i) 
   {
-    m_jet_E[i] = 0.;
-    m_jet_px[i] = 0.;
-    m_jet_py[i] = 0.;
-    m_jet_pz[i] = 0.;
-    m_jet_vx[i] = 0.;
-    m_jet_vy[i] = 0.;
-    m_jet_vz[i] = 0.;
+    m_jet_E[i]   = 0.;
+    m_jet_px[i]  = 0.;
+    m_jet_py[i]  = 0.;
+    m_jet_pz[i]  = 0.;
+    m_jet_vx[i]  = 0.;
+    m_jet_vy[i]  = 0.;
+    m_jet_vz[i]  = 0.;
     m_jet_eta[i] = 0.;
     m_jet_phi[i] = 0.;
     
@@ -222,6 +250,13 @@ void JetExtractor::reset()
     m_jet_btag_TCHE[i] = 0.;
     m_jet_btag_TCHP[i] = 0.;
     m_jet_MCIndex[i]    = -1;
+    m_jet_MCPdgId[i]    = 0;
+    m_jet_MCPdgIdMother[i] = 0;
+    m_jet_MCPdgIdGdMother[i] = 0;
+    m_jet_MCPx[i] = 1e6;
+    m_jet_MCPy[i] = 1e6;
+    m_jet_MCPz[i] = 1e6;
+    m_jet_MCEn[i] = 1e6;
   }
   m_jet_lorentzvector->Clear();
 }
