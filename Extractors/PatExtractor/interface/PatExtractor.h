@@ -72,13 +72,14 @@ class PatExtractor : public edm::EDAnalyzer {
   bool do_Mtt_;
   bool do_SemiMu_;  
   bool do_Chi2_;
-  bool do_dimu_;
   bool do_usebtaginchi2_;
   bool do_KF_;
   bool do_ChoiceWKF_;
+  bool do_dimu_;
   bool do_Syst_;
   int systvalue_;
 
+  int nevts_;
   edm::InputTag photon_tag_;   // 
   edm::InputTag electron_tag_; // 
   edm::InputTag jet_tag_;      // 
@@ -93,7 +94,6 @@ class PatExtractor : public edm::EDAnalyzer {
   std::string outFilename_;
   std::string inFilename_;
 
-  int nevts_;
 
   std::vector<std::string> m_settings_;
 
