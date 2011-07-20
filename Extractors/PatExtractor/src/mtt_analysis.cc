@@ -574,8 +574,8 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
   //count the b-tagged jets in the selected jets sample
   if (usebtaginfo) {
     for (int i=0; i<(int)JetsIdx.size(); i++) {
-      if(m_jet->getJetBTagProb_TCHE(i)>min_btag_TCHET_chi2) {
-	btaggedjets.push_back(i);
+      if(m_jet->getJetBTagProb_TCHE(JetsIdx[i])>min_btag_TCHET_chi2) {
+	btaggedjets.push_back(JetsIdx[i]);
       }
     }
   }//otherwise the vector of btagged jets stays empty
