@@ -575,7 +575,7 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
   if (usebtaginfo) {
     for (int i=0; i<(int)JetsIdx.size(); i++) {
       if(m_jet->getJetBTagProb_TCHE(JetsIdx[i])>min_btag_TCHET_chi2) {
-	btaggedjets.push_back(JetsIdx[i]);
+	btaggedjets.push_back(i);
       }
     }
   }//otherwise the vector of btagged jets stays empty
