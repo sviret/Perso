@@ -192,7 +192,7 @@ void PatExtractor::getInfo(int ievent)
   m_event->getInfo(ievent);
   
   if (do_HLT_)      m_HLT->getInfo(ievent);
-  if (do_MC_)       m_muon->getInfo(ievent);
+  if (do_MC_)       m_MC->getInfo(ievent);
   if (do_Trk_)      m_track->getInfo(ievent);
   if (do_Vertex_)   m_vertex->getInfo(ievent);
   if (do_MET_)      m_MET->getInfo(ievent);
