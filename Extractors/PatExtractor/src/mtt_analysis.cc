@@ -100,7 +100,7 @@ void mtt_analysis::reset(bool do_MC_)
   m_mtt_NGoodMuons=0;
   m_mtt_NLooseGoodMuons=0;
   m_mtt_isSel=0;
-  m_mtt_IsBestSolMatched=999;
+  m_mtt_IsBestSolMatched=0;
   m_mtt_NGoodElectrons=0;
   SelJetsIdx.clear();
   SelLeptIdx=-1;
@@ -633,7 +633,7 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
 	    jet4idx=j4;
 	    
 	    /// Try to find a matching solution
-	    if(do_MC_ && match_MC(JetsIdx[bjet1idx],JetsIdx[bjet2idx],JetsIdx[jet3idx],JetsIdx[jet4idx],LeptIdx,do_SemiMu_,m_MC,m_jet,m_electron,m_muon)){m_mtt_OneMatchedCombi = 1;}
+	    if(do_MC_ && match_MC(JetsIdx[bjet1idx],JetsIdx[bjet2idx],JetsIdx[jet3idx],JetsIdx[jet4idx],m_jet)){m_mtt_OneMatchedCombi = 1;}
 	      
 	    //here we use the method to actually calculate the chi2
 	    if(do_SemiMu_) {
@@ -749,7 +749,7 @@ void mtt_analysis::LoopOverCombinations(JetExtractor *m_jet,
       }
     }
 
-  if(do_MC_){m_mtt_IsBestSolMatched=match_MC(JetsIdx[bestbjet1idx],JetsIdx[bestbjet2idx],JetsIdx[bestjet3idx],JetsIdx[bestjet4idx],LeptIdx,do_SemiMu_,m_MC,m_jet,m_electron,m_muon);}
+  if(do_MC_){m_mtt_IsBestSolMatched=match_MC(JetsIdx[bestbjet1idx],JetsIdx[bestbjet2idx],JetsIdx[bestjet3idx],JetsIdx[bestjet4idx],m_jet);}
   if(do_ChoiceWKF_){  
     m_mtt_KFChi2=minkinfitchi2; 
   } else {
@@ -947,43 +947,19 @@ int mtt_analysis::match_MC(int idxJetbH,
                            int idxJetbL,
 			   int idxJet1,
 			   int idxJet2,
-			   int idxLepton,
-			   bool decayChannel,
-			   MCExtractor * m_MC,
-			   JetExtractor *m_jet,
-	       	           ElectronExtractor *m_electron,
-	                   MuonExtractor *m_muon)
+			   JetExtractor * m_jet)
 {
    if(
-      /// Ask if Jet b hadronique  come from a b and top
-      fabs(m_MC->getType(m_jet->getJetMCIndex(idxJetbH)))==5 &&
-      fabs(m_MC->getType(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJetbH))))==6 &&
-      
-      /// Ask if Jet b leptonique  come from a b and top
-      fabs(m_MC->getType(m_jet->getJetMCIndex(idxJetbL)))==5 &&
-      fabs(m_MC->getType(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJetbL))))==6 &&
-      
-      /// Ask if jet 1,2 come from light quark and W and top
-      fabs(m_MC->getType(m_jet->getJetMCIndex(idxJet1)))<5 && 
-      fabs(m_MC->getType(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJet1))))==24 &&
-      fabs(m_MC->getType(m_MC->getMom1Index(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJet1)))))==6 &&
-      fabs(m_MC->getType(m_jet->getJetMCIndex(idxJet2)))<5 && 
-      fabs(m_MC->getType(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJet2))))==24 &&
-      fabs(m_MC->getType(m_MC->getMom1Index(m_MC->getMom1Index(m_jet->getJetMCIndex(idxJet2)))))==6 /*&&
-           /// Ask if lepton come from W and top
-      (
-       (
-        fabs(m_MC->getType(m_muon->getMuMCIndex(idxLepton)))==13 &&
-        fabs(m_MC->getType(m_MC->getMom1Index(m_muon->getMuMCIndex(idxLepton))))==24 &&
-        fabs(m_MC->getType(m_MC->getMom1Index(m_MC->getMom1Index(m_muon->getMuMCIndex(idxLepton)))))==6
-       )
-       || 
-       (
-        fabs(m_MC->getType(m_electron->getEleMCIndex(idxLepton)))==11 &&
-        fabs(m_MC->getType(m_MC->getMom1Index(m_electron->getEleMCIndex(idxLepton))))==24 &&
-        fabs(m_MC->getType(m_MC->getMom1Index(m_MC->getMom1Index(m_electron->getEleMCIndex(idxLepton)))))==6
-       )
-      )*/
+      fabs(m_jet->getJetMCPdgId(idxJetbH))==5 &&
+      fabs(m_jet->getJetMCPdgIdMother(idxJetbH))==6 &&
+      fabs(m_jet->getJetMCPdgId(idxJetbL))==5 &&
+      fabs(m_jet->getJetMCPdgIdMother(idxJetbL))==6 &&
+      fabs(m_jet->getJetMCPdgId(idxJet1))<5 &&
+      fabs(m_jet->getJetMCPdgIdMother(idxJet1))==24 &&
+      fabs(m_jet->getJetMCPdgIdGdMother(idxJet1))==6 &&
+      fabs(m_jet->getJetMCPdgId(idxJet2))<5 &&
+      fabs(m_jet->getJetMCPdgIdMother(idxJet2))==24 &&
+      fabs(m_jet->getJetMCPdgIdGdMother(idxJet2))==6
       )
     {return 1;}
     else{return 0;}

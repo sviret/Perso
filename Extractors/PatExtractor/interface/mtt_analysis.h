@@ -86,12 +86,7 @@ class mtt_analysis
         int idxJetbL,
         int idxJet1,
         int idxJet2,
-        int idxLepton,
-        bool decayChannel,
-        MCExtractor * m_MC,
-        JetExtractor *m_jet,
-        ElectronExtractor *m_electron,
-        MuonExtractor *m_muon);
+        JetExtractor *m_jet);
 
     /// Lepton veto
     void LeptonVeto();

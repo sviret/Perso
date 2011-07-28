@@ -1,3 +1,7 @@
+2011-07-28 nicolas <beaupere@ipnl.in2p3.fr>
+       * changed MC matching algorithm in mtt_analysis : from Lyon's to PAT
+       * variable m_mtt_OneMatchedCombi and m_mtt_IsBestSolMatched use PAT MC matching
+
 2011-07-26 Seb Viret  <viret@in2p3.fr>
        *BugFix in PatExtractor::getInfo
 
