@@ -20,7 +20,8 @@ InfoExtractor::InfoExtractor(const edm::Run *run, const edm::EventSetup *setup)
 
 
 
-  m_tree    = new TTree("MIB_info","Run properties");  
+  m_tree    = new TTree("MIB_info","Run properties");
+  m_tree_ps = new TTree("PS_info","Prescale factors");  
 
   // Branches definition
 
@@ -28,16 +29,22 @@ InfoExtractor::InfoExtractor(const edm::Run *run, const edm::EventSetup *setup)
   m_tree->Branch("n_evt",           &nevent,"n_evt/I");
   m_tree->Branch("LBmin",           &m_LBmin,"LBmin/I");
   m_tree->Branch("LBmax",           &m_LBmax,"LBmax/I");
-  m_tree->Branch("L1_tech_pres",    &m_tech_trig_pre,"L1_tech_pres[64]/I");
   m_tree->Branch("L1_tech_mask",    &m_tech_trig_act,"L1_tech_mask[64]/I");
-  m_tree->Branch("L1_algo_pres",    &m_alg_trig_pre,"L1_algo_pres[128]/I");
   m_tree->Branch("L1_algo_mask",    &m_alg_trig_act,"L1_algo_mask[128]/I");
   m_tree->Branch("B1_bx_Imax",      &i_bx_B1,"B1_bx_Imax[3564]/F");
   m_tree->Branch("B2_bx_Imax",      &i_bx_B2,"B2_bx_Imax[3564]/F");
-
   m_tree->Branch("n_paths",  &m_n_HLTs,"n_paths/I");       
-  m_tree->Branch("HLT_vector","vector<string>",&m_HLT_vector);
+  m_tree->Branch("HLT_vector","vector<string>",&m_HLT_vector);  
+  m_tree->Branch("L1_tech_pres",    &m_tech_trig_pre,"L1_tech_pres[64]/I");
+  m_tree->Branch("L1_algo_pres",    &m_alg_trig_pre,"L1_algo_pres[128]/I");
   m_tree->Branch("HLT_pscale","vector<int>",&m_HLT_prescales);
+
+  m_tree_ps->Branch("LB_number",       &m_LBnum,"LB_number/I");
+  m_tree_ps->Branch("L1_tech_pres",    &m_tech_trig_pre,"L1_tech_pres[64]/I");
+  m_tree_ps->Branch("L1_algo_pres",    &m_alg_trig_pre,"L1_algo_pres[128]/I");
+  m_tree_ps->Branch("HLT_pscale","vector<int>",&m_HLT_prescales);
+
+
   // Set everything to 0
 
 
@@ -59,6 +66,8 @@ void InfoExtractor::writeInfo(const edm::LuminosityBlock *lumi)
     m_LBmax=m_LB;
   }
 
+  m_LBnum=m_LB;
+
   if (m_LBmin>m_LB)     m_LBmin=m_LB;
   if (m_LBmax<m_LB)     m_LBmax=m_LB;
 
@@ -68,14 +77,17 @@ void InfoExtractor::writeInfo(const edm::LuminosityBlock *lumi)
   
   if (!lumiDetails.isValid()) return;
 
-  //std::cout << lumiDetails->lumiBeam1Intensities().size() << std::endl;
-  //std::cout << lumiDetails->lumiBeam2Intensities().size() << std::endl;
+  //  std::cout << lumiDetails->lumiBeam1Intensities().size() << std::endl;
+  //  std::cout << lumiDetails->lumiBeam2Intensities().size() << std::endl;
 
   if (!lumiDetails->lumiBeam1Intensities().size()) return;
   if (!lumiDetails->lumiBeam2Intensities().size()) return;
   
   for (int i=0;i<3564;++i) 
   {
+    //    std::cout << lumiDetails->lumiBeam1Intensity(i) << std::endl;
+    //    std::cout << lumiDetails->lumiBeam2Intensity(i) << std::endl;
+
     if (lumiDetails->lumiBeam1Intensity(i)/10000000000. > i_bx_B1[i])
       i_bx_B1[i]=lumiDetails->lumiBeam1Intensity(i)/10000000000.;
 
@@ -107,7 +119,8 @@ void InfoExtractor::writeInfo(const edm::Event *event, const edm::EventSetup *se
     {    
       ++iBit;  
       m_alg_trig_pre[iBit] = (*cItBit); 
-      //std::cout << iBit << " / " << m_alg_trig_pre[iBit] << std::endl;
+      //if (m_alg_trig_pre[iBit])
+	//std::cout << iBit << " / " << m_alg_trig_pre[iBit] << std::endl;
     }
 
   iBit=-1;
@@ -171,6 +184,8 @@ void InfoExtractor::writeInfo(const edm::Event *event, const edm::EventSetup *se
 	found=(triggerNames.triggerName(i)).find("BeamHalo");
       
       if (int(found)==-1) continue;
+      //std::cout << triggerNames.triggerName(i) << " / " 
+      //		<< hltConfig.prescaleValue( *event, *setup,triggerNames.triggerName(i)) << std::endl;
 
       m_HLT_vector.push_back(triggerNames.triggerName(i));
       m_HLT_prescales.push_back(hltConfig.prescaleValue( *event, *setup,triggerNames.triggerName(i)));
@@ -220,4 +235,9 @@ void InfoExtractor::fillTree(int nevt)
   nevent=nevt;
 
   m_tree->Fill(); 
+}
+
+void InfoExtractor::fillPSTree()
+{
+  m_tree_ps->Fill(); 
 }

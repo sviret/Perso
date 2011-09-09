@@ -1,10 +1,12 @@
 #include "../interface/EventExtractor.h"
 
 
-EventExtractor::EventExtractor(const edm::EventSetup *setup)
+EventExtractor::EventExtractor(edm::InputTag tag, const edm::EventSetup *setup)
 {
   //std::cout << "EventExtractor objet is created" << std::endl;
 
+
+  m_tag = tag;
 
   // Tree definition
 
@@ -25,7 +27,6 @@ EventExtractor::EventExtractor(const edm::EventSetup *setup)
 
   m_tree->Branch("L1_tech_bits",    &m_tech_trig_ind,"L1_tech_bits[64]/I");
   m_tree->Branch("L1_algo_bits",    &m_alg_trig_ind,"L1_algo_bits[128]/I");
-
 
   // Set everything to 0
   
@@ -62,7 +63,7 @@ void EventExtractor::writeInfo(const edm::LuminosityBlock *lumi)
 // Method filling the main particle tree
 //
 
-void EventExtractor::writeInfo(const edm::Event *event) 
+void EventExtractor::writeInfo(const edm::Event *event, bool MC) 
 {
   EventExtractor::reset();
 
@@ -83,11 +84,11 @@ void EventExtractor::writeInfo(const edm::Event *event)
 
 
   edm::Handle<L1GlobalTriggerReadoutRecord> l1GtRR;
-  event->getByLabel("gtDigis",l1GtRR);
+  //event->getByLabel("gtDigis",l1GtRR);
+  event->getByLabel(m_tag,l1GtRR);
 
   L1GlobalTriggerReadoutRecord L1GTRR   = *l1GtRR.product();              
   DecisionWord gtDecisionWord           = L1GTRR.decisionWord();
-
 
   for (int iBit=0;iBit<128;++iBit) 
   {
@@ -110,7 +111,7 @@ void EventExtractor::writeInfo(const edm::Event *event)
     }
   */
 
-  m_selected=false;
+  if (!MC) m_selected=false;
 
   // Look at the technical bits
 
@@ -157,11 +158,12 @@ void EventExtractor::writeInfo(const edm::Event *event)
 	if (int(found)==-1) continue;
 
 	m_selected=true;
- 
+
+	/*
 	  std::cout <<  i
 	  << "trigger pass= " << triggerNames.triggerName(i)
 	  << std::endl;
-	
+	*/
 
 	m_HLT_vector.push_back(triggerNames.triggerName(i));
 	m_n_HLTs++;

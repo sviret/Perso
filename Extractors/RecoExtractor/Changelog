@@ -1,3 +1,13 @@
+2011-09-09  Seb Viret  <viret@in2p3.fr>
+ 
+       	* Possibility to change the L1Trigger record tag in EventExtractor 
+	(for MC compatibility) 
+
+	* A new tree, containing the good prescale values, is now filled in for each event
+	This is done in INFOExtractor and is necessary for run containing prescale changes
+
+	This version has been tested against CMSSW_4_2_4_patch1
+
 2011-06-24  Seb Viret  <viret@in2p3.fr>
  
        	* Adding a new class MCExtractor reading the info from

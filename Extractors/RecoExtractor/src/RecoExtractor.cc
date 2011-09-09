@@ -12,6 +12,7 @@ RecoExtractor::RecoExtractor(const edm::ParameterSet& config) :
   do_TRK_        (config.getUntrackedParameter<bool>("doTracks", false)),
   do_VTX_        (config.getUntrackedParameter<bool>("doVertices", false)),
   do_MC_         (config.getUntrackedParameter<bool>("doMC", false)),
+  EVT_tag_       (config.getParameter<edm::InputTag>("L1digi_tag")),
   PIX_tag_       (config.getParameter<edm::InputTag>("pixel_tag")),
   SST_tag_       (config.getParameter<edm::InputTag>("tracker_tag")),
   HF_tag_        (config.getParameter<edm::InputTag>("HF_tag")),
@@ -36,7 +37,7 @@ void RecoExtractor::beginRun(Run const& run, EventSetup const& setup)
 
   if (do_INFO_)  m_INFO     = new InfoExtractor(&run,&setup);
   if (do_MC_)    m_MC       = new MCExtractor(&setup);
-  if (do_EVT_)   m_EVT      = new EventExtractor(&setup);
+  if (do_EVT_)   m_EVT      = new EventExtractor(EVT_tag_,&setup);
   if (do_PIX_)   m_PIX      = new PixelExtractor(PIX_tag_,&setup);
   if (do_SST_)   m_SST      = new TrackerExtractor(SST_tag_,&setup);
   if (do_HF_)    m_HF       = new HFExtractor(HF_tag_,&setup);
@@ -58,7 +59,7 @@ void RecoExtractor::analyze(const edm::Event& event, const edm::EventSetup& setu
 
   if (do_EVT_)
   {
-    m_EVT->writeInfo(&event);
+    m_EVT->writeInfo(&event,do_MC_);
 
     if (!(m_EVT->isSelected()) && !do_MC_)
       return;
@@ -76,10 +77,17 @@ void RecoExtractor::analyze(const edm::Event& event, const edm::EventSetup& setu
   if (do_HF_)       m_HF->writeInfo(&event);
   if (do_TRK_)      m_TRK->writeInfo(&event,&setup);
   if (do_VTX_)      m_VTX->writeInfo(&event);
+  if (do_INFO_)     m_INFO->fillPSTree();
 
   ++nevent;
 }
  
+
+void RecoExtractor::endLuminosityBlock(const edm::LuminosityBlock& lumi, const edm::EventSetup & setup )
+{
+  doItOnce = true;
+}
+
 void RecoExtractor::endRun(Run const&, EventSetup const&) {
   
 

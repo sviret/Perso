@@ -38,6 +38,7 @@ class RecoExtractor : public edm::EDAnalyzer{
   /// Method called before the event loop
   void beginRun(edm::Run const&, edm::EventSetup const&);
   void beginLuminosityBlock(const edm::LuminosityBlock&, const edm::EventSetup&);
+  void endLuminosityBlock(const edm::LuminosityBlock&, const edm::EventSetup&);
 
   /// Method called once per event
   void analyze(const edm::Event&, const edm::EventSetup& );

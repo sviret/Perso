@@ -30,18 +30,19 @@ class EventExtractor
 
  public:
 
-  EventExtractor(const edm::EventSetup *setup);
+  EventExtractor(edm::InputTag tag, const edm::EventSetup *setup);
   ~EventExtractor();
 
 
   void writeInfo(const edm::LuminosityBlock *lumi); 
-  void writeInfo(const edm::Event *event); 
+  void writeInfo(const edm::Event *event, bool MC); 
   void reset();
   bool isSelected();
 
  private:
   
   TTree* m_tree;
+  edm::InputTag m_tag;
 
   bool  m_selected;
 
@@ -59,6 +60,7 @@ class EventExtractor
 
   int   m_tech_trig_ind[64]; // L1 Technical triggers firing the event
   int   m_alg_trig_ind[128]; // L1 Algo triggers firing the event
+
 
   float i_bx_B1_now[3564];   // Beam1 intensity map for the event
   float i_bx_B2_now[3564];   // Beam2 intensity map for the event

@@ -13,6 +13,8 @@ MIBextraction = cms.EDAnalyzer("RecoExtractor",
   # Main stuff
   doINFO           = cms.untracked.bool(True),      
   doEvent          = cms.untracked.bool(True),
+  L1digi_tag       = cms.InputTag( "gtDigis" ),                           
+
   doMC             = cms.untracked.bool(False),
                 
   # Add Pixel information                              
