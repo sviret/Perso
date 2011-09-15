@@ -1,7 +1,7 @@
 #include "../interface/TrackExtractor.h"
 
 
-TrackExtractor::TrackExtractor(edm::InputTag tag, const edm::EventSetup *setup)
+TrackExtractor::TrackExtractor(edm::InputTag tag)
 {
   //std::cout << "TrackExtractor objet is created" << std::endl;
 

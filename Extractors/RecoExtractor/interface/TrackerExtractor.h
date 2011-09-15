@@ -35,12 +35,13 @@ class TrackerExtractor
 
  public:
 
-  TrackerExtractor(edm::InputTag tag, const edm::EventSetup *setup);
+  TrackerExtractor(edm::InputTag tag);
   ~TrackerExtractor();
 
 
   //  void writeInfo(const reco::Tracker *part, int index); 
   void writeInfo(const edm::Event *event, const edm::EventSetup *setup); 
+  void init(const edm::EventSetup *setup); 
 
   void reset();
   void fillTree(); 

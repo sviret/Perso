@@ -61,12 +61,12 @@ class MCExtractor
 {
  public:
   /// Constructor
-  MCExtractor(const edm::EventSetup *setup);
+  MCExtractor();
   /// Destructor
   virtual ~MCExtractor(){}
 
   void writeInfo(const edm::Event *event); 
-
+  void init(const edm::EventSetup *setup);
 
   void reset();
   void fillTree(); 

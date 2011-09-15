@@ -36,6 +36,7 @@ class RecoExtractor : public edm::EDAnalyzer{
   virtual ~RecoExtractor(){ }
  
   /// Method called before the event loop
+  void beginJob();
   void beginRun(edm::Run const&, edm::EventSetup const&);
   void beginLuminosityBlock(const edm::LuminosityBlock&, const edm::EventSetup&);
   void endLuminosityBlock(const edm::LuminosityBlock&, const edm::EventSetup&);
@@ -46,6 +47,8 @@ class RecoExtractor : public edm::EDAnalyzer{
   /// Method called at the end of the event loop
   void endRun(edm::Run const&, edm::EventSetup const&);
   
+  void endJob();
+
  private:
 
   int nevent;

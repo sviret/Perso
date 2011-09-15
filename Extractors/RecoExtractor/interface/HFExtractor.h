@@ -33,10 +33,11 @@ class HFExtractor
 
  public:
 
-  HFExtractor(edm::InputTag tag, const edm::EventSetup *setup);
+  HFExtractor(edm::InputTag tag);
   ~HFExtractor();
 
   void writeInfo(const edm::Event *event); 
+  void init(const edm::EventSetup *setup); 
 
   void reset();
   void fillTree(); 

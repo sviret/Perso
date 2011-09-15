@@ -1,14 +1,12 @@
 #include "../interface/TrackerExtractor.h"
 
 
-TrackerExtractor::TrackerExtractor(edm::InputTag tag, const edm::EventSetup *setup)
+TrackerExtractor::TrackerExtractor(edm::InputTag tag)
 {
   //std::cout << "TrackerExtractor objet is created" << std::endl;
 
 
   m_tag = tag;
-
-  setup->get<TrackerDigiGeometryRecord>().get(theTrackerGeometry);
 
   // Tree definition
 
@@ -31,6 +29,10 @@ TrackerExtractor::~TrackerExtractor()
 {}
 
 
+void TrackerExtractor::init(const edm::EventSetup *setup)
+{
+  setup->get<TrackerDigiGeometryRecord>().get(theTrackerGeometry);
+}
 
 //
 // Method filling the main particle tree

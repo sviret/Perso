@@ -1,30 +1,18 @@
 #include "../interface/InfoExtractor.h"
 
 
-InfoExtractor::InfoExtractor(const edm::Run *run, const edm::EventSetup *setup)
+InfoExtractor::InfoExtractor()
 {
   InfoExtractor::reset();
 
-  //std::cout << "InfoExtractor objet is created" << std::endl;
-
-  m_l1GtUtils.retrieveL1EventSetup(*setup);
-
-  const std::string processName = "HLT"; 
-  bool changed(true);
-
-  hltConfig.init( *run, *setup, processName, changed );
-
-
-
   // Tree definition
-
-
 
   m_tree    = new TTree("MIB_info","Run properties");
   m_tree_ps = new TTree("PS_info","Prescale factors");  
 
   // Branches definition
 
+  m_tree->Branch("run_number",      &m_run,"run_number/I");
   m_tree->Branch("n_LB",            &m_nLB,"n_LB/I");
   m_tree->Branch("n_evt",           &nevent,"n_evt/I");
   m_tree->Branch("LBmin",           &m_LBmin,"LBmin/I");
@@ -43,11 +31,20 @@ InfoExtractor::InfoExtractor(const edm::Run *run, const edm::EventSetup *setup)
   m_tree_ps->Branch("L1_tech_pres",    &m_tech_trig_pre,"L1_tech_pres[64]/I");
   m_tree_ps->Branch("L1_algo_pres",    &m_alg_trig_pre,"L1_algo_pres[128]/I");
   m_tree_ps->Branch("HLT_pscale","vector<int>",&m_HLT_prescales);
+}
 
 
-  // Set everything to 0
 
+void InfoExtractor::init(const edm::Run *run, const edm::EventSetup *setup)
+{
+  m_l1GtUtils.retrieveL1EventSetup(*setup);
 
+  const std::string processName = "HLT"; 
+  bool changed(true);
+
+  hltConfig.init( *run, *setup, processName, changed );
+
+  InfoExtractor::reset();
 }
 
 InfoExtractor::~InfoExtractor()
@@ -103,6 +100,10 @@ void InfoExtractor::writeInfo(const edm::LuminosityBlock *lumi)
 void InfoExtractor::writeInfo(const edm::Event *event, const edm::EventSetup *setup) 
 {
 
+  m_run = (event->id()).run();
+  m_n_HLTs = 0;
+  m_HLT_vector.clear();
+  m_HLT_prescales.clear();
 
   int err = -1;
 
@@ -199,9 +200,10 @@ void InfoExtractor::writeInfo(const edm::Event *event, const edm::EventSetup *se
 
 void InfoExtractor::reset()
 {
-
+  m_run        = 0;
   nevent       = 0;
   m_nLB        = 0;
+  m_LBnum      = 0;
   m_LBmin      = -1;
   m_LBmax      = -1;
 

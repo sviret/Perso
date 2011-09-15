@@ -1,7 +1,7 @@
 #include "../interface/EventExtractor.h"
 
 
-EventExtractor::EventExtractor(edm::InputTag tag, const edm::EventSetup *setup)
+EventExtractor::EventExtractor(edm::InputTag tag)
 {
   //std::cout << "EventExtractor objet is created" << std::endl;
 

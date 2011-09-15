@@ -1,29 +1,8 @@
 #include "../interface/MCExtractor.h"
 
 
-MCExtractor::MCExtractor(const edm::EventSetup *setup)
+MCExtractor::MCExtractor()
 {
-  //std::cout << "MCExtractor objet is created" << std::endl;
-
-  //
-  // Initializations 
-  //
-
-  // Here we build the whole detector
-  // We need that to retrieve all the hits
-
-  setup->get<TrackerDigiGeometryRecord>().get(theTrackerGeometry);
-  setup->get<MuonGeometryRecord>().get(dtGeometry);
-  setup->get<MuonGeometryRecord>().get(cscGeometry);
-  setup->get<MuonGeometryRecord>().get(rpcGeometry);
-  setup->get<CaloGeometryRecord>().get(caloGeometry);
-
-  HEgeom = caloGeometry->getSubdetectorGeometry(DetId::Hcal, HcalEndcap);
-  HBgeom = caloGeometry->getSubdetectorGeometry(DetId::Hcal, HcalBarrel);
-  HFgeom = caloGeometry->getSubdetectorGeometry(DetId::Hcal, HcalForward);
-  EEgeom = caloGeometry->getSubdetectorGeometry(DetId::Ecal, EcalEndcap);
-  EBgeom = caloGeometry->getSubdetectorGeometry(DetId::Ecal, EcalBarrel);
-
 
   //
   // Tree definition
@@ -69,6 +48,30 @@ MCExtractor::MCExtractor(const edm::EventSetup *setup)
 
   MCExtractor::reset();
 
+}
+
+void MCExtractor::init(const edm::EventSetup *setup)
+{
+  //std::cout << "MCExtractor objet is created" << std::endl;
+
+  //
+  // Initializations 
+  //
+
+  // Here we build the whole detector
+  // We need that to retrieve all the hits
+
+  setup->get<TrackerDigiGeometryRecord>().get(theTrackerGeometry);
+  setup->get<MuonGeometryRecord>().get(dtGeometry);
+  setup->get<MuonGeometryRecord>().get(cscGeometry);
+  setup->get<MuonGeometryRecord>().get(rpcGeometry);
+  setup->get<CaloGeometryRecord>().get(caloGeometry);
+
+  HEgeom = caloGeometry->getSubdetectorGeometry(DetId::Hcal, HcalEndcap);
+  HBgeom = caloGeometry->getSubdetectorGeometry(DetId::Hcal, HcalBarrel);
+  HFgeom = caloGeometry->getSubdetectorGeometry(DetId::Hcal, HcalForward);
+  EEgeom = caloGeometry->getSubdetectorGeometry(DetId::Ecal, EcalEndcap);
+  EBgeom = caloGeometry->getSubdetectorGeometry(DetId::Ecal, EcalBarrel);
 }
 
 //

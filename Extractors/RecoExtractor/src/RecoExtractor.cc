@@ -25,24 +25,31 @@ RecoExtractor::RecoExtractor(const edm::ParameterSet& config) :
 
 
 
-
-
-
-void RecoExtractor::beginRun(Run const& run, EventSetup const& setup) 
+void RecoExtractor::beginJob() 
 {
   m_file     = new TFile(outFilename_.c_str(),"RECREATE");
 
   nevent       = 0;
   doItOnce     = true;
 
-  if (do_INFO_)  m_INFO     = new InfoExtractor(&run,&setup);
-  if (do_MC_)    m_MC       = new MCExtractor(&setup);
-  if (do_EVT_)   m_EVT      = new EventExtractor(EVT_tag_,&setup);
-  if (do_PIX_)   m_PIX      = new PixelExtractor(PIX_tag_,&setup);
-  if (do_SST_)   m_SST      = new TrackerExtractor(SST_tag_,&setup);
-  if (do_HF_)    m_HF       = new HFExtractor(HF_tag_,&setup);
-  if (do_TRK_)   m_TRK      = new TrackExtractor(TRK_tag_,&setup);
+  if (do_INFO_)  m_INFO     = new InfoExtractor();
+  if (do_MC_)    m_MC       = new MCExtractor();
+  if (do_EVT_)   m_EVT      = new EventExtractor(EVT_tag_);
+  if (do_PIX_)   m_PIX      = new PixelExtractor(PIX_tag_);
+  if (do_SST_)   m_SST      = new TrackerExtractor(SST_tag_);
+  if (do_HF_)    m_HF       = new HFExtractor(HF_tag_);
+  if (do_TRK_)   m_TRK      = new TrackExtractor(TRK_tag_);
   if (do_VTX_)   m_VTX      = new VertexExtractor(VTX_tag_);
+}
+
+
+void RecoExtractor::beginRun(Run const& run, EventSetup const& setup) 
+{
+  if (do_INFO_)  m_INFO->init(&run,&setup);
+  if (do_MC_)    m_MC->init(&setup);
+  if (do_PIX_)   m_PIX->init(&setup);
+  if (do_SST_)   m_SST->init(&setup);
+  if (do_HF_)    m_HF->init(&setup);
 }
 
 
@@ -93,12 +100,18 @@ void RecoExtractor::endRun(Run const&, EventSetup const&) {
 
   if (do_INFO_) m_INFO->fillTree(nevent);
 
+  //std::cout << "Total # of events      = "<< nevent  << std::endl;
+
+}
+
+void RecoExtractor::endJob() {
+  
+
   std::cout << "Total # of events      = "<< nevent  << std::endl;
 
   m_file->Write();
   m_file->Close();  
 }
-
     
    
   

@@ -1,15 +1,12 @@
 #include "../interface/HFExtractor.h"
 
 
-HFExtractor::HFExtractor(edm::InputTag tag, const edm::EventSetup *setup)
+HFExtractor::HFExtractor(edm::InputTag tag)
 {
   //std::cout << "HFExtractor objet is created" << std::endl;
 
 
   m_tag = tag;
-
-  setup->get<CaloGeometryRecord>().get(caloGeometry);
-  HFgeom = caloGeometry->getSubdetectorGeometry(DetId::Hcal, HcalForward);
 
   // Tree definition
 
@@ -36,6 +33,11 @@ HFExtractor::~HFExtractor()
 {}
 
 
+void HFExtractor::init(const edm::EventSetup *setup)
+{
+  setup->get<CaloGeometryRecord>().get(caloGeometry);
+  HFgeom = caloGeometry->getSubdetectorGeometry(DetId::Hcal, HcalForward);
+}
 
 //
 // Method filling the main particle tree

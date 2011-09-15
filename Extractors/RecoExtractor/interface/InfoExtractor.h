@@ -30,10 +30,10 @@ class InfoExtractor
 
  public:
 
-  InfoExtractor(const edm::Run *run, const edm::EventSetup *setup);
+  InfoExtractor();
   ~InfoExtractor();
 
-
+  void init(const edm::Run *run, const edm::EventSetup *setup); 
   void writeInfo(const edm::Event *event, const edm::EventSetup *setup); 
   void writeInfo(const edm::LuminosityBlock *lumi);
   void reset();
@@ -50,8 +50,9 @@ class InfoExtractor
   HLTConfigProvider   hltConfig;
   L1GtUtils           m_l1GtUtils;
 
+  int   m_run;               // Run number (we are working on fill basis now)
   int   m_nLB;               // Number of lumi blocks (LB) analyzed
-  int   m_LBnum;               //
+  int   m_LBnum;             //
   int   m_LBmin;             // First LB number
   int   m_LBmax;             // Last LB number
   int   m_tech_trig_pre[64]; // L1 Prescale factors for technical bits 

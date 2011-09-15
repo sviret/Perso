@@ -39,10 +39,11 @@ class PixelExtractor
 
  public:
 
-  PixelExtractor(edm::InputTag tag, const edm::EventSetup *setup);
+  PixelExtractor(edm::InputTag tag);
   ~PixelExtractor();
 
 
+  void init(const edm::EventSetup *setup);
   //  void writeInfo(const reco::Pixel *part, int index); 
   void writeInfo(const edm::Event *event); 
 

@@ -1,14 +1,9 @@
 #include "../interface/PixelExtractor.h"
 
 
-PixelExtractor::PixelExtractor(edm::InputTag tag, const edm::EventSetup *setup)
+PixelExtractor::PixelExtractor(edm::InputTag tag)
 {
-  //std::cout << "PixelExtractor objet is created" << std::endl;
-
-
   m_tag = tag;
-
-  setup->get<TrackerDigiGeometryRecord>().get(theTrackerGeometry);
 
   // Tree definition
 
@@ -34,6 +29,10 @@ PixelExtractor::~PixelExtractor()
 {}
 
 
+void PixelExtractor::init(const edm::EventSetup *setup)
+{
+  setup->get<TrackerDigiGeometryRecord>().get(theTrackerGeometry);
+}
 
 //
 // Method filling the main particle tree

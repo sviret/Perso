@@ -30,7 +30,7 @@ class EventExtractor
 
  public:
 
-  EventExtractor(edm::InputTag tag, const edm::EventSetup *setup);
+  EventExtractor(edm::InputTag tag);
   ~EventExtractor();
 
 

@@ -33,7 +33,7 @@ class TrackExtractor
 
  public:
 
-  TrackExtractor(edm::InputTag tag, const edm::EventSetup *setup);
+  TrackExtractor(edm::InputTag tag);
   ~TrackExtractor();
 
 
