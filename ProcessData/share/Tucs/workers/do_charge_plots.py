@@ -36,7 +36,7 @@ class do_charge_plots(ReadGenericCalibration):
     numberEventCut = None
     ftDict         = None
 
-    def __init__(self, processingDir='/tmp/sviret',nfiles=1):
+    def __init__(self, processingDir='/tmp/sviret',bitnumber=5,nfiles=1):
         self.processingDir  = processingDir
         self.ftDict         = {}
         self.events         = set()
@@ -44,9 +44,10 @@ class do_charge_plots(ReadGenericCalibration):
         self.BBTool         = MIBTools()
         self.nfiles         = nfiles
         self.canvases       = []
+        self.bit            = bitnumber
         self.dir            = getPlotDirectory()
         
-        for ii in range(12):
+        for ii in range(5):
             acanvas = src.MakeCanvas.MakeCanvas()
             acanvas.SetFrameFillColor(0)
             acanvas.SetFillColor(0);
@@ -95,24 +96,14 @@ class do_charge_plots(ReadGenericCalibration):
 
             print "...Analyze run",run
 
-            self.mcharge_PIX     = []
-            self.mcharge_PIX_SST = []
-            self.asym_PIX        = []
-            self.asym_HF         = []
-            self.asym_HF_PIX     = []
-
-            for k in range(3):
-                self.mcharge_PIX.append(ROOT.TH1F('Plot_1D_%d'%(k), '',600, 2000., 500000.))
-                self.mcharge_PIX_SST.append(ROOT.TH2F('Plot_2D_%d'%(k), '',600, 2000., 500000.,600, 10., 2000.))       
-                self.asym_HF_PIX.append(ROOT.TH2F('hfasym_vs_pixasym_%d'%(k),'',100, -.1, 1.1,100, -.1, 1.1))       
-                self.asym_HF.append(ROOT.TH1F('hfasym_vs_clus_%d'%(k),'',100, -.1, 1.1))            
-                self.asym_PIX.append(ROOT.TH1F('pixasym_vs_clus_%d'%(k),'',100, -.1, 1.1))
+            self.mcharge_PIX     = ROOT.TH1F('Plot_1D', '',600, 2000., 500000.)
+            self.mcharge_PIX_SST = ROOT.TH2F('Plot_2D', '',600, 2000., 500000.,600, 10., 2000.)    
+            self.asym_HF_PIX     = ROOT.TH2F('hfasym_vs_pixasym','',100, -.1, 1.1,100, -.1, 1.1)      
+            self.asym_HF         = ROOT.TH1F('hfasym_vs_clus','',100, -.1, 1.1)            
+            self.asym_PIX        = ROOT.TH1F('pixasym_vs_clus','',100, -.1, 1.1)
 
             
             # Get the numbers of the reference bunch crossings information
-
-            #self.sbeam1_ref_bx = self.BBTool.GetREFBCIDs(1,run)
-            #self.sbeam2_ref_bx = self.BBTool.GetREFBCIDs(2,run)
 
             self.sbeam1_ref_bx = self.BBTool.GetUnpairedBCIDs(1,run)
             self.sbeam2_ref_bx = self.BBTool.GetUnpairedBCIDs(2,run)
@@ -142,7 +133,7 @@ class do_charge_plots(ReadGenericCalibration):
                     if t2.PHYS==0:
                         continue
                                        
-                    if not t2.L1_algo_bits[4] and not t2.L1_algo_bits[5]:
+                    if not t2.L1_algo_bits[self.bit]:
                         continue
 
                     is_B1   = t2.L1_tech_bits[5]
@@ -203,27 +194,11 @@ class do_charge_plots(ReadGenericCalibration):
 
                     # Finally do some plots
 
-                    if t2.L1_algo_bits[4]:
-                        self.mcharge_PIX[0].Fill(m_ch_PIX)
-                        self.mcharge_PIX_SST[0].Fill(m_ch_PIX,m_ch_SST)                                 
-                        self.asym_HF_PIX[0].Fill(asym_hf,asym_pix)
-                        self.asym_PIX[0].Fill(asym_pix)
-                        self.asym_HF[0].Fill(asym_hf)
-                            
-                    if t2.L1_algo_bits[5]:  
-                        self.mcharge_PIX[1].Fill(m_ch_PIX)
-                        self.mcharge_PIX_SST[1].Fill(m_ch_PIX,m_ch_SST)                                 
-                        self.asym_HF_PIX[1].Fill(asym_hf,asym_pix)
-                        self.asym_PIX[1].Fill(asym_pix)
-                        self.asym_HF[1].Fill(asym_hf)
-
-                    if t2.L1_algo_bits[4] and t2.L1_algo_bits[5]:  
-                        self.mcharge_PIX[2].Fill(m_ch_PIX)
-                        self.mcharge_PIX_SST[2].Fill(m_ch_PIX,m_ch_SST)                                 
-                        self.asym_HF_PIX[2].Fill(asym_hf,asym_pix)
-                        self.asym_PIX[2].Fill(asym_pix)
-                        self.asym_HF[2].Fill(asym_hf)  
-
+                    self.mcharge_PIX.Fill(m_ch_PIX)
+                    self.mcharge_PIX_SST.Fill(m_ch_PIX,m_ch_SST)                                 
+                    self.asym_HF_PIX.Fill(asym_hf,asym_pix)
+                    self.asym_PIX.Fill(asym_pix)
+                    self.asym_HF.Fill(asym_hf)
 
             print "Now do some plots"
             
@@ -231,86 +206,85 @@ class do_charge_plots(ReadGenericCalibration):
             ROOT.gStyle.SetStatX(0.78)
             ROOT.gStyle.SetStatY(0.83)
 
-            for k in range(3):
-                self.plot_name = "Charge_2D_%d_%d"%(k,run)
-                self.canvases[k].cd()
-                self.canvases[k].SetLogx(1)
-                self.canvases[k].SetLogy(1)
-                self.mcharge_PIX_SST[k].GetXaxis().SetTitle("Mean PixB cluster charge");            
-                self.mcharge_PIX_SST[k].GetXaxis().SetTitleSize(0.05);
-                self.mcharge_PIX_SST[k].GetXaxis().SetTitleOffset(1.1);
-                self.mcharge_PIX_SST[k].GetYaxis().SetTitle("Mean TIB cluster charge");
-                self.mcharge_PIX_SST[k].GetYaxis().SetTitleSize(0.05);
-                self.mcharge_PIX_SST[k].GetYaxis().SetTitleOffset(1.16);
-                self.mcharge_PIX_SST[k].GetXaxis().SetRangeUser(2000.,600000.)
-                self.mcharge_PIX_SST[k].GetYaxis().SetRangeUser(10.,3000.)
-                self.mcharge_PIX_SST[k].SetMarkerStyle(1)
-                self.mcharge_PIX_SST[k].Draw()
-                self.canvases[k].Modified()
-                self.canvases[k].Print("%s/%s.png" % (self.dir,self.plot_name))
-                self.canvases[k].Print("%s/%s.C" % (self.dir,self.plot_name))
-                self.canvases[k].Print("%s/%s.eps" % (self.dir,self.plot_name))
-        
-
-                self.plot_name = "Charge_1D_%d_%d"%(k,run)
-                self.canvases[k+3].cd()
-                self.canvases[k+3].SetLogy(1)
-                self.mcharge_PIX[k].GetXaxis().SetTitle("Mean PixB cluster charge");            
-                self.mcharge_PIX[k].GetXaxis().SetTitleSize(0.05);
-                self.mcharge_PIX[k].GetXaxis().SetTitleOffset(1.1);
-                self.mcharge_PIX[k].GetXaxis().SetRangeUser(2000.,600000.)
-                self.mcharge_PIX[k].GetYaxis().SetRangeUser(0.5,10000.)
-                self.mcharge_PIX[k].Draw()
-                self.canvases[k+3].Modified()
-                self.canvases[k+3].Print("%s/%s.png" % (self.dir,self.plot_name))
-                self.canvases[k+3].Print("%s/%s.C" % (self.dir,self.plot_name))
-                self.canvases[k+3].Print("%s/%s.eps" % (self.dir,self.plot_name))
+            self.plot_name = "Charge_2D_%d_%d"%(self.bit,run)
+            self.canvases[0].cd()
+            self.canvases[0].SetLogx(1)
+            self.canvases[0].SetLogy(1)
+            self.mcharge_PIX_SST.GetXaxis().SetTitle("Mean PixB cluster charge");            
+            self.mcharge_PIX_SST.GetXaxis().SetTitleSize(0.05);
+            self.mcharge_PIX_SST.GetXaxis().SetTitleOffset(1.1);
+            self.mcharge_PIX_SST.GetYaxis().SetTitle("Mean TIB cluster charge");
+            self.mcharge_PIX_SST.GetYaxis().SetTitleSize(0.05);
+            self.mcharge_PIX_SST.GetYaxis().SetTitleOffset(1.16);
+            self.mcharge_PIX_SST.GetXaxis().SetRangeUser(2000.,600000.)
+            self.mcharge_PIX_SST.GetYaxis().SetRangeUser(10.,3000.)
+            self.mcharge_PIX_SST.SetMarkerStyle(20)
+            self.mcharge_PIX_SST.Draw()
+            self.canvases[0].Modified()
+            self.canvases[0].Print("%s/%s.png" % (self.dir,self.plot_name))
+            self.canvases[0].Print("%s/%s.C" % (self.dir,self.plot_name))
+            self.canvases[0].Print("%s/%s.eps" % (self.dir,self.plot_name))
             
-                self.plot_name = "HF_vs_PIX_%d_%d"%(k,run)
-                self.canvases[k+6].cd()
-                self.asym_HF_PIX[k].GetXaxis().SetTitle("HF asymetry");            
-                self.asym_HF_PIX[k].GetXaxis().SetTitleSize(0.05);
-                self.asym_HF_PIX[k].GetXaxis().SetTitleOffset(1.1);
-                self.asym_HF_PIX[k].GetYaxis().SetTitle("PIX asymetry");
-                self.asym_HF_PIX[k].GetYaxis().SetTitleSize(0.05);
-                self.asym_HF_PIX[k].GetYaxis().SetTitleOffset(1.16);
-                self.asym_HF_PIX[k].SetMarkerStyle(20)
-                self.asym_HF_PIX[k].Draw()
-                self.canvases[k+6].Modified()
-                self.canvases[k+6].Print("%s/%s.png" % (self.dir,self.plot_name))
-                self.canvases[k+6].Print("%s/%s.C" % (self.dir,self.plot_name))
-                self.canvases[k+6].Print("%s/%s.eps" % (self.dir,self.plot_name))
-                
-                self.plot_name = "HF_asym_%d_%d"%(k,run)
-                self.canvases[k+7].cd()
-                #self.canvases[k+7].SetLogy(1)
-                self.asym_HF[k].GetXaxis().SetTitle("HF asymetry");            
-                self.asym_HF[k].GetXaxis().SetTitleSize(0.05);
-                self.asym_HF[k].GetXaxis().SetTitleOffset(1.1);
-                self.asym_HF[k].GetYaxis().SetTitle("HF multiplicity");
-                self.asym_HF[k].GetYaxis().SetTitleSize(0.05);
-                self.asym_HF[k].GetYaxis().SetTitleOffset(1.16);
-                self.asym_HF[k].Draw()
-                
-                self.canvases[k+7].Modified()
-                self.canvases[k+7].Print("%s/%s.png" % (self.dir,self.plot_name))
-                self.canvases[k+7].Print("%s/%s.C" % (self.dir,self.plot_name))
-                self.canvases[k+7].Print("%s/%s.eps" % (self.dir,self.plot_name))
-                
-                self.plot_name = "PIX_asym_%d_%d"%(k,run)
-                self.canvases[k+8].cd()
-                self.asym_PIX[k].GetXaxis().SetTitle("PIX asymetry");            
-                self.asym_PIX[k].GetXaxis().SetTitleSize(0.05);
-                self.asym_PIX[k].GetXaxis().SetTitleOffset(1.1);
-                self.asym_PIX[k].GetYaxis().SetTitle("PIX multiplicity");
-                self.asym_PIX[k].GetYaxis().SetTitleSize(0.05);
-                self.asym_PIX[k].GetYaxis().SetTitleOffset(1.16);
-                self.asym_PIX[k].Draw()
-                
-                self.canvases[k+8].Modified()
-                self.canvases[k+8].Print("%s/%s.png" % (self.dir,self.plot_name))
-                self.canvases[k+8].Print("%s/%s.C" % (self.dir,self.plot_name))
-                self.canvases[k+8].Print("%s/%s.eps" % (self.dir,self.plot_name))            
+            
+            self.plot_name = "Charge_1D_%d_%d"%(self.bit,run)
+            self.canvases[1].cd()
+            self.canvases[1].SetLogy(1)
+            self.mcharge_PIX.GetXaxis().SetTitle("Mean PixB cluster charge");            
+            self.mcharge_PIX.GetXaxis().SetTitleSize(0.05);
+            self.mcharge_PIX.GetXaxis().SetTitleOffset(1.1);
+            self.mcharge_PIX.GetXaxis().SetRangeUser(2000.,600000.)
+            self.mcharge_PIX.GetYaxis().SetRangeUser(0.5,10000.)
+            self.mcharge_PIX.Draw()
+            self.canvases[1].Modified()
+            self.canvases[1].Print("%s/%s.png" % (self.dir,self.plot_name))
+            self.canvases[1].Print("%s/%s.C" % (self.dir,self.plot_name))
+            self.canvases[1].Print("%s/%s.eps" % (self.dir,self.plot_name))
+            
+            self.plot_name = "HF_vs_PIX_%d_%d"%(self.bit,run)
+            self.canvases[2].cd()
+            self.asym_HF_PIX.GetXaxis().SetTitle("HF asymetry");            
+            self.asym_HF_PIX.GetXaxis().SetTitleSize(0.05);
+            self.asym_HF_PIX.GetXaxis().SetTitleOffset(1.1);
+            self.asym_HF_PIX.GetYaxis().SetTitle("PIX asymetry");
+            self.asym_HF_PIX.GetYaxis().SetTitleSize(0.05);
+            self.asym_HF_PIX.GetYaxis().SetTitleOffset(1.16);
+            self.asym_HF_PIX.SetMarkerStyle(20)
+            self.asym_HF_PIX.Draw()
+            self.canvases[2].Modified()
+            self.canvases[2].Print("%s/%s.png" % (self.dir,self.plot_name))
+            self.canvases[2].Print("%s/%s.C" % (self.dir,self.plot_name))
+            self.canvases[2].Print("%s/%s.eps" % (self.dir,self.plot_name))
+            
+            self.plot_name = "HF_asym_%d_%d"%(self.bit,run)
+            self.canvases[3].cd()
+            #self.canvases[7].SetLogy(1)
+            self.asym_HF.GetXaxis().SetTitle("HF asymetry");            
+            self.asym_HF.GetXaxis().SetTitleSize(0.05);
+            self.asym_HF.GetXaxis().SetTitleOffset(1.1);
+            self.asym_HF.GetYaxis().SetTitle("HF multiplicity");
+            self.asym_HF.GetYaxis().SetTitleSize(0.05);
+            self.asym_HF.GetYaxis().SetTitleOffset(1.16);
+            self.asym_HF.Draw()
+            
+            self.canvases[3].Modified()
+            self.canvases[3].Print("%s/%s.png" % (self.dir,self.plot_name))
+            self.canvases[3].Print("%s/%s.C" % (self.dir,self.plot_name))
+            self.canvases[3].Print("%s/%s.eps" % (self.dir,self.plot_name))
+            
+            self.plot_name = "PIX_asym_%d_%d"%(self.bit,run)
+            self.canvases[4].cd()
+            self.asym_PIX.GetXaxis().SetTitle("PIX asymetry");            
+            self.asym_PIX.GetXaxis().SetTitleSize(0.05);
+            self.asym_PIX.GetXaxis().SetTitleOffset(1.1);
+            self.asym_PIX.GetYaxis().SetTitle("PIX multiplicity");
+            self.asym_PIX.GetYaxis().SetTitleSize(0.05);
+            self.asym_PIX.GetYaxis().SetTitleOffset(1.16);
+            self.asym_PIX.Draw()
+            
+            self.canvases[4].Modified()
+            self.canvases[4].Print("%s/%s.png" % (self.dir,self.plot_name))
+            self.canvases[4].Print("%s/%s.C" % (self.dir,self.plot_name))
+            self.canvases[4].Print("%s/%s.eps" % (self.dir,self.plot_name))            
                 
         self.ftDict = {}
 

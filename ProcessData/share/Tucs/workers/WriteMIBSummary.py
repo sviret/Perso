@@ -62,14 +62,14 @@ class WriteMIBSummary(ReadGenericCalibration):
         self.bx1     = array( 'i', [ 0 ] )        
         self.bx2     = array( 'i', [ 0 ] )        
         self.bxcoll  = array( 'i', [ 0 ] )        
-        self.nevts   = array( 'i', 6*[ 0 ] )
+        self.nevts   = array( 'i', 128*[ 0 ] )
         self.mdist   = array( 'i', [ 0 ] )
 
         self.occur   = array( 'i', 3564*5*[ 0 ] )
         self.trk     = array( 'i', 3564*[ 0 ] )
         self.vtx     = array( 'i', 3564*[ 0 ] )
         
-        self.totSize = 6*2*5
+        self.totSize = 128*2*5
         
         self.tot_rates = array( 'f', self.totSize*[ 0. ] )
         self.rates     = array( 'f', 200*self.totSize*[ 0. ] )
@@ -78,7 +78,6 @@ class WriteMIBSummary(ReadGenericCalibration):
         self.erates     = array( 'f', 200*self.totSize*[ 0. ] )
         
         self.presc_a   = array( 'i', 128*[ 0. ] )
-        self.presc_t   = array( 'i', 64*[ 0. ] )
         
         self.to.Branch('nslices',self.nslices,'nslices/I')
         self.to.Branch('tspan',self.tspan,'tspan/I')
@@ -87,7 +86,7 @@ class WriteMIBSummary(ReadGenericCalibration):
         self.to.Branch('bx1',self.bx1,'bx1/I')
         self.to.Branch('bx2',self.bx2,'bx2/I')
         self.to.Branch('bxcoll',self.bxcoll,'bxcoll/I')
-        self.to.Branch('nevents',self.nevts,'nevents[6]/I')
+        self.to.Branch('nevents',self.nevts,'nevents[128]/I')
         self.to.Branch('mdist',self.mdist,'mdist/I')
         self.to.Branch('occur',self.occur,'occur[17820]/I')
         self.to.Branch('tracks',self.trk,'occur[3564]/I')
@@ -95,10 +94,9 @@ class WriteMIBSummary(ReadGenericCalibration):
 
 
         self.to.Branch('algo_prescale',self.presc_a,'algo_prescale[128]/I')
-        self.to.Branch('tech_prescale',self.presc_t,'tech_prescale[64]/I')
         
-        self.to.Branch('rates',self.tot_rates,'rates[60]/F')
-        self.to.Branch('rates_vs_t',self.rates,'rates_vs_t[12000]/F')
+        self.to.Branch('rates',self.tot_rates,'rates[1280]/F')
+        self.to.Branch('rates_vs_t',self.rates,'rates_vs_t[256000]/F')
 
         
     def ProcessRegion(self, region):
@@ -112,7 +110,7 @@ class WriteMIBSummary(ReadGenericCalibration):
             if type!=2: # Just look at tech bit rates for now
                 continue
 
-            if bit<3 or bit>8:
+            if bit==0:
                 continue
                 
             if not event.data.has_key('is_OK'):
@@ -127,17 +125,9 @@ class WriteMIBSummary(ReadGenericCalibration):
                 self.bx1[0]     = event.data['BX1']    
                 self.bx2[0]     = event.data['BX2']    
                 self.bxcoll[0]  = event.data['BXcoll']
-                self.nevts[0]   = event.data['N3']
-                self.nevts[1]   = event.data['N4']
-                self.nevts[2]   = event.data['N5']
-                self.nevts[3]   = event.data['N6']
-                self.nevts[4]   = 0
-                self.nevts[5]   = event.data['N8']
                 self.doitonce   = True
 
-                #print event.data['max_time'] 
-
-                self.mdist[0]      =  event.data['max_time'] 
+                self.mdist[0]   =  event.data['max_time'] 
 
                 for ii in range(5*self.mdist[0]):
                     self.occur[ii] = event.data['occurences'][ii]
@@ -147,20 +137,16 @@ class WriteMIBSummary(ReadGenericCalibration):
                     self.vtx[ii] = event.data['vertices'][ii]
 
 
-                for ii in range(64):
-                    self.presc_t[ii] = event.data['t_presc'][ii]
-
-                for ii in range(128):
-                    self.presc_a[ii] = event.data['a_presc'][ii]
-
+            self.presc_a[bit-1] = event.data['a_presc']
+            self.nevts[bit-1]   = event.data['Nevt']
 
             for k in range(5):
-      
-                index = 10*(bit-3)+5*(beam-1)+k
+
+                index = 10*(bit-1)+5*(beam-1)+k
                 self.tot_rates[index]=event.data['bb_rate'][k]
 
                 for i in range(event.data['n_slices']):
-                    index = self.totSize*i+10*(bit-3)+5*(beam-1)+k
+                    index = self.totSize*i+10*(bit-1)+5*(beam-1)+k
                     self.rates[index]=event.data['bb_rate_tslice']\
                                        [event.data['n_slices']*k+i]
             

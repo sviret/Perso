@@ -241,10 +241,10 @@ def constructMIB_DQ():
 
         # 64 technical bits
         if ("Tech" in partition.GetHash()):
-            tbits = set([Region('Bit%02d' % x) for x in range(0, 63)])
+            tbits = set([Region('Bit%03d' % x) for x in range(0, 63)])
 
         if ("Algo" in partition.GetHash()):
-            tbits = set([Region('Bit%02d' % x) for x in range(0, 128)])
+            tbits = set([Region('Bit%03d' % x) for x in range(0, 128)])
         
         # and make them children of the partition
         partition.SetChildren(tbits)

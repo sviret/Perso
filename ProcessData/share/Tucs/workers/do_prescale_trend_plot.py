@@ -46,7 +46,7 @@ class do_prescale_trend_plot(GenericWorker):
 
     def __init__(self, pixcut=0, doEps=False):
         self.doEps    = doEps
-        self.bit      = 4
+        self.bit      = 5
         self.pixc     = pixcut
         self.dir      = getPlotDirectory()
         self.events1  = set()
@@ -109,8 +109,8 @@ class do_prescale_trend_plot(GenericWorker):
         max_var  = 0
                     
         for event in self.events1:
-            if max_var<math.fabs(event.data['presc_a'][4]):
-                max_var = event.data['presc_a'][4] 
+            if max_var<math.fabs(event.data['presc_a']):
+                max_var = event.data['presc_a'] 
 
         if max_var == 0: # No events there
             return
@@ -120,7 +120,7 @@ class do_prescale_trend_plot(GenericWorker):
         graph_lim = 1.2*max_var    
 
 
-        tmp = "Bit_4 prescale evolution"
+        tmp = "Bit_5 prescale evolution"
         self.plot_name1 = "prescale_4_history"
                                   
         self.hhist_1 = ROOT.TH2F(self.plot_name1, self.plot_name1,\
@@ -149,7 +149,7 @@ class do_prescale_trend_plot(GenericWorker):
         
         for event in self.events1: # fill the histogram                    
             self.hhist_1.Fill((event.data['t_start']+event.data['t_stop'])/2.-self.time_min,\
-                              event.data['presc_a'][4])
+                              event.data['presc_a'])
 
         # Then draw it...
                 

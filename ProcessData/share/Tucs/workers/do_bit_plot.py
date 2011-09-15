@@ -113,9 +113,9 @@ class do_bit_plot(GenericWorker):
 
         graph_lim   = max(1.4*max_rate_B1,1.4*max_rate_B2)
             
-        tmp  = "Norm. rate for Tech.Bit%d"%(self.bit)
+        tmp  = "Norm. rate for Algo.Bit%d (in 10^11 Hz/p)"%(self.bit)
         
-        self.plot_name = "bit_%d_rate_run_%d_%d"%(self.bit,self.run,self.pixc)
+        self.plot_name = "bit_%d_rate_fill_%d_%d"%(self.bit,self.run,self.pixc)
         
         self.c1.SetFrameFillColor(0)
         self.c1.SetFillColor(0);
@@ -179,12 +179,18 @@ class do_bit_plot(GenericWorker):
         
         l = ROOT.TLatex()
         l.SetNDC();
-        l.SetTextFont(72);
-        l.DrawLatex(0.1922,0.867,"CMS");
+        l.SetTextFont(72)
+        l.DrawLatex(0.1922,0.867,"CMS")
         
         l2 = ROOT.TLatex()
-        l2.SetNDC();
-        l2.DrawLatex(0.1922,0.811,"Preliminary");
+        l2.SetNDC()
+        l2.DrawLatex(0.1922,0.811,"Preliminary")
+
+        leg = ROOT.TLegend(0.7,0.83,0.88,0.97,"","brNDC")
+        leg.SetFillColor(0)
+        leg.AddEntry("Channel_hist_B1","BEAM 1","p");
+        leg.AddEntry("Channel_hist_B2","BEAM 2","p");
+        leg.Draw()
         
         self.c1.Modified()  
         

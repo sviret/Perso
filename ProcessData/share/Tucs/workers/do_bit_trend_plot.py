@@ -44,10 +44,11 @@ class do_bit_trend_plot(GenericWorker):
 
     c1 = src.MakeCanvas.MakeCanvas()
 
-    def __init__(self, bit=34, pixcut=0, doEps=False):
+    def __init__(self, bit=34, pixcut=0, evtcut=0, doEps=False):
         self.doEps    = doEps
         self.bit      = bit
         self.pixc     = pixcut
+        self.evtc     = evtcut        
         self.dir      = getPlotDirectory()
         self.events1  = set()
         self.events2  = set()
@@ -75,23 +76,23 @@ class do_bit_trend_plot(GenericWorker):
             if self.bit != bit:
                 continue
 
-            if bit<3 or bit>8:
-                continue
-
             if event.runNumber not in self.run_list:
                 self.run_list.append(event.runNumber)
 
             if event.data.has_key('is_OK') and event.data['t_start']!=0 and event.data['bb_rate'][self.pixc]>0.1:    
 
+                if event.data['nevts']<self.evtc:
+                    continue
+
                 if beam == 1:                
                     self.events1.add(event)
-
+                        
                 if beam == 2:                
                     self.events2.add(event)
 
                 if self.time_min>event.data['t_start']:
                     self.time_min = event.data['t_start']                    
-                            
+                    
                 if self.time_max<event.data['t_stop']:
                     self.time_max = event.data['t_stop']
 
@@ -113,26 +114,10 @@ class do_bit_trend_plot(GenericWorker):
         # Then we do the graphs
                 
         max_var  = 0
-
-        mean_val_1=0.
-        mean_val_2=0.
-
-        std_val_1=0.
-        std_val_2=0.
-        
-        n_val_1=0.
-        n_val_2=0.    
-                    
+                      
         for event in self.events1:
             if event.data['bb_rate'][self.pixc]==0:
                 continue
-
-            #if (self.bit==5 and self.pixc==0):
-            #    print max_var
-            #    print event.data['bb_rate'][self.pixc]
-
-            mean_val_1 += event.data['bb_rate'][self.pixc]
-            n_val_1    += 1.
             
             if max_var<math.fabs(event.data['bb_rate'][self.pixc]):
                 max_var = math.fabs(event.data['bb_rate'][self.pixc])
@@ -140,97 +125,22 @@ class do_bit_trend_plot(GenericWorker):
         for event in self.events2:
             if event.data['bb_rate'][self.pixc]==0:
                 continue
-
-            mean_val_2 += event.data['bb_rate'][self.pixc]
-            n_val_2    += 1.
             
             if max_var<math.fabs(event.data['bb_rate'][self.pixc]):
                 max_var = math.fabs(event.data['bb_rate'][self.pixc])
 
         if max_var == 0: # No events there
             return
-
-
-
             
-        if (n_val_1<1 or n_val_2<1):
-            return
-
-        mean_val_1 /= n_val_1
-        mean_val_2 /= n_val_2
-
-        #if (self.bit==5):
-        #    print mean_val_1,mean_val_2
           
-        for event in self.events1:
-            if event.data['bb_rate'][self.pixc]==0:
-                continue
-
-            std_val_1 += (event.data['bb_rate'][self.pixc]-mean_val_1)\
-                         *(event.data['bb_rate'][self.pixc]-mean_val_1)
-
-        for event in self.events2:
-            if event.data['bb_rate'][self.pixc]==0:
-                continue
-
-            std_val_2 += (event.data['bb_rate'][self.pixc]-mean_val_2)\
-                         *(event.data['bb_rate'][self.pixc]-mean_val_2)
-
-        if (n_val_1>1):
-            std_val_1=math.sqrt(std_val_1/(n_val_1-1))
-
-        if (n_val_2>1):
-            std_val_2=math.sqrt(std_val_2/(n_val_2-1))
-            
-        n_val_1=0.
-        n_val_2=0.
-             
-        mean_val_1_1=0.
-        mean_val_2_1=0.
-        
-        for event in self.events1:
-            
-            if event.data['bb_rate'][self.pixc]==0:
-                continue
-
-            var = math.fabs(event.data['bb_rate'][self.pixc]-mean_val_1)
-
-            if (var < 2.*std_val_1):
-                mean_val_1_1 += event.data['bb_rate'][self.pixc]
-                n_val_1    += 1.
-                                        
-        for event in self.events2:
-            if event.data['bb_rate'][self.pixc]==0:
-                continue
-
-            var = math.fabs(event.data['bb_rate'][self.pixc]-mean_val_2)
-
-            if (var < 2.*std_val_2):
-                mean_val_2_1 += event.data['bb_rate'][self.pixc]
-                n_val_2    += 1.
-
-
-        if (n_val_1<1 or n_val_2<1):
-            return
-
-        mean_val_1_1 /= n_val_1
-        mean_val_2_1 /= n_val_2
-        
-        limit_1 = 1.5*mean_val_1_1
-        limit_2 = 1.5*mean_val_2_1
-
-        
         # Cosmetics (Part 2): the partition graph itself
 
         graph_lim = 1.1*max_var
             
-        #graph_lim = max(limit_1,limit_2)
-        #graph_lim = 10./(self.pixc+1)  
-
-        tmp = "Bit %d evolution" % (self.bit)
+        tmp = "Algo. Bit %d evolution (in 10^11 Hz/p)" % (self.bit)
         self.plot_name1 = "bit_%d_history_%d_1" % (self.bit,self.pixc)
         self.plot_name2 = "bit_%d_history_%d_2" % (self.bit,self.pixc)
-                                  
+           
         self.hhist_1 = ROOT.TH2F(self.plot_name1, self.plot_name1,\
                                  500, 0, self.time_max-self.time_min+1, 100, 0.0, graph_lim)
                                  
@@ -292,6 +202,12 @@ class do_bit_trend_plot(GenericWorker):
         l2.SetNDC();
         l2.DrawLatex(0.1922,0.811,"Preliminary");
             
+        leg = ROOT.TLegend(0.7,0.13,0.88,0.27,"","brNDC")
+        leg.SetFillColor(0)
+        leg.AddEntry(self.plot_name1,"BEAM 1","p");
+        leg.AddEntry(self.plot_name2,"BEAM 2","p");
+        leg.Draw()
+        
         self.c1.Modified()  
         
         self.c1.Print("%s/%s.png" % (self.dir,self.plot_name1))

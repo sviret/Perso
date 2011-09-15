@@ -44,7 +44,7 @@ cd $TOP
 
 
 # List of summary rootuples stored on lxplus
-runlist=`ls $FINALSTORDIR | grep run_1 | grep .root | sed 's/MIB_summary_run_//g;s/.root//g;'`
+runlist=`ls $FINALSTORDIR | grep fill_ | grep .root | sed 's/MIB_summary_fill_//g;s/.root//g;'`
 
 
 # Then launch the run-by-run analysis
@@ -55,12 +55,14 @@ runlist=`ls $FINALSTORDIR | grep run_1 | grep .root | sed 's/MIB_summary_run_//g
 for f in $runlist
 do
   rm $RELDIR/$STEP/batch/TMP_FILES/run_${f}_DQ.sh
-  is_there=`ls $FINALDIR | grep R$f | wc -l`
+  is_there=`ls $FINALDIR | grep F$f | wc -l`
   
+  fill_runlist=`grep $f the_list.txt`
+
   if [ $is_there = 0 ]; then
       echo $f
       echo "#\!/bin/bash" > $RELDIR/$STEP/batch/TMP_FILES/run_${f}_DQ.sh
-      echo "source $RELDIR/$STEP/batch/data_run_monitor.sh $f $RELDIR $FINALDIR" >> $RELDIR/$STEP/batch/TMP_FILES/run_${f}_DQ.sh
+      echo "source $RELDIR/$STEP/batch/data_run_monitor.sh $fill_runlist $RELDIR $FINALDIR" >> $RELDIR/$STEP/batch/TMP_FILES/run_${f}_DQ.sh
       chmod 755 $RELDIR/$STEP/batch/TMP_FILES/run_${f}_DQ.sh
       if [ "$BATCH" = "BATCH" ]; then      
 	  bsub -q 1nh -e /dev/null -o /tmp/${LOGNAME}_out.txt $RELDIR/$STEP/batch/TMP_FILES/run_${f}_DQ.sh
@@ -73,7 +75,7 @@ done
 #
 # Done via the script data_trend_monitor.sh
 
-runlist2=`ls $FINALSTORDIR | grep run_1 | grep .root | sed ':start /^.*$/N;s/\n/','/g; t start' | sed 's/MIB_summary_run_//g;s/.root//g;'`
+runlist2=`ls $FINALSTORDIR | grep fill_ | grep .root | sed ':start /^.*$/N;s/\n/','/g; t start' | sed 's/MIB_summary_fill_//g;s/.root//g;'`
 
 echo $runlist2
 

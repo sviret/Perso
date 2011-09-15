@@ -283,15 +283,17 @@ def getRunInfo(dbsession,c,runnum,lmin):
         if split_start[2]=='AM':
             t_start += (int(h_start[0])%12)*3600
         else:
-            t_start += int(h_start[0])*3600+12*3600
+            t_start += (int(h_start[0])%12)*3600+12*3600
 
         if split_stop[2]=='AM':
             t_stop += (int(h_stop[0])%12)*3600
         else:
-            t_stop += int(h_stop[0])*3600+12*3600
+            t_stop += (int(h_stop[0])%12)*3600+12*3600
 
         
         run_length = (t_stop-t_start)/3600
+
+        #print runnum, split_start, split_stop, t_start, t_stop, run_length        
 
         if run_length < lmin:
             return [True,'']
@@ -346,14 +348,16 @@ def getRunList(dbsession,c,runnum):
 
         runval = 0
 
-        minlength=0.5
+        minlength=0.0
     
         while cursor.next():
             run = cursor.currentRow()['runnumber'].data()
             
+
             if runval!=run:
 
                 runval=run
+
 
 
                 # First check that the run lasts at least 30 minutes
@@ -367,7 +371,7 @@ def getRunList(dbsession,c,runnum):
 
                 L1key  = run_result[1]
                 HLTkey = HLTkey_ForRun(dbsession,c,run)
-        
+                FILLnum= FillNum_ForRun(dbsession,c,run)
                 if 'collisions' not in L1key:
                     continue
                 
@@ -377,7 +381,7 @@ def getRunList(dbsession,c,runnum):
                 if '2760GeV' in HLTkey:
                     continue
                 
-                #print run,HLTkey        
+                print FILLnum,run,L1key,HLTkey        
 
                 list_run.append(run)
 
@@ -423,27 +427,31 @@ def main():
         connectstring=connectparser.fullfrontierStr(connectparser.schemaname(),p.parameterdict())
 
         
-    lastrun  = args.runnumber
+    lastfillrun1  = args.runnumber
 
-    run_list = [] # The list of runs we will get
+    run_list  = [] # The list of runs we will get
+    fill_list = [] # The list of fills we will get
  
     f=open('the_list.txt','r+') # The list of runs we start from 
 
     for line in f:
         if '1' in line:
             split = line.split(' ')[0:]
-            lastrun = split[0] 
-            split2 = lastrun.split('_')[0:]
-            lastrun = split2[0] 
+            lastfill        = split[0]
+            lastfillrunlist = split[1].split('_')  
+            lastfilllastrun = lastfillrunlist[len(lastfillrunlist)-2] 
 
-    print 'Last run in the current list is',lastrun
+            #print lastfillrunlist
+
+
+    print 'Last fill treated is ',lastfill,' with first run ', lastfilllastrun
     print '...we start from there...'
 
     svc=coral.ConnectionService()
     session=svc.connect(connectstring,accessMode=coral.access_ReadOnly)
 
     is_ok = True
-    firstrun = int(lastrun)+1
+    firstrun = int(int(lastfilllastrun))
 
     run_list=getRunList(session,c,firstrun)
     run_list.sort()
@@ -451,13 +459,34 @@ def main():
     #print run_list
 
     for run in run_list:        
-        if FillNum_ForRun(session,c,run) == '0':
+
+        fillnum = FillNum_ForRun(session,c,run)
+
+        if fillnum == '0':
             continue
         
-        if FillNum_ForRun(session,c,run) == 'None':
+        if fillnum == 'None':
             continue
-        
-        f.write("\n%d_EXTR0_SKIM0 %s"%(run,FillNum_ForRun(session,c,run)))
+
+        if fillnum not in fill_list:
+            fill_list.append(FillNum_ForRun(session,c,run))
+
+    fill_list.sort()
+
+    for fill in fill_list:  
+
+        if fill == lastfill:
+            for run in run_list:        
+                if FillNum_ForRun(session,c,run) == fill:
+                    f.write("%d_"%(run))
+
+        else:
+            f.write("\n%s "%(fill))
+
+            for run in run_list:        
+                if FillNum_ForRun(session,c,run) == fill:
+                    f.write("%d_"%(run))
+
     
     del session
     del svc

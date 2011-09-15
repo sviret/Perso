@@ -46,7 +46,7 @@ class do_bunches_trend_plot(GenericWorker):
 
     def __init__(self, doEps=False):
         self.doEps    = doEps
-        self.bit      = 4
+        self.bit      = 5
         self.dir      = getPlotDirectory()
         self.events   = set()
         self.run_list = []
@@ -108,8 +108,8 @@ class do_bunches_trend_plot(GenericWorker):
                     
         for event in self.events:
 
-            if event.data['BX1']>500:
-                print event.runNumber
+            #if event.data['BX1']>500:
+            #    print event.runNumber
             
             if max_var<math.fabs(event.data['BX1']):
                 max_var = math.fabs(event.data['BX1'])

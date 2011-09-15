@@ -1,6 +1,6 @@
 ############################################################
 #
-# do_single_run_html.py
+# do_single_fill_html.py
 #
 ############################################################
 #
@@ -9,14 +9,14 @@
 # November 23, 2010
 #
 # Goal: Creates an html page to display the results 
-#       for run ******
+#       for fill ******
 #
-# Name of the page: Run_******_background_DQM.html
+# Name of the page: Fill_******_background_DQM.html
 #
 # Input parameters are:
 #
-# -> runnum: the CMS run number
-#   DEFAULT is 143187
+# -> fillnum: the CMS fill number
+#   DEFAULT is 2083
 #
 # For more info, have a look at the CMS MIB webpage:
 # 
@@ -28,11 +28,12 @@ from src.GenericWorker import *
 import time
 import math
 
-class do_single_run_html(GenericWorker):
+class do_single_fill_html(GenericWorker):
     "Compute history plot"
 
-    def __init__(self, runnum=143187):
-        self.run      = runnum            
+    def __init__(self, fillnum=143187, runlist=[]):
+        self.fill     = fillnum
+        self.list     = runlist        
         self.BBTool   = MIBTools()
         self.doItonce = False
 
@@ -42,17 +43,15 @@ class do_single_run_html(GenericWorker):
         self.nBxc     = 0        
         self.rDur     = 0        
 
-        self.presc_a  = [0 for x in range(128)]
+        self.presc_a  = [0 for x in range(129)]
         
-        self.rates_B1 = [0 for x in range(3)]
-        self.rates_B2 = [0 for x in range(3)]
-        self.nevts    = [0 for x in range(3)]
-
-        self.prescale = 666
+        self.rates_B1 = [0 for x in range(129)]
+        self.rates_B2 = [0 for x in range(129)]
+        self.nevts    = [0 for x in range(129)]
 
         # We start to write the html code
         
-        self.filename="Fill_%d_background_DQM.html"%(self.run)
+        self.filename="Fill_%d_background_DQM.html"%(self.fill)
 
         self.htm = open(self.filename,"w")
 
@@ -86,7 +85,7 @@ class do_single_run_html(GenericWorker):
         self.htm.write("<div id='pagelogo'>\n")
         self.htm.write("  <a style='background-image: url(http://sviret.web.cern.ch/sviret/pub/skins/pmwiki/pmwiki-32.gif);'\n")
 
-        text = "     href='http://sviret.web.cern.ch/sviret/Welcome.php' title=\"MIB summary for FILL %d\"></a>\n"%self.run
+        text = "     href='http://sviret.web.cern.ch/sviret/Welcome.php' title=\"MIB summary for FILL %d\"></a>\n"%self.fill
         self.htm.write(text)
         
         self.htm.write("</div><!-- id='pagelogo' -->\n")
@@ -100,14 +99,26 @@ class do_single_run_html(GenericWorker):
         self.htm.write("\n")         
         self.htm.write("      <div id='wikitext'>\n")
         
-        text = "	<h1>Standard analysis for fill <strong>%d</strong></h1>\n"%self.run
+        text = "	<h1>Standard analysis for fill <strong>%d</strong></h1>\n"%self.fill
         self.htm.write(text)
         
         self.htm.write("	<h2>Basic information</h2>\n")
         text = "	<p>Information for this fill is available on WBM by following <a target='_blank'  class='urllink' href='https://cmswbm.web.cern.ch/cmswbm/cmsdb/servlet/FillReport?FILL="
-        text_s = "%s%d' title='' rel='nofollow'>this link</a>.<br /><br />\n"%(text,self.run)            
+        text_s = "%s%d' title='' rel='nofollow'>this link</a>.<br /><br />\n"%(text,self.fill)            
         self.htm.write(text_s)
+    
+        index      = 0
 
+        for run in self.list:
+
+            if index==0:
+                text="List of runs contained in the fill: <a target='_blank'  class='urllink' href='https://cmswbm.web.cern.ch/cmswbm/cmsdb/servlet/RunSummary?RUN=%d' title='' rel='nofollow'><strong>%d</strong></a>"%(run,run)
+            else:                
+                text=", <a target='_blank'  class='urllink' href='https://cmswbm.web.cern.ch/cmswbm/cmsdb/servlet/RunSummary?RUN=%d' title='' rel='nofollow'><strong>%d</strong></a>"%(run,run)
+
+            self.htm.write(text)
+            index=index+1
+        self.htm.write("<br /><br />\n")     
         
     def ProcessRegion(self, region):
                           
@@ -119,10 +130,10 @@ class do_single_run_html(GenericWorker):
             if not event.data.has_key('is_OK'):
                 continue
     
-            if event.runNumber != self.run:
+            if event.runNumber != self.fill:
                 continue
                 
-            [type, tbit, beam] = self.BBTool.GetNumber(event.data['region'])
+            [type, bit, beam] = self.BBTool.GetNumber(event.data['region'])
 
 
             if not self.doItonce:
@@ -134,45 +145,41 @@ class do_single_run_html(GenericWorker):
                 self.rDur     = (event.data['t_stop']-event.data['t_start'])/60.
                 self.nLB      = event.data['n_slices']
                 self.tslice   = event.data['slice_length']/60.
-                
-                for k in range(128):
-                    self.presc_a[k] = event.data['presc_a'][k]                    
-                    
-                self.doItonce=True
-                    
-            self.nevts[0] = event.data['nevts_2']
-            self.nevts[1] = event.data['nevts_4']
-            self.nevts[2] = event.data['nevts_5']
+                self.doItonce = True
+
+            self.presc_a[bit] = event.data['presc_a']                                        
+            self.nevts[bit]   = event.data['nevts']
                
             if beam==1:
-                self.rates_B1[tbit-2]  = event.data['bb_rate'][0]
+                self.rates_B1[bit]  = event.data['bb_rate'][0]
           
             if beam==2:
-                self.rates_B2[tbit-2]  = event.data['bb_rate'][0]
+                self.rates_B2[bit]  = event.data['bb_rate'][0]
    
 
     def ProcessStop(self):
 
         # Then we do the graphs
 
-        text="Fill duration (in min): %.1f<br />\n"%(self.rDur)
+        text="Fill duration (in min): <strong>%.1f</strong><br />\n"%(self.rDur)
         self.htm.write(text)                  
         self.htm.write("Number of bunches:<br /></p>\n")
         text="<ul><li>Beam 1: <strong>%d</strong></li>\n"%(self.nBx1)
         self.htm.write(text)
         text="<li>Beam 2: <strong>%d</strong></li>\n"%(self.nBx2)
         self.htm.write(text)
-        text="<li>Colliding: <strong>%d</strong></li>\n"%(self.nBxc)
-        self.htm.write(text)
-        text="<li><a target='_blank'  class='urllink' href='http://sviret.web.cern.ch/sviret/Images/CMS/MIB/Monitor/Rootuples/2011/BCID_list_%d.txt' title='' rel='nofollow'><strong>Filling scheme info for this fill</strong></a></li></ul>\n"%(self.run)
+        text="<li>Colliding: <strong>%d</strong></li></ul>\n"%(self.nBxc)
         self.htm.write(text)
         
-        self.htm.write("<p>In order to further remove albedo effect, we are only using the bunches which are in front of bunch trains, of far enough from the last colliding bunch crossing (more than 1. microsecond (40 bunch crossings)). Their list is provided in the text file linked previously</p>\n")
+        self.htm.write("<p>In order to further remove albedo effect, we are only using the bunches which are in front of bunch trains, of far enough from the last colliding bunch crossing (more than 1. microsecond (40 bunch crossings)). Their list is provided in the text file linked below</p>\n")
+
+        text="<a target='_blank'  class='urllink' href='http://sviret.web.cern.ch/sviret/Images/CMS/MIB/Monitor/Rootuples/2011/BCID_list_%d.txt' title='' rel='nofollow'><strong>Filling scheme info for the fill</strong></a>\n"%(self.fill)
+        self.htm.write(text)
         
         self.htm.write("<div class='vspace'></div>\n")
         self.htm.write("<h2>Overall normalized rates (given in Hz/10<sup>11</sup>p)</h2>\n")
 
-        self.htm.write("<p>Rate calculation is described on <a target='_blank'  class='urllink' href='http://sviret.web.cern.ch/sviret/Welcome.php?n=CMS.MIBMonitorHowTo' title='' rel='nofollow'>this page</a>. The bit numbers given here corresponds to algo bits, which are described on <a target='_blank'  class='urllink' https://twiki.cern.ch/twiki/bin/view/CMS/GlobalTriggerAvailableMenus' title='' rel='nofollow'>this page</a>.</p>\n")
+        self.htm.write("<p>Rate calculation is described on <a target='_blank'  class='urllink' href='http://sviret.web.cern.ch/sviret/Welcome.php?n=CMS.MIBMonitorHowTo' title='' rel='nofollow'>this page</a>. The bit numbers given here corresponds to algo bits, which are described on <a target='_blank'  class='urllink' href='https://twiki.cern.ch/twiki/bin/view/CMS/GlobalTriggerAvailableMenus' title='' rel='nofollow'>this page</a>.</p>\n")
 
         self.htm.write("<p>The prescale value given is the one measured at the start of the fill. Prescale value changes during the fill are taken into account in the rate normalization</p>\n")
         
@@ -180,39 +187,49 @@ class do_single_run_html(GenericWorker):
         self.htm.write("<table align='center' border='1' cellpadding='5' cellspacing='0' >\n")
         self.htm.write("<tr>\n")
         self.htm.write("<td id='GreyCell'  valign='top'> Bit number</td>\n")
-        self.htm.write("<td id='GreyCell'  valign='top'> 2 (BGas HF BEAM1)</td>\n")
-        self.htm.write("<td id='GreyCell'  valign='top'> 4 (BGas HF BEAM2)</td>\n")
-        self.htm.write("<td id='GreyCell'  valign='top'> 5 (BGas_HF)</td>\n")
-        #self.htm.write("<td id='GreyCell'  valign='top'> 8 (BHalo)</td>\n")
-        self.htm.write("</tr>\n")
 
+        for i in range(10):
+
+            if self.nevts[i]==0:
+                continue
+
+            self.htm.write("<td id='GreyCell'  valign='top'> %d </td>\n"%i)
+
+        self.htm.write("</tr>\n")
         self.htm.write("<tr>\n")
         self.htm.write("<td id='GreyCell'  valign='top'> <strong>L1*HLT prescale</strong></td>\n")
 
-        for i in range(3):
+        for i in range(10):
+            
+            if self.nevts[i]==0:
+                continue
             
             if self.presc_a[i]==1:
                 self.htm.write("<td id='Code' align='center'  valign='top'> %d</td>\n"%self.presc_a[i])
             else:
                 self.htm.write("<td id='RedCell' align='center'  valign='top'> %d</td>\n"%self.presc_a[i])
 
-        self.htm.write("</tr>\n")
-        
+        self.htm.write("</tr>\n")        
         self.htm.write("<tr>\n")
         self.htm.write("<td id='GreyCell'  valign='top'> <strong>Nevts used</strong></td>\n")
 
-        for i in range(3):
+        for i in range(10):
+            
+            if self.nevts[i]==0:
+                continue
             
             self.htm.write("<td id='Code' align='center'  valign='top'> %d</td>\n"%self.nevts[i])
             
         self.htm.write("</tr>\n")        
-
         self.htm.write("<tr>\n")
         self.htm.write("<td id='GreyCell'  valign='top'> <strong>BEAM1</strong></td>\n")
 
 
-        for i in range(3):
+        for i in range(10):
 
+            if self.nevts[i]==0:
+                continue
+            
             if self.rates_B1[i]>0.1:
                 self.htm.write("<td id='Code' align='center'  valign='top'> %.2f</td>\n"%self.rates_B1[i])
             else:
@@ -223,7 +240,10 @@ class do_single_run_html(GenericWorker):
         self.htm.write("<td id='GreyCell'  valign='top'> <strong>BEAM2</strong></td>\n")
 
 
-        for i in range(3):
+        for i in range(10):
+
+            if self.nevts[i]==0:
+                continue
 
             if self.rates_B2[i]>0.1:
                 self.htm.write("<td id='Code' align='center'  valign='top'> %.2f</td>\n"%self.rates_B2[i])
@@ -236,10 +256,11 @@ class do_single_run_html(GenericWorker):
         self.htm.write("<br>\n")
 
 
-        #self.WriteAlbedo()
+        if self.nevts[6]!=0:
+            self.WriteAlbedo()
 
         
-        if self.rates_B1[2]>0.1 or self.rates_B2[2]>0.1:
+        if self.rates_B1[5]>0.1 or self.rates_B2[5]>0.1:
         
             self.WritePIX_SST_HF()
             self.WriteTRK_VTX()
@@ -247,15 +268,9 @@ class do_single_run_html(GenericWorker):
             self.htm.write(" <div class='vspace'></div><h2>Rate evolution during fill (if applicable)</h2>\n")
             self.htm.write("<p><br clear='all' /></p>\n")
 
-            for i in range(3):
-
-                bitname = "%d"%(2+i)
-                realbitname = bitname
-                if i!=0:
-                    realbitname = "%d"%(3+i)
-            
-                if self.rates_B1[i]>0.1 or self.rates_B2[i]>0.1:
-                    self.WriteInfo(bitname,realbitname)
+        for i in range(10):            
+            if self.rates_B1[i]>0.1 or self.rates_B2[i]>0.1:
+                self.WriteInfo(i)
         
         self.htm.write("  </div>\n")
 
@@ -306,11 +321,11 @@ class do_single_run_html(GenericWorker):
         self.htm.close()
 
 
-    def WriteInfo(self,bitname,realbitname):
+    def WriteInfo(self,bitname):
 
 
         
-        text="<ul><li>Algo bit %s rate<br /></li></ul>\n"%(realbitname)
+        text="<ul><li>Algo bit %d rate<br /></li></ul>\n"%(bitname)
         
         self.htm.write(text)
         
@@ -328,10 +343,10 @@ class do_single_run_html(GenericWorker):
 
             self.htm.write("<td>\n")
 
-            text="<a target='_blank' class='urllink' href='bit_%s_rate_run_%d_%d.png'>\n"%(bitname,self.run,i)
+            text="<a target='_blank' class='urllink' href='bit_%s_rate_fill_%d_%d.png'>\n"%(bitname,self.fill,i)
             self.htm.write(text)
             
-            text="<img id='figd' src='bit_%s_rate_run_%d_%d.png'>\n"%(bitname,self.run,i)
+            text="<img id='figd' src='bit_%s_rate_fill_%d_%d.png'>\n"%(bitname,self.fill,i)
             self.htm.write(text)
 
             text="<div id='FigTitle'>%d. Rate evolution during fill with at least %d pixel cluster(s).</div>\n"%(i,self.pixcuts[i])
@@ -357,8 +372,8 @@ class do_single_run_html(GenericWorker):
 
         self.htm.write("<p>The following plot shows, for the events passing algo bit 6 (Interbunch_BSC), the number of events recorded as a function of the distance to the last colliding BX, measured in microseconds. Different cluster multiplicity cuts are applied. Interbunch bit is based on events recorded in quiet BXs (no beam at all).</p><br>\n")
 
-        self.htm.write("<a target='_blank' class='urllink' href='bit_rate_run_%d_BCID.png'>\n"%(self.run))
-        self.htm.write("<img id='fig2' src='bit_rate_run_%d_BCID.png'></a>\n"%(self.run))
+        self.htm.write("<a target='_blank' class='urllink' href='bit_rate_fill_%d_BCID.png'>\n"%(self.fill))
+        self.htm.write("<img id='fig2' src='bit_rate_fill_%d_BCID.png'></a>\n"%(self.fill))
 
         self.htm.write("<div id='FigTitle'>Rate evolution as a function of the distance to the last collision.</div>\n")
 
@@ -375,13 +390,13 @@ class do_single_run_html(GenericWorker):
         self.htm.write("<tbody>\n")
         self.htm.write("<tr>\n")
         self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='bit_rate_run_%d_TRK.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='bit_rate_run_%d_TRK.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<a target='_blank' class='urllink' href='bit_rate_fill_%d_TRK.png'>\n"%(self.fill))
+        self.htm.write("<img id='fig3' src='bit_rate_fill_%d_TRK.png' alt=''></a>\n"%(self.fill))
         self.htm.write("<div id='FigTitle'>Number of events with tracks in empty bunches, as a function of the distance to the last collision.</div>\n")
         self.htm.write("</td>\n")
         self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='bit_rate_run_%d_VTX.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='bit_rate_run_%d_VTX.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<a target='_blank' class='urllink' href='bit_rate_fill_%d_VTX.png'>\n"%(self.fill))
+        self.htm.write("<img id='fig3' src='bit_rate_fill_%d_VTX.png' alt=''></a>\n"%(self.fill))
         self.htm.write("<div id='FigTitle'>Number of events with vertices in empty bunches, as a function of the distance to the last collision.</div>\n")
         self.htm.write("</td>\n")
         self.htm.write("</tr>\n")
@@ -397,13 +412,13 @@ class do_single_run_html(GenericWorker):
         self.htm.write("<tbody>\n")
         self.htm.write("<tr>\n")
         self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='dEdx_6_1_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='dEdx_6_1_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<a target='_blank' class='urllink' href='dEdx_6_1_%d.png'>\n"%(self.fill))
+        self.htm.write("<img id='fig3' src='dEdx_6_1_%d.png' alt=''></a>\n"%(self.fill))
         self.htm.write("<div id='FigTitle'>dEdx as a function of the track momentum, for events recorded 25ns after the last collision.</div>\n")
         self.htm.write("</td>\n")
         self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='etaphi_6_1_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='etaphi_6_1_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<a target='_blank' class='urllink' href='etaphi_6_1_%d.png'>\n"%(self.fill))
+        self.htm.write("<img id='fig3' src='etaphi_6_1_%d.png' alt=''></a>\n"%(self.fill))
         self.htm.write("<div id='FigTitle'>Eta/Phi coordinates of the selected tracks, for events recorded 25ns after the last collision.</div>\n")
         self.htm.write("</td>\n")
         self.htm.write("</tr>\n")
@@ -416,13 +431,13 @@ class do_single_run_html(GenericWorker):
         self.htm.write("<tbody>\n")
         self.htm.write("<tr>\n")
         self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='dEdx_6_2_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='dEdx_6_2_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<a target='_blank' class='urllink' href='dEdx_6_2_%d.png'>\n"%(self.fill))
+        self.htm.write("<img id='fig3' src='dEdx_6_2_%d.png' alt=''></a>\n"%(self.fill))
         self.htm.write("<div id='FigTitle'>dEdx as a function of the track momentum, for events recorded 50ns after the last collision.</div>\n")
         self.htm.write("</td>\n")
         self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='etaphi_6_2_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='etaphi_6_2_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<a target='_blank' class='urllink' href='etaphi_6_2_%d.png'>\n"%(self.fill))
+        self.htm.write("<img id='fig3' src='etaphi_6_2_%d.png' alt=''></a>\n"%(self.fill))
         self.htm.write("<div id='FigTitle'>Eta/Phi coordinates of the selected tracks, for events recorded 50ns after the last collision.</div>\n")
         self.htm.write("</td>\n")
         self.htm.write("</tr>\n")
@@ -445,8 +460,8 @@ class do_single_run_html(GenericWorker):
         self.htm.write("<tbody>\n")
         self.htm.write("<tr>\n")
         self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='Charge_2D_5_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='Charge_2D_5_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<a target='_blank' class='urllink' href='Charge_2D_5_%d.png'>\n"%(self.fill))
+        self.htm.write("<img id='fig3' src='Charge_2D_5_%d.png' alt=''></a>\n"%(self.fill))
         self.htm.write("<div id='FigTitle'>1. PIXB vs TIB mean cluster charge, for events passing bit 5.</div>\n")
         self.htm.write("</td>\n")
         self.htm.write("</tr>\n")
@@ -461,8 +476,8 @@ class do_single_run_html(GenericWorker):
         self.htm.write("<tbody>\n")
         self.htm.write("<tr>\n")
         self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='Charge_1D_5_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='Charge_1D_5_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<a target='_blank' class='urllink' href='Charge_1D_5_%d.png'>\n"%(self.fill))
+        self.htm.write("<img id='fig3' src='Charge_1D_5_%d.png' alt=''></a>\n"%(self.fill))
         self.htm.write("<div id='FigTitle'>2. PIXB mean cluster charge, for events passing bit 5.</div>\n")
         self.htm.write("</td>\n")
         self.htm.write("</tr>\n")
@@ -477,8 +492,8 @@ class do_single_run_html(GenericWorker):
         self.htm.write("<tbody>\n")
         self.htm.write("<tr>\n")
         self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='HF_vs_PIX_5_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='HF_vs_PIX_5_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<a target='_blank' class='urllink' href='HF_vs_PIX_5_%d.png'>\n"%(self.fill))
+        self.htm.write("<img id='fig3' src='HF_vs_PIX_5_%d.png' alt=''></a>\n"%(self.fill))
         self.htm.write("<div id='FigTitle'>3. HF vs PIX asymetry, for events passing bit 5..</div>\n")
         self.htm.write("</td>\n")
         self.htm.write("</tr>\n")
@@ -499,23 +514,23 @@ class do_single_run_html(GenericWorker):
         self.htm.write("<tbody>\n")
         self.htm.write("<tr>\n")
         self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='TrackMult_5_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='TrackMult_5_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<a target='_blank' class='urllink' href='TrackMult_5_%d.png'>\n"%(self.fill))
+        self.htm.write("<img id='fig3' src='TrackMult_5_%d.png' alt=''></a>\n"%(self.fill))
         self.htm.write("<div id='FigTitle'>1. Track multiplicity.</div>\n")
         self.htm.write("</td>\n")
         self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='TrackPt_5_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='TrackPt_5_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<a target='_blank' class='urllink' href='TrackPt_5_%d.png'>\n"%(self.fill))
+        self.htm.write("<img id='fig3' src='TrackPt_5_%d.png' alt=''></a>\n"%(self.fill))
         self.htm.write("<div id='FigTitle'>2. Tracks transverse momentum.</div>\n")
         self.htm.write("</td>\n")
         self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='TrackEta1_5_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='TrackEta1_5_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<a target='_blank' class='urllink' href='TrackEta1_5_%d.png'>\n"%(self.fill))
+        self.htm.write("<img id='fig3' src='TrackEta1_5_%d.png' alt=''></a>\n"%(self.fill))
         self.htm.write("<div id='FigTitle'>3. Tracks eta for beam 1 events.</div>\n")
         self.htm.write("</td>\n")
         self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='TrackEta2_5_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='TrackEta2_5_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<a target='_blank' class='urllink' href='TrackEta2_5_%d.png'>\n"%(self.fill))
+        self.htm.write("<img id='fig3' src='TrackEta2_5_%d.png' alt=''></a>\n"%(self.fill))
         self.htm.write("<div id='FigTitle'>4. Tracks eta for beam 2 events.</div>\n")
         self.htm.write("</td>\n")
         self.htm.write("</tr>\n")
@@ -528,18 +543,18 @@ class do_single_run_html(GenericWorker):
         self.htm.write("<tbody>\n")
         self.htm.write("<tr>\n")
         self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='VtxMult_5_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='VtxMult_5_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<a target='_blank' class='urllink' href='VtxMult_5_%d.png'>\n"%(self.fill))
+        self.htm.write("<img id='fig3' src='VtxMult_5_%d.png' alt=''></a>\n"%(self.fill))
         self.htm.write("<div id='FigTitle'>5. Vertex multiplicity.</div>\n")
         self.htm.write("</td>\n")
         self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='VtxZ_5_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='VtxZ_5_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<a target='_blank' class='urllink' href='VtxZ_5_%d.png'>\n"%(self.fill))
+        self.htm.write("<img id='fig3' src='VtxZ_5_%d.png' alt=''></a>\n"%(self.fill))
         self.htm.write("<div id='FigTitle'>6. Vertices Z distribution.</div>\n")
         self.htm.write("</td>\n")
         self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='VtxXY_5_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='VtxXY_5_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<a target='_blank' class='urllink' href='VtxXY_5_%d.png'>\n"%(self.fill))
+        self.htm.write("<img id='fig3' src='VtxXY_5_%d.png' alt=''></a>\n"%(self.fill))
         self.htm.write("<div id='FigTitle'>7. Vertices XY distribution.</div>\n")
         self.htm.write("</td>\n")
         self.htm.write("</tr>\n")
@@ -554,13 +569,13 @@ class do_single_run_html(GenericWorker):
         self.htm.write("<tbody>\n")
         self.htm.write("<tr>\n")
         self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='dEdx_5_0_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='dEdx_5_0_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<a target='_blank' class='urllink' href='dEdx_5_0_%d.png'>\n"%(self.fill))
+        self.htm.write("<img id='fig3' src='dEdx_5_0_%d.png' alt=''></a>\n"%(self.fill))
         self.htm.write("<div id='FigTitle'>dEdx as a function of the track momentum.</div>\n")
         self.htm.write("</td>\n")
         self.htm.write("<td>\n")
-        self.htm.write("<a target='_blank' class='urllink' href='etaphi_5_0_%d.png'>\n"%(self.run))
-        self.htm.write("<img id='fig3' src='etaphi_5_0_%d.png' alt=''></a>\n"%(self.run))
+        self.htm.write("<a target='_blank' class='urllink' href='etaphi_5_0_%d.png'>\n"%(self.fill))
+        self.htm.write("<img id='fig3' src='etaphi_5_0_%d.png' alt=''></a>\n"%(self.fill))
         self.htm.write("<div id='FigTitle'>Eta/Phi coordinates of the selected tracks.</div>\n")
         self.htm.write("</td>\n")
         self.htm.write("</tr>\n")

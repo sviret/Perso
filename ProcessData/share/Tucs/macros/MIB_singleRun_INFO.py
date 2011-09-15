@@ -14,40 +14,43 @@ execfile('src/load.py', globals()) # don't remove this!
 
 
 #
-# First give the number of the run you want to analyze 
+# First give the number of the fill you want to analyze 
 # 
-# You could find info on the run on the CMS WBM page:
+# You could find info on the fill on the CMS WBM page:
 #
-# https://cmswbm.web.cern.ch/cmswbm/cmsdb/servlet/RunSummary?RUN=****
+# https://cmswbm.web.cern.ch/cmswbm/cmsdb/servlet/FillReport?FILL=****
 #
-# where **** is the run number
+# where **** is the fill number
 
 
-run  = 162924  # Run number
-ndat = 1       # Number of files on CASTOR for this run
+fill  = 2083  # Fill number
+ndat  = 1     # Number of files on CASTOR for this run
+
+inputdir = '/tmp/sviret'
 
 #
-# Create the list of events to be analyzed, and read the ROOTuple information
-#
-#
+# Create the list of events to be analyzed, read the ROOTuple information
+# , produce the skimmed info and some plots
 
+a = Use(fill)
+b = ReadMIBbits(processingDir=inputdir,nfiles=ndat) 
+c = WriteMIBSummary(RNum=fill)
+d = do_charge_plots(processingDir=inputdir,bitnumber=5,nfiles=ndat)
+e = do_track_plots(processingDir=inputdir,bitnumber=5,nfiles=ndat)
+f = do_vertex_plots(processingDir=inputdir,bitnumber=5,nfiles=ndat)
+g = do_dedx_plots(processingDir=inputdir,bitnumber=5,nfiles=ndat)
+h = do_dedx_plots(processingDir=inputdir,bitnumber=6,nfiles=ndat,delay=1)
+i = do_dedx_plots(processingDir=inputdir,bitnumber=6,nfiles=ndat,delay=2)
 
-a = Use(run)
-b = ReadMIB(processingDir='/tmp/sviret',nfiles=ndat,techHF=True)
-c = WriteMIBSummary(RNum=run)
-e = do_charge_plots(processingDir='/tmp/sviret',nfiles=ndat)
-f = do_track_plots(processingDir='/tmp/sviret',nfiles=ndat)
-g = do_vertex_plots(processingDir='/tmp/sviret',nfiles=ndat)
-h = do_dedx_plots(processingDir='/tmp/sviret',bitnumber=4,nfiles=ndat)
-i = do_dedx_plots(processingDir='/tmp/sviret',bitnumber=6,nfiles=ndat,delay=1)
-j = do_dedx_plots(processingDir='/tmp/sviret',bitnumber=6,nfiles=ndat,delay=2)
+# Launch the part of the analysis you want
 
-# Launch the analysis
+# Just the skimming
+#processors = [a,b,c]
 
-#processors = [a,b,c,f,g]
-#processors = [a,b,c,e,f,g,h,i]
-processors = [a,b]
+# The full house
+processors = [a,b,c,d,e,f,g,h,i]
 
+# Etc....
 
 #
 # Go for it!!!

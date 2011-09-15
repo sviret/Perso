@@ -37,7 +37,7 @@ class do_track_plots(ReadGenericCalibration):
     numberEventCut = None
     ftDict         = None
 
-    def __init__(self, processingDir='/tmp/sviret',nfiles=1):
+    def __init__(self, processingDir='/tmp/sviret',bitnumber=5,nfiles=1):
         self.processingDir  = processingDir
         self.ftDict         = {}
         self.events         = set()
@@ -46,6 +46,7 @@ class do_track_plots(ReadGenericCalibration):
         self.nfiles         = nfiles
         self.canvases       = []
         self.dir            = getPlotDirectory()
+        self.bit            = bitnumber
         
         for ii in range(12):
             acanvas = src.MakeCanvas.MakeCanvas()
@@ -107,8 +108,6 @@ class do_track_plots(ReadGenericCalibration):
 
             self.sbeam1_ref_bx = self.BBTool.GetUnpairedBCIDs(1,run)
             self.sbeam2_ref_bx = self.BBTool.GetUnpairedBCIDs(2,run)
-            #self.sbeam1_ref_bx = self.BBTool.GetREFBCIDs(1,run)
-            #self.sbeam2_ref_bx = self.BBTool.GetREFBCIDs(2,run)
             
         
             # Finally loop on the events
@@ -132,7 +131,7 @@ class do_track_plots(ReadGenericCalibration):
                     if t2.PHYS==0:
                         continue
                     
-                    if t2.L1_algo_bits[5]==0:
+                    if not t2.L1_algo_bits[self.bit]:
                         continue
                                           
                     is_B1   = t2.L1_tech_bits[5]
@@ -181,7 +180,7 @@ class do_track_plots(ReadGenericCalibration):
             ROOT.gStyle.SetStatX(0.78)
             ROOT.gStyle.SetStatY(0.83)
 
-            self.plot_name = "TrackMult_%d"%(run)
+            self.plot_name = "TrackMult_%d_%d"%(self.bit,run)
             self.canvases[0].cd()
             self.canvases[0].SetLogy(1)
             self.track_mult.GetXaxis().SetTitle("Track multiplicity for event passing bit 5");            
@@ -194,7 +193,7 @@ class do_track_plots(ReadGenericCalibration):
             self.canvases[0].Print("%s/%s.C" % (self.dir,self.plot_name))
             self.canvases[0].Print("%s/%s.eps" % (self.dir,self.plot_name))
         
-            self.plot_name = "TrackPt_%d"%(run)
+            self.plot_name = "TrackPt_%d_%d"%(self.bit,run)
             self.canvases[1].cd()
             self.canvases[1].SetLogy(1)
             self.track_pt.GetXaxis().SetTitle("Pt of tracks for events passing bit 5");            
@@ -207,7 +206,7 @@ class do_track_plots(ReadGenericCalibration):
             self.canvases[1].Print("%s/%s.C" % (self.dir,self.plot_name))
             self.canvases[1].Print("%s/%s.eps" % (self.dir,self.plot_name))
             
-            self.plot_name = "TrackEta1_%d"%(run)
+            self.plot_name = "TrackEta1_%d_%d"%(self.bit,run)
             self.canvases[2].cd()
             #self.canvases[2].SetLogy(1)
             self.track_eta1.GetXaxis().SetTitle("Eta of tracks for BEAM1 events passing bit 5");            
@@ -220,7 +219,7 @@ class do_track_plots(ReadGenericCalibration):
             self.canvases[2].Print("%s/%s.C" % (self.dir,self.plot_name))
             self.canvases[2].Print("%s/%s.eps" % (self.dir,self.plot_name))
              
-            self.plot_name = "TrackEta2_%d"%(run)
+            self.plot_name = "TrackEta2_%d_%d"%(self.bit,run)
             self.canvases[3].cd()
             #self.canvases[3].SetLogy(1)
             self.track_eta2.GetXaxis().SetTitle("Eta of tracks for BEAM2 events passing bit 5");            

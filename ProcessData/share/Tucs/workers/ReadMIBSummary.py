@@ -46,8 +46,6 @@ class ReadMIBSummary(ReadGenericCalibration):
         self.events         = set()
         self.run_list       = set()
         self.black_list     = set()
-        self.pcorDict       = {146325:2200,146335:2200,146417:00,146436:800,146437:800,146510:1600,146511:1600,146514:1100,146561:1100,146589:1600,146644:8400,146698:8400,146710:6000,146713:6000,146715:6000,146719:6000,146724:6000,146728:4200,146804:8400,146807:6000,146944:12000,147043:12000,147048:12000,147114:12000,147115:12000,147206:16000,147217:12000,147219:12000,147222:8000,147284:16000,147289:20000,147390:16000,147450:16000,147451:16000}
-
             
     def ProcessRegion(self, region):
 
@@ -59,8 +57,7 @@ class ReadMIBSummary(ReadGenericCalibration):
             
             if event.runNumber and not self.ftDict.has_key(event.runNumber):
                  
-                f, t = self.getFileTree('MIB_summary_run_%d.root' % event.runNumber, 'MIB_final')
-                #f, t = self.getFileTree('MIB_summary_run_HF8_%d.root' % event.runNumber, 'MIB_final')
+                f, t = self.getFileTree('MIB_summary_fill_%d.root' % event.runNumber, 'MIB_final')
 
                 if [f, t] == [None, None]:
                     self.black_list.add(event.runNumber)    
@@ -82,7 +79,7 @@ class ReadMIBSummary(ReadGenericCalibration):
 
         print self.run_list
 
-        totSize = 6*2*5
+        totSize = 128*2*5
 
         for run in self.run_list:
 
@@ -99,19 +96,12 @@ class ReadMIBSummary(ReadGenericCalibration):
             bc2     = t.bx2
             bccoll  = t.bxcoll
             tspan   = t.tspan
-            p3      = t.nevents[0]
-            p4      = t.nevents[1]
-            p5      = t.nevents[2]
-            p6      = t.nevents[3]
-            p7      = t.nevents[4]
-            p8      = t.nevents[5]
-
 
             if nslices==0 or bccoll==0: # Don't go further if the ROOTuple is empty
                 continue                # Or if the run seems bad
 
             
-            print "BunchFill sheme for run",run,":"
+            print "BunchFill sheme for fill",run,":"
             print bc1,"bunches in Beam1,",bc2,"bunches in Beam2, and",\
                   bccoll,"colliding bunches..." 
 
@@ -125,8 +115,14 @@ class ReadMIBSummary(ReadGenericCalibration):
                 if type!=2: # Just look at tech bit rates for now
                     continue
 
-                if bit<3 or bit>8:
+                if bit==0:
                     continue
+
+                #print bit
+
+                if t.nevents[bit-1]==0:
+                    continue
+
                 
                 event.data['is_OK']               = True 
                 event.data['BX1']                 = bc1+bccoll  # Number of B1 bunches
@@ -136,17 +132,11 @@ class ReadMIBSummary(ReadGenericCalibration):
                 event.data['t_stop']              = tstop       # Run stop                
                 event.data['n_slices']            = nslices
                 event.data['slice_length']        = tspan
-                event.data['fillnum']             = self.BBTool.GetFillNumber(run)
+                event.data['fillnum']             = run
                 event.data['bb_rate']             = []
                 event.data['bb_rate_tslice']      = []
-                event.data['presc_a']             = []
-                event.data['presc_t']             = []
-                event.data['nevts_3']             = p3
-                event.data['nevts_4']             = p4
-                event.data['nevts_5']             = p5
-                event.data['nevts_6']             = p6
-                event.data['nevts_7']             = p7
-                event.data['nevts_8']             = p8
+                event.data['presc_a']             = t.algo_prescale[bit-1]
+                event.data['nevts']               = t.nevents[bit-1]
                 
                 event.data['max_time']            = t.mdist
                 event.data['occurences']          = []
@@ -159,20 +149,14 @@ class ReadMIBSummary(ReadGenericCalibration):
                 for k in range(t.mdist):
                     event.data['trk'].append(t.tracks[k])
                     event.data['vtx'].append(t.vertices[k])
-                    
-                for k in range(128):
-                    event.data['presc_a'].append(t.algo_prescale[k]) 
-
-                for k in range(64):
-                    event.data['presc_t'].append(t.tech_prescale[k]) 
-                    
+                                        
                 for k in range(5):
 
-                    index = 10*(bit-3)+5*(beam-1)+k
+                    index = 10*(bit-1)+5*(beam-1)+k
                     event.data['bb_rate'].append(t.rates[index])
                         
                     for i in range(nslices):
-                        index = totSize*i+10*(bit-3)+5*(beam-1)+k
+                        index = totSize*i+10*(bit-1)+5*(beam-1)+k
                         event.data['bb_rate_tslice'].append(t.rates_vs_t[index])
 
         self.ftDict = {}

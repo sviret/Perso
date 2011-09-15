@@ -6,9 +6,9 @@
 #
 # --> Link to the monitoring page:
 #
-# http://sviret.web.cern.ch/sviret/Images/CMS/MIB/Monitor/2011/Trends/MIB_monitor.html
+# http://sviret.web.cern.ch/sviret/Images/CMS/MIB/Monitor/2011/FillTrends/MIB_FILL_monitor.html
 #
-# 19/04/2011 (viret@in2p3.fr)
+# 14/09/2011 (viret@in2p3.fr)
 #
 ################################################
 
@@ -19,18 +19,18 @@ In all cases complete details are provided in the script themselves
 
 1. Data extraction:
 
---> Main script                                     : runDQ_extraction.sh
---> Scripts used by the main script during this step: data_extractor.sh/getRunList.py
+--> Main script                                     : runDQ_extraction_fill.sh
+--> Scripts used by the main script during this step: data_fill_extractor.sh/getRunList.py
 --> Cron job frequency                              : every day at 4:00, 12:00, 20:00
 
 --> FRAMEWORK       : CMSSW (C++)
---> INPUT DIRECTORY : /castor/cern.ch/cms/store/data/Run2011A/Commissioning/RECO/
+--> INPUT DIRECTORY : /castor/cern.ch/cms/store/data/Run2011(A/B)/Commissioning/RECO/
 --> OUTPUT DIRECTORY: /castor/cern.ch/user/s/sviret/MIB/DQ/Prod
 
 
 2. Data skimming:
 
---> Main script                                     : runDQ_extraction.sh
+--> Main script                                     : runDQ_extraction_fill.sh
 --> Scripts used by the main script during this step: data_skimmer.sh
 --> Cron job frequency                              : every day at 4:00, 12:00, 20:00
 

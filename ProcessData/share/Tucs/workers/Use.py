@@ -132,6 +132,7 @@ class Use(GenericWorker):
                 
                 data           = {}
                 data['region'] = region.GetHash()   # Trigger bit
-                region.AddEvent(Event(runType=self.type, runNumber=int(run), LSNumber=[], data=data, time=date))                   
+                
+                region.AddEvent(Event(runType=self.type, runNumber=int(run), LSNumber=[], data=data, time=date))  
                 #print data['region']
 

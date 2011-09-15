@@ -59,7 +59,7 @@ def MakeCanvas():
     ROOT.gStyle.SetPadTickX(1)
     ROOT.gStyle.SetPadTickY(1)
 
-    c1 = ROOT.TCanvas("c1_n%d" % canvas_number, "c1",0,44,800,602)
+    c1 = ROOT.TCanvas("c1_n%d" % canvas_number, "c1",0,44,1000,600)
     c1.Range(66.32653,-678.7319,91.31868,3835.625)
             
     c1.SetFrameBorderMode(0)

@@ -44,10 +44,10 @@ rm plots/latest
 
 python macros/MIB_trend_DQ_BASE.py
 
-cp MIB_monitor.html ${3}/Trends
+cp MIB_FILL_monitor.html ${3}/FillTrends
 cd plots/latest
-cp ${3}/Trends/*.png ${3}/Trends/Archive
-cp *.png ${3}/Trends/
+cp ${3}/FillTrends/*.png ${3}/FillTrends/Archive
+cp *.png ${3}/FillTrends/
 
 mutt -s '[MIB TUCS]:New status info was produced with runs '$runlist viret@in2p3.fr < /dev/null
 
