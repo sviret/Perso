@@ -101,7 +101,7 @@ class MCExtractor
   // simulated hits
 
   static const int 	m_part_nMAX    = 10000;
-  static const int 	m_part_nhitMAX = 1000;
+  static const int 	m_part_nhitMAX = 10000;
 
 
   int    		m_part_n;

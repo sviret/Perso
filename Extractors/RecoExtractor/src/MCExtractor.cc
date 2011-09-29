@@ -23,6 +23,7 @@ MCExtractor::MCExtractor()
   m_tree->Branch("gen_z",   &m_gen_z,   "gen_z[gen_n]/F");
 
 
+
   // Infos related to the subsequent tracking particles
 
   m_tree->Branch("subpart_n",        &m_part_n,    "subpart_n/I");
@@ -114,6 +115,10 @@ void MCExtractor::writeInfo(const edm::Event *event)
   event->getByLabel("g4SimHits","EcalHitsEE",EEHits); 
   edm::PCaloHitContainer::const_iterator isubpartEE; 
 
+  edm::Handle<edm::PSimHitContainer> BSCHits;    // BSC
+  event->getByLabel("g4SimHits","BSCHits",BSCHits); 
+  edm::PSimHitContainer::const_iterator isubpartBSC; 
+
   edm::Handle<TrackingParticleCollection>  TPCollection ;
   event->getByLabel("mergedtruth","MergedTrackTruth",TPCollection);       
   const TrackingParticleCollection tpColl = *(TPCollection.product());
@@ -147,7 +152,46 @@ void MCExtractor::writeInfo(const edm::Event *event)
     
     GlobalPoint hit_position;
     int subdetID        = 0;
-    double m_Ethreshold = 0.1;
+    double m_Ethreshold = 0.03;
+    
+    bool match = false;
+
+    for (isubpartBSC = BSCHits->begin(); isubpartBSC != BSCHits->end(); isubpartBSC++)
+    {
+      if (n_hits >= m_part_nhitMAX) continue;
+      
+      match = false;
+      int bscid = static_cast<int>(isubpartBSC->trackId());
+
+      //      std::cout << static_cast<int>(isubpartBSC->trackId()) << " / "
+      //		<< static_cast<int>(tp->g4Track_begin()->trackId()) << std::endl ;
+      
+      for (TrackingParticle::g4t_iterator g4T=tp->g4Track_begin(); g4T!=tp->g4Track_end(); ++g4T) 
+      {
+	if (bscid == static_cast<int>(g4T->trackId())) 
+	{
+	  match = true;
+	  break;
+	}
+      }
+
+
+      // Is the hit from the TP? 
+      if (match)
+      {	
+	std::cout << " BSC hits!!" << std::endl ;
+
+	m_hits_x[n_hits_tot]  = isubpartBSC->entryPoint().x();   
+	m_hits_y[n_hits_tot]  = isubpartBSC->entryPoint().y();   
+	m_hits_z[n_hits_tot]  = isubpartBSC->entryPoint().z();   
+	m_hits_e[n_hits_tot]  = isubpartBSC->energyLoss();   
+	m_hits_id[n_hits_tot] = 1000;  
+
+	++n_hits;
+	++n_hits_tot;
+      }
+    }
+   
 
     // 1. HCal hits 
 
@@ -282,11 +326,13 @@ void MCExtractor::writeInfo(const edm::Event *event)
       DetId theDetUnitId(itp->detUnitId());
       
       // Go away if not in a tracking detector
-      
+      //std::cout << theDetUnitId.det() << std::endl;   
 
       if (theDetUnitId.det() != DetId::Tracker && theDetUnitId.det() != DetId::Muon)
+      {
+	std::cout << itp->entryPoint().z() << " / "  << theDetUnitId.det() << std::endl;   
 	continue;
-      
+      }
 
       if (theDetUnitId.det() == DetId::Tracker)
       {
@@ -313,6 +359,8 @@ void MCExtractor::writeInfo(const edm::Event *event)
       m_hits_z[n_hits_tot]  = static_cast<float>(hit_position.z());   
       m_hits_e[n_hits_tot]  = 0.;   
       m_hits_id[n_hits_tot] = subdetID;  
+
+
 
 
       ++n_hits;

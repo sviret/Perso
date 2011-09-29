@@ -1,3 +1,9 @@
+2011-09-29  Seb Viret  <viret@in2p3.fr>
+ 
+       	* Adding BSC hits in MCextractor
+
+	This version has been tested against CMSSW_4_2_8_patch3
+
 2011-09-15  Seb Viret  <viret@in2p3.fr>
  
        	* Modification of many class in order to run RECOExtrator on 
