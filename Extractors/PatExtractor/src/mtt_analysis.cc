@@ -982,18 +982,18 @@ void mtt_analysis::SystModifJetsAndMET(JetExtractor *m_jet,METExtractor *m_MET,u
   if (SystType==1) { // JES
     for(unsigned int iJet = 0; iJet<nJets ; iJet++)
       {
-	myJet = m_jet->getJetLorentzVector(iJet);
-	//	unc=histo_uncertainty->GetBinContent(histo_uncertainty->FindBin(myJet->Pt(),myJet->Eta()))
-	jecUnc->setJetEta(myJet->Eta());
-	jecUnc->setJetPt(myJet->Pt()); // here you must use the CORRECTED jet pt
-	unc = jecUnc->getUncertainty(true);
-	unc=0.1;
-	corr=sqrt(pow(unc,2));
-	//use corrected jet pt for met correction
-	met_corr_x+=myJet->Px()*(SystValue*corr);
-	met_corr_y+=myJet->Py()*(SystValue*corr);
-	//
-	m_jet->setJetLorentzVector(iJet,myJet->E()*(1.+SystValue*corr),myJet->Px()*(1.+SystValue*corr),myJet->Py()*(1.+SystValue*corr),myJet->Pz()*(1.+SystValue*corr));
+        myJet = m_jet->getJetLorentzVector(iJet);
+        //	unc=histo_uncertainty->GetBinContent(histo_uncertainty->FindBin(myJet->Pt(),myJet->Eta()))
+        jecUnc->setJetEta(myJet->Eta());
+        jecUnc->setJetPt(myJet->Pt()); // here you must use the CORRECTED jet pt
+        unc = jecUnc->getUncertainty(true);
+        unc=0.1;
+        corr=sqrt(pow(unc,2));
+        //use corrected jet pt for met correction
+        met_corr_x+=myJet->Px()*(SystValue*corr);
+        met_corr_y+=myJet->Py()*(SystValue*corr);
+        //
+        m_jet->setJetLorentzVector(iJet,myJet->E()*(1.+SystValue*corr),myJet->Px()*(1.+SystValue*corr),myJet->Py()*(1.+SystValue*corr),myJet->Pz()*(1.+SystValue*corr));
       }
     m_MET->setMETLorentzVector(0,myMET->E(),myMET->Px()-met_corr_x,myMET->Py()-met_corr_y,myMET->Pz());
   }

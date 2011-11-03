@@ -113,7 +113,20 @@ JetExtractor::JetExtractor(TFile *a_file)
 JetExtractor::~JetExtractor()
 {}
 
-
+bool JetExtractor::isPFLooseJetID(const pat::Jet *part)
+{
+  if (part->isPFJet()) 
+  {
+    // compute pfJetID
+    bool PFLooseJID=false;
+    bool PFLooseJIDchf=true;
+    if(fabs(part->eta())<2.4 && part->chargedHadronEnergyFraction()<=0.) PFLooseJIDchf=false;
+    if(fabs(part->eta())<2.4 && part->chargedMultiplicity()<=0.) PFLooseJIDchf=false;
+    if(part->neutralHadronEnergyFraction()<0.99 && part->chargedEmEnergyFraction()<0.99 && part->neutralEmEnergyFraction()<0.99 && PFLooseJIDchf) PFLooseJID=true;
+    return PFLooseJID;
+  }
+  return true; // for calo jet this jetID is meaningless. Set it to true.
+}
 
 //
 // Method filling the main particle tree
@@ -126,20 +139,29 @@ void JetExtractor::writeInfo(const edm::Event *event)
   edm::View<pat::Jet> p_jets = *jetHandle;
 
   JetExtractor::reset();
-  JetExtractor::fillSize(static_cast<int>(p_jets.size()));
+  //JetExtractor::fillSize(static_cast<int>(p_jets.size()));
 
-  if (JetExtractor::getSize())
+  int nJets=static_cast<int>(p_jets.size());
+  int iJet=0;
+  if (nJets)
   {
-    for(int i=0; i<JetExtractor::getSize(); ++i) 
-      JetExtractor::writeInfo(&p_jets.at(i),i); 
+    for(int i=0; i<nJets; ++i) 
+    {
+      if ( isPFLooseJetID(&p_jets.at(i)) )
+      {
+        JetExtractor::writeInfo(&p_jets.at(i),iJet); 
+        iJet++;
+      }
+    }
   }
-
+  JetExtractor::fillSize(iJet);
   JetExtractor::fillTree();
 }
 
 
 void JetExtractor::writeInfo(const edm::Event *event, MCExtractor* m_MC) 
 {
+ // note : we don't apply pfloosejetid on MC
   edm::Handle< edm::View<pat::Jet> >  jetHandle;
   event->getByLabel(m_tag, jetHandle);
   edm::View<pat::Jet> p_jets = *jetHandle;
@@ -158,12 +180,12 @@ void JetExtractor::writeInfo(const edm::Event *event, MCExtractor* m_MC)
       if(jet_genparton)
       {
         m_jet_MCPdgId[i] = jet_genparton->pdgId();
-	m_jet_MCPdgIdMother[i] = jet_genparton->mother()->pdgId();
-	if(jet_genparton->mother()->mother()){m_jet_MCPdgIdGdMother[i] = jet_genparton->mother()->mother()->pdgId();}
-	m_jet_MCPx[i] = jet_genparton->px();
-	m_jet_MCPy[i] = jet_genparton->py();
-	m_jet_MCPz[i] = jet_genparton->pz();
-	m_jet_MCEn[i] = jet_genparton->energy();
+        m_jet_MCPdgIdMother[i] = jet_genparton->mother()->pdgId();
+        if(jet_genparton->mother()->mother()){m_jet_MCPdgIdGdMother[i] = jet_genparton->mother()->mother()->pdgId();}
+        m_jet_MCPx[i] = jet_genparton->px();
+        m_jet_MCPy[i] = jet_genparton->py();
+        m_jet_MCPz[i] = jet_genparton->pz();
+        m_jet_MCEn[i] = jet_genparton->energy();
       }
       
       /// Lyon's jet matching

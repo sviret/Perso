@@ -47,6 +47,7 @@ class JetExtractor
   void fillSize(int size);
   int  getSize();
 
+  bool isPFLooseJetID(const pat::Jet *part);
   int getMatch(const pat::Jet *part, MCExtractor* m_MC);
 
   TLorentzVector *getJetLorentzVector(int jetidx) {return (TLorentzVector*)m_jet_lorentzvector->At(jetidx);}
@@ -62,7 +63,7 @@ class JetExtractor
   int getJetMCPx(int jetidx){return m_jet_MCPx[jetidx];}
   int getJetMCPy(int jetidx){return m_jet_MCPy[jetidx];}
   int getJetMCPz(int jetidx){return m_jet_MCPz[jetidx];}
-  
+
   bool isOK() {return m_OK;}
 
   void setJetLorentzVector(int jetidx, float E, float Px, float Py, float Pz);

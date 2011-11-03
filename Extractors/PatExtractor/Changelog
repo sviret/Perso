@@ -1,3 +1,7 @@
+
+2011-11-03 Stephane <stephane.perries@cern.ch>
+       * added loosepfjetid selection when running on data
+
 2011-07-28 nicolas <beaupere@ipnl.in2p3.fr>
        * changed MC matching algorithm in mtt_analysis : from Lyon's to PAT
        * variable m_mtt_OneMatchedCombi and m_mtt_IsBestSolMatched use PAT MC matching
