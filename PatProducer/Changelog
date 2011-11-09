@@ -1,3 +1,10 @@
+2011-11-09  Seb Viret  <viret@in2p3.fr>
+ 
+       	* Major update, runPAT_production script has been 
+	automated and now works also on MC. 
+	See the tutorial for info
+
+
 2011-06-21  Seb Viret  <viret@in2p3.fr>
  
        	* Modify runPAT_production.sh for easier use
