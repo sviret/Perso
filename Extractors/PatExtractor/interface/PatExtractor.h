@@ -49,11 +49,11 @@ class PatExtractor : public edm::EDAnalyzer {
 
   void analyze(const edm::Event&, const edm::EventSetup& );
   
-  void fillInfo(const edm::Event *event);
+  void fillInfo(const edm::Event *event,const edm::EventSetup& setup);
   void getInfo(int ievent);
   void initialize();
   void retrieve();
-  void doAna();
+  void doAna(const edm::EventSetup & setup);
 
  private:
 
@@ -94,8 +94,8 @@ class PatExtractor : public edm::EDAnalyzer {
   std::string outFilename_;
   std::string inFilename_;
 
-
   std::vector<std::string> m_settings_;
+  std::string jet_corr_service_;
 
   TFile* m_infile;
   TFile* m_outfile;

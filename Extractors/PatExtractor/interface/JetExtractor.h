@@ -11,6 +11,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Utilities/interface/InputTag.h"
+#include "JetMETCorrections/Objects/interface/JetCorrector.h"
 
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/Common/interface/View.h"
@@ -19,12 +20,14 @@
 
 //Include std C++
 #include <iostream>
+#include <string>
 
 #include "TMath.h"
 #include "TTree.h"
 #include "TFile.h"
 #include "TLorentzVector.h"
 #include "TClonesArray.h"
+#include "TH1F.h"
 
 class JetExtractor
 {
@@ -36,10 +39,16 @@ class JetExtractor
   ~JetExtractor();
 
 
-  void writeInfo(const edm::Event *event, MCExtractor* m_MC); 
-  void writeInfo(const edm::Event *event); 
+  void writeInfo(const edm::Event *event,const edm::EventSetup & iSetup,std::string jet_corr_service,MCExtractor* m_MC); 
+  void writeInfo(const edm::Event *event,const edm::EventSetup & iSetup,std::string jet_corr_service); 
 
-  void writeInfo(const pat::Jet *part, int index); 
+  void writeInfo(const pat::Jet *part, int index);
+  void writeInfo(const pat::Jet * part,
+		 const JetCorrector * corrector,
+		 const edm::Event & iEvent,
+		 const edm::EventSetup & iSetup,
+		 int index);
+		 
   void getInfo(int ievt); 
 
   void reset();
@@ -112,6 +121,7 @@ class JetExtractor
   float m_jet_MCEn[m_jets_MAX];
 
   MCExtractor* MC_Coll;
+  
 };
 
 #endif 

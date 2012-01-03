@@ -18,11 +18,11 @@ PatExtractor::PatExtractor(const edm::ParameterSet& config) :
   do_Mtt_        (config.getUntrackedParameter<bool>("doMtt", false)),
   do_SemiMu_     (config.getUntrackedParameter<bool>("doSemiMu", false)),
   do_Chi2_       (config.getUntrackedParameter<bool>("doChi2", false)),
-  do_usebtaginchi2_      (config.getUntrackedParameter<bool>("doUseBTaginChi2", true)),
-  do_KF_      (config.getUntrackedParameter<bool>("doKF", true)),
-  do_ChoiceWKF_      (config.getUntrackedParameter<bool>("doChoiceWKF", true)),
+  do_usebtaginchi2_  (config.getUntrackedParameter<bool>("doUseBTaginChi2", true)),
+  do_KF_         (config.getUntrackedParameter<bool>("doKF", true)),
+  do_ChoiceWKF_  (config.getUntrackedParameter<bool>("doChoiceWKF", true)),
   do_dimu_       (config.getUntrackedParameter<bool>("doDimuon", false)),
-  do_Syst_      (config.getUntrackedParameter<bool>("doSyst", false)),
+  do_Syst_       (config.getUntrackedParameter<bool>("doSyst", false)),
   systvalue_     (config.getUntrackedParameter<int>("systvalue",1)),
   nevts_         (config.getUntrackedParameter<int>("n_events", 10000)),
 
@@ -36,7 +36,9 @@ PatExtractor::PatExtractor(const edm::ParameterSet& config) :
   trk_tag_       (config.getParameter<edm::InputTag>("trk_tag")),
   outFilename_   (config.getParameter<std::string>("extractedRootFile")),
   inFilename_    (config.getParameter<std::string>("inputRootFile")),
-  m_settings_    (config.getUntrackedParameter<std::vector<std::string> >("analysisSettings"))
+  m_settings_    (config.getUntrackedParameter<std::vector<std::string> >("analysisSettings")),
+  jet_corr_service_ (config.getParameter<std::string>("jet_corr_service"))
+  
 {
   LogDebug("") << "Using the " << photon_tag_ << " photon collection";
 
@@ -63,7 +65,6 @@ void PatExtractor::beginJob()
 
 
   // Analysis is done on request, if the infos are there
-
   if (do_Mtt_ && do_Muon_ && do_Electron_ && do_Jet_ && do_MET_ && do_Vertex_)      
     m_Mtt_analysis = new mtt_analysis(do_MC_,do_MCPU_,do_SemiMu_,
 				      m_muon,m_electron,m_jet,m_MET,m_vertex,
@@ -95,8 +96,8 @@ void PatExtractor::beginRun(Run const& run, EventSetup const& setup)
       if (i%1000 == 0)
 	std::cout << "Processing " << i << "th event" << std::endl;
 
-      PatExtractor::getInfo(i);// Retrieve the info from an existing ROOTuple      
-      PatExtractor::doAna();   // Then do the analysis on request  
+      PatExtractor::getInfo(i);   // Retrieve the info from an existing ROOTuple      
+      PatExtractor::doAna(setup); // Then do the analysis on request  
 
       ++nevent_tot; 
     }
@@ -112,8 +113,8 @@ void PatExtractor::analyze(const edm::Event& event, const edm::EventSetup& setup
   
   if (do_fill_) 
   {
-    PatExtractor::fillInfo(&event); // Fill the ROOTuple
-    PatExtractor::doAna();          // Then do the analysis on request    
+    PatExtractor::fillInfo(&event,setup); // Fill the ROOTuple
+    PatExtractor::doAna(setup);           // Then do the analysis on request    
   }
     
   ++nevent;
@@ -145,7 +146,7 @@ void PatExtractor::endJob() {
 
 // Here we fill the rootuple with info coming from the PatTuple
 
-void PatExtractor::fillInfo(const edm::Event *event) 
+void PatExtractor::fillInfo(const edm::Event *event,const edm::EventSetup& setup) 
 {
   m_event->writeInfo(event,do_MCPU_);
 
@@ -172,8 +173,8 @@ void PatExtractor::fillInfo(const edm::Event *event)
   if (do_Jet_)
   {
     (do_MC_)
-      ? m_jet->writeInfo(event,m_MC)
-      : m_jet->writeInfo(event);
+      ? m_jet->writeInfo(event,setup,jet_corr_service_,m_MC)
+      : m_jet->writeInfo(event,setup,jet_corr_service_);
   }
   
   if (do_Photon_)
@@ -208,9 +209,9 @@ void PatExtractor::getInfo(int ievent)
 
 void PatExtractor::initialize() 
 {
-  m_outfile     = new TFile(outFilename_.c_str(),"RECREATE");
+  m_outfile = new TFile(outFilename_.c_str(),"RECREATE");
 
-  m_event    = new EventExtractor();
+  m_event   = new EventExtractor();
 
   if (do_HLT_)      m_HLT      = new HLTExtractor();
   if (do_MC_)       m_MC       = new MCExtractor();
@@ -266,13 +267,26 @@ void PatExtractor::retrieve()
 // In other words this is where the analysis is done
 //
 
-void PatExtractor::doAna() 
+void PatExtractor::doAna(const edm::EventSetup & setup) 
 {
   if (do_Mtt_ && do_Muon_ && do_Electron_ && do_Jet_ && do_MET_ && do_Vertex_) 
   {
     m_Mtt_analysis->reset(do_MC_);
     iseventselected=-1;
-    m_Mtt_analysis->mtt_Sel(do_MC_,do_MCPU_,do_SemiMu_,m_event,m_muon,m_electron,m_jet,m_MET,m_vertex,do_Chi2_, do_Syst_,systvalue_);
+    m_Mtt_analysis->mtt_Sel(do_MC_,
+                            do_MCPU_,
+			    do_SemiMu_,
+			    m_event,
+			    m_muon,
+			    m_electron,
+			    m_jet,
+			    m_MET,
+			    m_vertex,
+			    setup,
+			    do_Chi2_,
+			    do_Syst_,
+			    systvalue_);
+			    
     iseventselected=m_Mtt_analysis->getisSel();
     //calculate the best jets pairing with a chi2 minimization
     if (do_Chi2_) m_Mtt_analysis->LoopOverCombinations(m_jet,

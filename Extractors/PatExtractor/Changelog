@@ -1,3 +1,7 @@
+2012-01-03 Nicolas <beaupere@ipnl.in2p3.fr>
+       * Changed JetExtractor, PatExctractor classes. Added new methode to allow off-line JEC instead of used Global Tag.
+         This is not a permanant solution, it's in new Global Tag waiting (with last JEC).
+       * Changed in mtt_analysis the way to derived jec uncertainty.
 
 2011-11-03 Stephane <stephane.perries@cern.ch>
        * added loosepfjetid selection when running on data

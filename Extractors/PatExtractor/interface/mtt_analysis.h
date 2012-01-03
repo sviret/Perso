@@ -34,16 +34,43 @@ using namespace std;
 #include "../interface/AlienKinFit.h"
 #include "../interface/EventExtractor.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
+#include "JetMETCorrections/Objects/interface/JetCorrectionsRecord.h"
+#include "FWCore/Framework/interface/EventSetup.h"
 
 class mtt_analysis
 {
   public:
-    mtt_analysis(bool do_MC_,bool do_MCPU_,bool do_SemiMu_, MuonExtractor *m_muon, ElectronExtractor *m_electron, JetExtractor *m_jet, METExtractor *m_MET, VertexExtractor *m_vertex, bool do_Chi2_, bool do_KF_,bool do_ChoiceWKF_, bool do_Syst_);
+    mtt_analysis(bool do_MC_,
+                 bool do_MCPU_,
+		 bool do_SemiMu_,
+		 MuonExtractor *m_muon,
+		 ElectronExtractor *m_electron,
+		 JetExtractor *m_jet,
+		 METExtractor *m_MET,
+		 VertexExtractor *m_vertex,
+		 bool do_Chi2_,
+		 bool do_KF_,
+		 bool do_ChoiceWKF_,
+		 bool do_Syst_);
 
     ~mtt_analysis();
 
     //Selection
-    int mtt_Sel(bool do_MC_,bool do_MCPU_,bool do_SemiMu_, EventExtractor* m_Event,MuonExtractor *m_muon, ElectronExtractor *m_electron, JetExtractor *m_jet, METExtractor *m_MET, VertexExtractor *m_vertex, bool do_Chi2_, bool do_Syst_, int systvalue);
+    int mtt_Sel(bool do_MC_,
+                bool do_MCPU_,
+		bool do_SemiMu_,
+		EventExtractor* m_Event,
+		MuonExtractor *m_muon,
+		ElectronExtractor *m_electron,
+		JetExtractor *m_jet,
+		METExtractor *m_MET,
+		VertexExtractor *m_vertex,
+		const edm::EventSetup & iSetup,
+		bool do_Chi2_,
+		bool do_Syst_,
+		int systvalue);
+		
     /// Lepton selection
     int LeptonSel(bool do_SemiMu_,MuonExtractor *m_muon, ElectronExtractor *m_electron,JetExtractor *m_jet, int isSel);
     int MuonSel(MuonExtractor *m_muon, ElectronExtractor *m_electron,JetExtractor *m_jet, int isSel);

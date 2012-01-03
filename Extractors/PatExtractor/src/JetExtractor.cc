@@ -51,6 +51,7 @@ JetExtractor::JetExtractor(edm::InputTag tag)
   // Set everything to 0
 
   JetExtractor::reset();
+  
 }
 
 
@@ -132,7 +133,7 @@ bool JetExtractor::isPFLooseJetID(const pat::Jet *part)
 // Method filling the main particle tree
 //
 
-void JetExtractor::writeInfo(const edm::Event *event) 
+void JetExtractor::writeInfo(const edm::Event *event,const edm::EventSetup & iSetup,std::string jet_corr_service) 
 {
   edm::Handle< edm::View<pat::Jet> >  jetHandle;
   event->getByLabel(m_tag, jetHandle);
@@ -145,11 +146,16 @@ void JetExtractor::writeInfo(const edm::Event *event)
   int iJet=0;
   if (nJets)
   {
+    /// Get JEC factor from setup
+    std::string JetCorrectionService = jet_corr_service;
+    //std::cout<<"JetCorrectionService = "<<JetCorrectionService<<std::endl;
+    const JetCorrector * corrector = JetCorrector::getJetCorrector(JetCorrectionService,iSetup);
+    
     for(int i=0; i<nJets; ++i) 
     {
       if ( isPFLooseJetID(&p_jets.at(i)) )
       {
-        JetExtractor::writeInfo(&p_jets.at(i),iJet); 
+        JetExtractor::writeInfo(&p_jets.at(i),corrector,*event,iSetup,iJet); 
         iJet++;
       }
     }
@@ -159,7 +165,7 @@ void JetExtractor::writeInfo(const edm::Event *event)
 }
 
 
-void JetExtractor::writeInfo(const edm::Event *event, MCExtractor* m_MC) 
+void JetExtractor::writeInfo(const edm::Event *event,const edm::EventSetup & iSetup,std::string jet_corr_service,MCExtractor* m_MC) 
 {
  // note : we don't apply pfloosejetid on MC
   edm::Handle< edm::View<pat::Jet> >  jetHandle;
@@ -171,9 +177,13 @@ void JetExtractor::writeInfo(const edm::Event *event, MCExtractor* m_MC)
 
   if (JetExtractor::getSize())
   {
+    /// Get JEC factor from setup
+    std::string JetCorrectionService = jet_corr_service;
+    const JetCorrector * corrector = JetCorrector::getJetCorrector(JetCorrectionService,iSetup);
+    
     for(int i=0; i<JetExtractor::getSize(); ++i)
     { 
-      JetExtractor::writeInfo(&p_jets.at(i),i); 
+      JetExtractor::writeInfo(&p_jets.at(i),corrector,*event,iSetup,i); 
       
       /// get pat mc matching to have pdgId
       const reco::Candidate * jet_genparton = p_jets.at(i).genParton();
@@ -196,6 +206,7 @@ void JetExtractor::writeInfo(const edm::Event *event, MCExtractor* m_MC)
 
   JetExtractor::fillTree();
 }
+
 
 void JetExtractor::writeInfo(const pat::Jet *part, int index) 
 {
@@ -225,8 +236,65 @@ void JetExtractor::writeInfo(const pat::Jet *part, int index)
     m_jet_btag_BjetProb[index] = part->bDiscriminator("jetBProbabilityBJetTags");
     m_jet_btag_SSVHE[index]    = part->bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
     m_jet_btag_SSVHP[index]    = part->bDiscriminator("simpleSecondaryVertexHighPurBJetTags");
-    m_jet_btag_TCHE[index]    = part->bDiscriminator("trackCountingHighEffBJetTags");
-    m_jet_btag_TCHP[index]    = part->bDiscriminator("trackCountingHighPurBJetTags");
+    m_jet_btag_TCHE[index]     = part->bDiscriminator("trackCountingHighEffBJetTags");
+    m_jet_btag_TCHP[index]     = part->bDiscriminator("trackCountingHighPurBJetTags");
+  }
+}
+
+
+void JetExtractor::writeInfo(const pat::Jet *part,
+			     const JetCorrector * corrector,
+			     const edm::Event & iEvent,
+			     const edm::EventSetup & iSetup,
+                             int index) 
+{
+  if (index>=m_jets_MAX) return;
+    
+  int count = 0;
+  for(unsigned int i=0 ; i<part->availableJECSets().size() ; i++)
+  {
+     count++;
+     if(count>1){std::cout<<"ATTENTION : Plus d'un Set de JEC"<<std::endl;}
+     if(part->availableJECSets()[i]!="patJetCorrFactorsPFlow"){std::cout<<"ATTENTION : Set de JEC different"<<std::endl;}
+  }
+  
+  /// Get Uncorrected jet
+  pat::Jet no_cor_jet = part->correctedJet("Uncorrected","none","patJetCorrFactorsPFlow");
+  
+  /// Apply new jet correction
+  edm::RefToBase<reco::Jet> jetRef;
+  double jec_factor = corrector->correction(no_cor_jet,jetRef,iEvent,iSetup);
+  no_cor_jet.scaleEnergy(jec_factor);
+  
+  /// Corrected jet
+  pat::Jet corr_jet = no_cor_jet;
+  
+  new((*m_jet_lorentzvector)[index]) TLorentzVector(corr_jet.px(),corr_jet.py(),corr_jet.pz(),corr_jet.energy());
+  
+  m_jet_E[index]    = corr_jet.energy();
+  m_jet_px[index]   = corr_jet.px();
+  m_jet_py[index]   = corr_jet.py();
+  m_jet_pz[index]   = corr_jet.pz();
+  m_jet_vx[index]   = corr_jet.vx();
+  m_jet_vy[index]   = corr_jet.vy();
+  m_jet_vz[index]   = corr_jet.vz();
+  m_jet_eta[index]  = corr_jet.eta();
+  m_jet_phi[index]  = corr_jet.phi();    
+  
+  if(corr_jet.isPFJet())
+  {
+    m_jet_chmult[index]        = corr_jet.chargedMultiplicity();
+    m_jet_chmuEfrac[index]     = corr_jet.chargedMuEnergyFraction();
+    m_jet_chemEfrac[index]     = corr_jet.chargedEmEnergyFraction();
+    m_jet_chhadEfrac[index]    = corr_jet.chargedHadronEnergyFraction();
+    m_jet_nemEfrac[index]      = corr_jet.neutralEmEnergyFraction();
+    m_jet_nhadEfrac[index]     = corr_jet.neutralHadronEnergyFraction();
+    m_jet_btag_jetProb[index]  = corr_jet.bDiscriminator("jetProbabilityBJetTags");
+    m_jet_btag_BjetProb[index] = corr_jet.bDiscriminator("jetBProbabilityBJetTags");
+    m_jet_btag_SSVHE[index]    = corr_jet.bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
+    m_jet_btag_SSVHP[index]    = corr_jet.bDiscriminator("simpleSecondaryVertexHighPurBJetTags");
+    m_jet_btag_TCHE[index]     = corr_jet.bDiscriminator("trackCountingHighEffBJetTags");
+    m_jet_btag_TCHP[index]     = corr_jet.bDiscriminator("trackCountingHighPurBJetTags");
   }
 }
 
