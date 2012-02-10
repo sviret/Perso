@@ -16,6 +16,7 @@ PatExtractor2::PatExtractor2(const edm::ParameterSet& config) :
   do_Trk_        (config.getUntrackedParameter<bool>("doTrack", false)),
   do_Mtt_        (config.getUntrackedParameter<bool>("doMtt", false)),
   do_dimu_       (config.getUntrackedParameter<bool>("doDimuon", false)),
+  do_ftt_        (config.getUntrackedParameter<bool>("do4TopHLT", false)),
   nevts_         (config.getUntrackedParameter<int>("n_events", 10000)),
 
   photon_tag_    (config.getParameter<edm::InputTag>("photon_tag")),
@@ -61,6 +62,10 @@ void PatExtractor2::beginJob()
 
   if (do_dimu_ && do_Muon_)      
     m_dimuon_analysis = new dimuon_analysis(m_ana_settings);
+
+
+  if (do_ftt_ && do_HLT_ && do_MC_)      
+    m_fourtop_trigger_analysis = new fourtop_trigger_analysis(m_ana_settings);
 }
 
 
@@ -128,6 +133,10 @@ void PatExtractor2::endJob() {
     m_outfile->Write();
     m_outfile->Close();
   }
+
+  if (do_ftt_&& do_HLT_ && do_MC_) 
+    m_fourtop_trigger_analysis->fourtop_trigger_finalize(nevent_tot);
+
 }
 
 
@@ -247,4 +256,12 @@ void PatExtractor2::doAna()
   {
     m_dimuon_analysis->dimuon_Sel(m_muon,nevent_tot);
   }
+
+  // A four top trigger analysis
+
+  if (do_ftt_&& do_HLT_ && do_MC_) 
+  {
+    m_fourtop_trigger_analysis->fourtop_trigger_Sel(m_HLT,m_MC,nevent_tot);
+  }
+
 }

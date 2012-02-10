@@ -72,7 +72,7 @@ PATextraction = cms.EDAnalyzer("PatExtractor2",
 
    doMtt         = cms.untracked.bool(False),
    doDimuon      = cms.untracked.bool(False),
-
+   do4TopHLT     = cms.untracked.bool(False),
    n_events = cms.untracked.int32(10000),  # How many events you want to analyze (only if fillTree=False)
 
    # The analysis settings could be whatever you want

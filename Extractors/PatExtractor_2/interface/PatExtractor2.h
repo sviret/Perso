@@ -28,6 +28,7 @@
 
 #include "../interface/mtt_analysis_new.h"
 #include "../interface/dimuon_analysis.h"
+#include "../interface/fourtop_trigger_analysis.h"
 
 #include "TFile.h"
 
@@ -69,6 +70,7 @@ class PatExtractor2 : public edm::EDAnalyzer {
 
   bool do_Mtt_;
   bool do_dimu_;
+  bool do_ftt_;
   int  nevts_;
 
   edm::InputTag photon_tag_;   // 
@@ -105,8 +107,9 @@ class PatExtractor2 : public edm::EDAnalyzer {
   HLTExtractor*      m_HLT;
   AnalysisSettings*  m_ana_settings;
 
-  mtt_analysis_new*  m_Mtt_analysis_new;
-  dimuon_analysis*   m_dimuon_analysis;
+  mtt_analysis_new*           m_Mtt_analysis_new;
+  dimuon_analysis*            m_dimuon_analysis;
+  fourtop_trigger_analysis*   m_fourtop_trigger_analysis;
 
   int iseventselected;
 

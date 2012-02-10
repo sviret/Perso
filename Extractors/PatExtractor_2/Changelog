@@ -1,3 +1,7 @@
+2012-02-10 Viret <viret@in2p3.fr>
+
+       *Added an analysis class for trigger studies
+
 2011-11-10 Viret <viret@in2p3.fr>
 
        *First version of the new PatExtractor package
