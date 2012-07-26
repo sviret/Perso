@@ -1,6 +1,0 @@
-This directory contains some batch scripts necessary for beam background events production.
-
-Simulation / Trigger / Reconstruction steps are done in one single pass.
-
-
-However, simulation needs some hacking in the package /SimG4Core/Generators, and trigger needs a special menu (tough one could run wihtout it if necessary).
