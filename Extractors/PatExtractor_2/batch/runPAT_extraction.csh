@@ -30,11 +30,13 @@
 #
 #################################################
 
-# The directory where data is stored
-set OUTPUT_ROOT = "$CASTOR_HOME/CMS/Extraction" 
+# The directory where data is stored (on the IPNL SE)
+# Replace YOUR_EXTR_DIR by the directory where you want to pur the extracted stuff
+set OUTPUT_ROOT = "srm://lyogrid06.in2p3.fr/dpm/in2p3.fr/home/cms/data/store/user/YOUR_EXTR_DIR" 
 
-# The directory where PATuples are retrieved
-set INPUT_ROOT  = "$CASTOR_HOME/CMS/PAT"        
+# The directory where PATuples are retrieved (on the IPNL SE)
+# Replace YOUR_INPUT_DIR by the directory where the patuples are stored
+set INPUT_ROOT  = "srm://lyogrid06.in2p3.fr/dpm/in2p3.fr/home/cms/data/store/user/YOUR_INPUT_DIR"        
 
 # Define your CMSSW working area (where CMSSW releases are installed)
 set WORKDIR  = "$HOME/scratch0/testarea/"
@@ -59,6 +61,14 @@ set STEP              = "Extractors/PatExtractor_2"
 # There can't be more than $njoblimit running jobs ib batch
 # We need to do this in order to avoid CASTOR overload
 # we are rejected if making too many rfio requests 
+
+# Setup all the GRID stuff...
+setenv LFC_HOST 'lyogrid06.in2p3.fr'
+source /afs/cern.ch/cms/LCG/LCG-2/UI/cms_ui_env.csh # CMS grid environment
+
+# We get a PROXY and put it in $HOME, in order to make it accessible from batch machines
+voms-proxy-init --voms cms --hours 100 -out $HOME/.globus/gridproxy.cert
+setenv X509_USER_PROXY ${HOME}'/.globus/gridproxy.cert'
 
 cd $CMSSW_PROJECT_SRC
 
@@ -87,7 +97,7 @@ endif
 @ ndatafilestreat = 0 
 
 # How many files on tape
-set nfiles   = `nsls $DATA_INPUT | wc -l`
+set nfiles   = `lcg-ls $DATA_INPUT | wc -l`
 
 
 # We launch the pat_extraction jobs

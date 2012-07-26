@@ -1,3 +1,7 @@
+2012-07-26 Viret <viret@in2p3.fr>
+
+       *Modification of the batch scripts in order to use the lyon storage element instead of CASTOR.
+
 2012-02-13 Viret <viret@in2p3.fr>
 
        *Added some clarifications in Extractor_trigger_test.py
